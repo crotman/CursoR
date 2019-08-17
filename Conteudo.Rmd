@@ -39,6 +39,9 @@ knitr::opts_chunk$set(echo = FALSE)
 
 # TIDY DATA 
 
+## Organizando os dados de forma tidy
+
+![](imagens/tidydata.png)
 ## Tratamento de dados em passos: operador Pipe
 
 ## Funções básicas de tratamento (dplyr)
