@@ -70,6 +70,16 @@ R é uma linguagem que é interpretada por um [engine](https://cran.r-project.or
 ![](imagens/RStudio.png){width=50%}
 
 A princípio ele oferece um console para execução de comandos e a visualização do *environment*, ou seja, as variáveis que ele guarda na sessão atual.
+
+
+## Baixando o material do github
+
+Todo o material do curso está hospedado no Github, inclusive esta apresentação. 
+
+O repositório fica em [github/crotman/cursoR](https://github.com/crotman/CursoR).
+
+Para baixar este repositório no RStudio, crie um projeto em File/New Project, do tipo Github e use o endereço do repositório: https://github.com/crotman/CursoR.git.
+
     
 ## RStudio como console e rudimentos do R
 
@@ -93,7 +103,7 @@ x + 2
 
 ```
 
-Note o "[1]". Para o R tudo é vetorial. Isso facilita muito as coisas quando se lida com dados.
+O R é muito baseado em operações vetoriais. Isso facilita muito as coisas quando se lida com dados.
 
 A função mais usada do R provavelmente é a c(), que cria um vetor. De várias formas.
 
@@ -101,10 +111,32 @@ A função mais usada do R provavelmente é a c(), que cria um vetor. De várias
 
 c(1, 2, 3)
 
+c(1, 2, 3, c(4, 5, 6))
+
+1.4 : 9.4
+
+```
+
+##
+
+O operador **:** é usado para gerar um vetor com todos números entre os operandos, somando números inteiros ao primeiro operando.
+
+```{r echo=TRUE}
+
+1:10
+
+1.5:9.1
+
 ```
 
 
-## Baixando o material do github
+```{r echo=TRUE}
+
+seq(1, 10, 0.1)
+
+```
+
+
 
 ## Programação com vetores
 
