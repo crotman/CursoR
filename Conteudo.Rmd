@@ -5,7 +5,7 @@ date: "17/08/2019"
 output: 
     slidy_presentation:
         toc: true
-        toc_depth: 2
+        toc_depth: 3
 
 ---
 
@@ -15,13 +15,94 @@ knitr::opts_chunk$set(echo = FALSE)
 
 # INTRODUÇÃO
 
+
+## Objetivos do curso
+
+Meta final: que vários dos processos de análise de dados da empresa passem a ser feitos dentro do fluxo de trabalho do R.
+
+![](imagens/tidyverse.png)
+
+Ao fim do curso o objetivo é que todos os fios da meada sejam puxados para que o aluno consiga continuar por si só usando a vasta documentação que 
+
 ## Por que programar?
+
+
+Também amo o Excel, mas amo mais as seguintes vantagens:
+
+* **Reprodutibilidade**. Muito mais fácil refazer uma análise com código do que point and click
+
+* **Menor risco operacional**. A automatização é maior, a chance de erro na execução de um passo manual é nula
+
+* **Menor risco de continuidade** caso haja imprevistos com a equipe. 
+
+* **Maior flexibilidade**. Virtualmente tudo é possível
+
+* **Manutenção** mais fácil
+
+* **Controle de versão** de forma profissional
+
+* **Mais fácil do que parece**
+
 
 ## Por que programar em R?
 
+* Ela é feita para lidar com dados
+
+* Comunidade de usuários gigante e cooperativa
+
+* Prazeroso programar
+
+
 ## Fluxo de trabalho
 
+![](imagens/tidyverse_simplificado.png){width=50%} 
+
+
+![](imagens/tidyverse.png){width=50%}
+
+
 ## Ambiente R/RStudio
+
+R é uma linguagem que é interpretada por um [engine](https://cran.r-project.org/) gratuito.
+
+[RStudio](https://www.rstudio.com/) é o melhor ambiente de programação da linguagem R. A versão mais simples, que é totalmente funcional, é gratuita.
+
+![](imagens/RStudio.png){width=50%}
+
+A princípio ele oferece um console para execução de comandos e a visualização do *environment*, ou seja, as variáveis que ele guarda na sessão atual.
+    
+## RStudio como console e rudimentos do R
+
+No console é possível executar comandos, como o que atribui valor a uma variável
+
+```{r,  echo=TRUE}
+
+x <- 1
+
+```
+
+Note que a atribuição é feita com <- e não com = como na maioria das linguagens.
+
+>Dica: o atalho **alt** + **-** gera o sinal de atribuição
+
+Os comandos que não atribuem valor a uma variável são ecoados na tela
+
+```{r,  echo=TRUE}
+
+x + 2
+
+```
+
+Note o "[1]". Para o R tudo é vetorial. Isso facilita muito as coisas quando se lida com dados.
+
+A função mais usada do R provavelmente é a c(), que cria um vetor. De várias formas.
+
+```{r, echo=TRUE}
+
+c(1, 2, 3)
+
+```
+
 
 ## Baixando o material do github
 
@@ -59,7 +140,9 @@ knitr::opts_chunk$set(echo = FALSE)
 
 ## Funções de pivot (tidyr)
 
-## Tratamento de data (lubridate)
+## Tratamento de strings (caracteres) com stringr
+
+## Tratamento de datas (lubridate)
 
 ## Tratamento de dados categóricos (forcats) 
 
@@ -67,7 +150,33 @@ knitr::opts_chunk$set(echo = FALSE)
 
 # PROGRAMAÇÃO FUNCIONAL 
 
-## Aplicação de funções a dataframes
+## Aplicação de funções a dataframes (purrr)
+
+## map-reduce
+
+# EXECUTANDO MODELOS
+
+## Execução de modelos com broom
+
+## Execução de modelos com caret
+
+# SÉRIES TEMPORAIS
+
+## Repositórios de séries temporais
+
+## Manipulação de séries temporais
+
+## Biblioteca Forecast
+
+# COMUNICANDO OS RESULTADOS
+
+## Criando relatórios com R Markdown
+
+## Criando visualizações interativas com Shiny
+
+
+
+
 
 
 
