@@ -467,14 +467,16 @@ Bruno Crotman
 <p>A princípio ele oferece um console para execução de comandos e a visualização do <em>environment</em>, ou seja, as variáveis que ele guarda na sessão atual.</p>
 </div><div id="baixando-o-material-do-github" class="slide section level2">
 <h1>Baixando o material do github</h1>
-<p>Todo o material do curso está hospedado no Github, inclusive esta apresentação.</p>
+<p>Todo o material do curso está hospedado no Github, inclusive esta apresentação, escrita em RMarkdown.</p>
+<p>Os exemplos de código, as imagens e os dados mostrados nesta apresentação estão inclusos no repositório do curso.</p>
 <p>O repositório fica em <a href="https://github.com/crotman/CursoR">github/crotman/cursoR</a>.</p>
 <p>Para baixar este repositório no RStudio, crie um projeto em File/New Project, do tipo Github e use o endereço do repositório: <a href="https://github.com/crotman/CursoR.git" class="uri">https://github.com/crotman/CursoR.git</a>.</p>
-</div><div id="rstudio-como-console" class="slide section level2">
+</div>
+<div id="fundamentos-da-linguagem" class="title-slide slide section level1"><h1>FUNDAMENTOS DA LINGUAGEM</h1></div><div id="rstudio-como-console" class="slide section level2">
 <h1>RStudio como console</h1>
 <p>No console é possível executar comandos, como o que atribui valor a uma variável</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1">x &lt;-<span class="st"> </span><span class="dv">1</span></a></code></pre></div>
-<p>Note que a atribuição é feita com &lt;- e não com = como na maioria das linguagens.</p>
+<p>Note que a atribuição é feita com <code>&lt;-</code> e não com <code>=</code> como na maioria das linguagens.</p>
 <blockquote>
 <p>Dica: o atalho <strong>alt</strong> + <strong>-</strong> gera o sinal de atribuição</p>
 </blockquote>
@@ -491,14 +493,15 @@ Bruno Crotman
 <pre><code>## [1] 1 2 3 4 5 6</code></pre>
 <div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" title="1"><span class="fl">1.4</span> <span class="op">:</span><span class="st"> </span><span class="fl">9.4</span></a></code></pre></div>
 <pre><code>## [1] 1.4 2.4 3.4 4.4 5.4 6.4 7.4 8.4 9.4</code></pre>
-</div><div id="section" class="slide section level2">
-<h1></h1>
+</div><div id="outras-formas-de-gerar-um-vetor" class="slide section level2">
+<h1>Outras formas de gerar um vetor</h1>
 <p>O operador <code>:</code> é usado para gerar um vetor com todos números que estão entre os operandos e são formados somando números inteiros ao primeiro operando.</p>
 <div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" title="1"><span class="dv">1</span><span class="op">:</span><span class="dv">10</span></a></code></pre></div>
 <pre><code>##  [1]  1  2  3  4  5  6  7  8  9 10</code></pre>
 <div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb12-1" title="1"><span class="fl">1.5</span><span class="op">:</span><span class="fl">9.1</span></a></code></pre></div>
 <pre><code>## [1] 1.5 2.5 3.5 4.5 5.5 6.5 7.5 8.5</code></pre>
-<p>A função <code>seq()</code> é usada para criar um vetor com a especificação do valor inicial, do valor final e do incremento entre elementos do vetor.</p>
+<p>A função <code>seq()</code> é usada para criar um vetor de várias formas.</p>
+<p>Numa das formas especifica-se o valor inicial, o valor final e o incremento entre elementos do vetor.</p>
 <div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb14-1" title="1"><span class="kw">seq</span>(<span class="dv">1</span>, <span class="fl">9.99</span>, <span class="fl">0.1</span>)</a></code></pre></div>
 <pre><code>##  [1] 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0 2.1 2.2 2.3 2.4 2.5 2.6
 ## [18] 2.7 2.8 2.9 3.0 3.1 3.2 3.3 3.4 3.5 3.6 3.7 3.8 3.9 4.0 4.1 4.2 4.3
@@ -506,6 +509,18 @@ Bruno Crotman
 ## [52] 6.1 6.2 6.3 6.4 6.5 6.6 6.7 6.8 6.9 7.0 7.1 7.2 7.3 7.4 7.5 7.6 7.7
 ## [69] 7.8 7.9 8.0 8.1 8.2 8.3 8.4 8.5 8.6 8.7 8.8 8.9 9.0 9.1 9.2 9.3 9.4
 ## [86] 9.5 9.6 9.7 9.8 9.9</code></pre>
+</div><div id="parametros-nomeados" class="slide section level2">
+<h1>Parâmetros nomeados</h1>
+<p>Note que chamamos a função passando os parâmetros sem especificação de quais são eles. Eles são recebidos pela função dem específica.</p>
+<p>Mas no R também é possível passar parâmetros de forma nomeada.</p>
+<p>Clique em <code>F1</code> enquanto tem o cursor em cima da função e veja a ordem dos parâmetros. Veja que outros parâmetros que não utilizamos. Podemos usar <code>length.out</code> ao invés de <code>by</code>:</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb16-1" title="1"><span class="kw">seq</span>(<span class="dv">1</span>, <span class="dv">10</span>, <span class="dt">length.out =</span> <span class="dv">10</span>)</a></code></pre></div>
+<pre><code>##  [1]  1  2  3  4  5  6  7  8  9 10</code></pre>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb18-1" title="1"><span class="kw">seq</span>(<span class="dv">1</span>, <span class="dv">10</span>, <span class="dt">length.out =</span> <span class="dv">5</span>)</a></code></pre></div>
+<pre><code>## [1]  1.00  3.25  5.50  7.75 10.00</code></pre>
+<p>Outro parâmetro, <code>along.with</code> deixa que criemos um vetor num intervalo determinado e o memso número de elementos do vetor passado por este parâmetro.</p>
+<pre><code>##  [1]  20.00000  28.88889  37.77778  46.66667  55.55556  64.44444  73.33333
+##  [8]  82.22222  91.11111 100.00000</code></pre>
 </div><div id="programacao-com-vetores" class="slide section level2">
 <h1>Programação com vetores</h1>
 </div><div id="exemplo-inicial-de-visualizacao-de-dados" class="slide section level2">

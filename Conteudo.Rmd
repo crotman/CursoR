@@ -22,7 +22,7 @@ Meta final: que vários dos processos de análise de dados da empresa passem a s
 
 ![](imagens/tidyverse.png)
 
-Ao fim do curso o objetivo é que todos os fios da meada sejam puxados para que o aluno consiga continuar por si só usando a vasta documentação que 
+Ao fim do curso o objetivo é que todos os fios da meada sejam puxados para que o aluno consiga continuar por si só usando a vasta documentação disponível.
 
 ## Por que programar?
 
@@ -74,12 +74,16 @@ A princípio ele oferece um console para execução de comandos e a visualizaç�
 
 ## Baixando o material do github
 
-Todo o material do curso está hospedado no Github, inclusive esta apresentação. 
+Todo o material do curso está hospedado no Github, inclusive esta apresentação, escrita em RMarkdown.
+
+Os exemplos de código, as imagens e os dados mostrados nesta apresentação estão inclusos no repositório do curso.
 
 O repositório fica em [github/crotman/cursoR](https://github.com/crotman/CursoR).
 
 Para baixar este repositório no RStudio, crie um projeto em File/New Project, do tipo Github e use o endereço do repositório: https://github.com/crotman/CursoR.git.
 
+
+# FUNDAMENTOS DA LINGUAGEM
     
 ## RStudio como console
 
@@ -91,7 +95,7 @@ x <- 1
 
 ```
 
-Note que a atribuição é feita com <- e não com = como na maioria das linguagens.
+Note que a atribuição é feita com `<-` e não com `=` como na maioria das linguagens.
 
 >Dica: o atalho **alt** + **-** gera o sinal de atribuição
 
@@ -120,7 +124,7 @@ c(1, 2, 3, c(4, 5, 6))
 
 ```
 
-##
+## Outras formas de gerar um vetor
 
 O operador `:` é usado para gerar um vetor com todos números que estão entre os operandos e são formados somando números inteiros ao primeiro operando.
 
@@ -132,20 +136,49 @@ O operador `:` é usado para gerar um vetor com todos números que estão entre 
 
 ```
 
-A função `seq()` é usada para criar um vetor com a especificação do valor inicial, do valor final e do incremento entre elementos do vetor. 
+A função `seq()` é usada para criar um vetor de várias formas. 
+
+Numa das formas especifica-se o valor inicial, o valor final e o incremento entre elementos do vetor. 
 
 
 ```{r echo=TRUE}
 
 seq(1, 9.99, 0.1)
 
+
 ```
 
+## Parâmetros nomeados
 
 
+Note que chamamos a função passando os parâmetros sem especificação de quais são eles. Eles são recebidos pela função dem específica. 
 
+Mas no R também é possível passar parâmetros de forma nomeada. 
+
+Clique em `F1` enquanto tem o cursor em cima da função e veja a ordem dos parâmetros. Veja que outros parâmetros que não utilizamos. Podemos usar `length.out` ao invés de `by`:
+
+```{r echo=TRUE}
+
+
+seq(1, 10, length.out = 10)
+
+seq(1, 10, length.out = 5)
+
+```
+
+Outro parâmetro, `along.with`, deixa que criemos um vetor num intervalo determinado e o memso número de elementos do vetor passado por este parâmetro. 
+
+```{r}
+
+seq(20, 100, along.with = 1:10)
+
+```
 
 ## Programação com vetores
+
+As operações do R são 
+
+
 
 ## Exemplo inicial de visualização de dados
 
