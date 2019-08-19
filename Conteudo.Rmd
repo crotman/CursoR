@@ -81,7 +81,7 @@ O repositório fica em [github/crotman/cursoR](https://github.com/crotman/CursoR
 Para baixar este repositório no RStudio, crie um projeto em File/New Project, do tipo Github e use o endereço do repositório: https://github.com/crotman/CursoR.git.
 
     
-## RStudio como console e rudimentos do R
+## RStudio como console
 
 No console é possível executar comandos, como o que atribui valor a uma variável
 
@@ -103,7 +103,10 @@ x + 2
 
 ```
 
-O R é muito baseado em operações vetoriais. Isso facilita muito as coisas quando se lida com dados.
+Veja o `[1]` no console. O R considera que tudo é um vetor. É uma linguagem muito baseada em operações vetoriais. Isso facilita muito as coisas quando se lida com dados.
+
+
+## A função c()
 
 A função mais usada do R provavelmente é a c(), que cria um vetor. De várias formas.
 
@@ -119,7 +122,7 @@ c(1, 2, 3, c(4, 5, 6))
 
 ##
 
-O operador **:** é usado para gerar um vetor com todos números entre os operandos, somando números inteiros ao primeiro operando.
+O operador `:` é usado para gerar um vetor com todos números que estão entre os operandos e são formados somando números inteiros ao primeiro operando.
 
 ```{r echo=TRUE}
 
@@ -129,12 +132,16 @@ O operador **:** é usado para gerar um vetor com todos números entre os operan
 
 ```
 
+A função `seq()` é usada para criar um vetor com a especificação do valor inicial, do valor final e do incremento entre elementos do vetor. 
+
 
 ```{r echo=TRUE}
 
-seq(1, 10, 0.1)
+seq(1, 9.99, 0.1)
 
 ```
+
+
 
 
 
@@ -148,6 +155,12 @@ seq(1, 10, 0.1)
 
 ```
 
+
+## Data frames
+
+
+
+## Loops: cuidado!
 
 
 # TIDY DATA 
