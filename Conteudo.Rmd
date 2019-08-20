@@ -166,9 +166,9 @@ seq(1, 10, length.out = 5)
 
 ```
 
-Outro parâmetro, `along.with`, deixa que criemos um vetor num intervalo determinado e o memso número de elementos do vetor passado por este parâmetro. 
+Outro parâmetro, `along.with`, deixa que criemos um vetor num intervalo determinado e o mesmo número de elementos do vetor passado por este parâmetro. 
 
-```{r}
+```{r echo=TRUE}
 
 seq(20, 100, along.with = 1:10)
 
@@ -176,8 +176,74 @@ seq(20, 100, along.with = 1:10)
 
 ## Programação com vetores
 
-As operações do R são 
+As operações do R são vetoriais. Numa operação entre um vetor e um escalar, a operação com o escalar é aplicada a cada elemento do vetor
 
+
+```{r echo=TRUE}
+
+1:5 * 2
+
+```
+
+
+```{r echo=TRUE}
+
+1:10 / 10
+
+```
+
+
+Numa operação com vetores do mesmo tamanho, os elementos são pareados
+
+
+```{r echo=TRUE}
+
+1:10 * 1:10
+
+```
+
+## Programação com vetores - recycling
+
+Outro conceito importante é o de *recycling*. 
+
+Numa operação entre dois vetores de tamanhos diferentes, o vetor menor é repetido ciclicamente de forma a ficar com o mesmo tamanho do vetor maior. 
+
+Lembra que toda variável no R é um vetor? 
+
+Então... o escalar mostrado no primeiro código do slide anterior é um vetor de 1 elemento que sofre *recycling*
+
+
+```{r echo=TRUE}
+
+1:10 * 1:2
+
+```
+
+
+## Dataframes
+
+Dataframes são uma estrutra muito usada em análises de dados feitas em R.
+
+O dataframe consiste em um conjunto de vetores nomeados, com o mesmo número de elementos, que formam uma estrutura retangular, onde cada coluna é um dos vetor e cada linha n contém o n-ésimo elemento dos vetores.
+
+
+```{r echo=TRUE}
+
+df <- 
+    data.frame(
+    nome = c("João", "Maria", "Zezinho", "Juquinha"), 
+    idade = c(7, 8, 9, 10), 
+    altura = c(10, 11)
+    )
+
+df
+
+```
+
+
+
+
+## Loops: cuidado!
 
 
 ## Exemplo inicial de visualização de dados
@@ -187,13 +253,6 @@ As operações do R são
 
 
 ```
-
-
-## Data frames
-
-
-
-## Loops: cuidado!
 
 
 # TIDY DATA 
