@@ -277,6 +277,10 @@ df
 
 ## Funções de pivot (tidyr)
 
+## Funções de pivot (tidyselect)
+
+manobras com vars, starts_with, num_range etc
+
 ## Tratamento de strings (caracteres) com stringr
 
 ## Tratamento de datas (lubridate)
