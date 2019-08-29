@@ -50,6 +50,12 @@ Também amo o Excel, mas amo mais as seguintes vantagens:
 
 * Comunidade de usuários gigante e cooperativa
 
+* Ferramentas poderosas para comunicação dos resultados, em documentos ou aplicações
+
+* Muitos pesquisadores em métodos quantitativos que estão no estado-da-arte publicam seus métodos em bibliotecas escritas em R
+
+
+
 * Prazeroso programar
 
 
@@ -222,28 +228,34 @@ Então... o escalar mostrado no primeiro código do slide anterior é um vetor d
 
 ## Dataframes
 
-Dataframes são uma estrutra muito usada em análises de dados feitas em R.
+Dataframes são uma estrutura muito usada em análises de dados feitas em R.
 
-O dataframe consiste em um conjunto de vetores nomeados, com o mesmo número de elementos, que formam uma estrutura retangular, onde cada coluna é um dos vetor e cada linha n contém o n-ésimo elemento dos vetores.
+O dataframe consiste em um conjunto de vetores nomeados, com o mesmo número de elementos, que formam uma estrutura retangular, onde cada coluna é um vetor e cada linha n contém o n-ésimo elemento dos vetores.
 
+É similar a uma tabela de banco de dados.
 
 ```{r echo=TRUE}
 
 df <- 
     data.frame(
-    nome = c("João", "Maria", "Zezinho", "Juquinha"), 
-    idade = c(7, 8, 9, 10), 
-    altura = c(10, 11)
+        nome = c("João", "Maria", "Zezinho", "Juquinha"), 
+        idade = c(7, 8, 9, 10), 
+        altura = c(10, 11)
     )
 
 df
 
 ```
 
+## Controle de fluxo
+
+
 
 
 
 ## Loops: cuidado!
+
+A linguagem R contém instruções para execução de loops 
 
 
 ## Exemplo inicial de visualização de dados
