@@ -10,6 +10,9 @@ output:
 ---
 
 ```{r setup, include=FALSE}
+
+library(tidyverse)
+
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
@@ -141,6 +144,63 @@ Para baixar este repositório no RStudio, crie um projeto em File/New Project, d
 # FUNDAMENTOS DA LINGUAGEM
     
 
+## Tipos de valores "armazenados" por variáveis
+
+Para o R, simplificando para o escopo deste curso, as variáveis "armazenam" os seguintes tipos:
+
+* Vetores (vetores atômicos e listas)
+
+```{r, echo=TRUE}
+1L:10L
+```
+
+
+* Data Frames
+
+```{r, echo=TRUE}
+tibble(col1 = 1:10, col2 = 11:20 )
+```
+
+## Tipos de valores "armazenados" por variáveis (cont.)
+
+* Funções (sim... uma variável pode conter uma função)
+
+```{r, echo=TRUE}
+
+f <- function(a, b)
+{
+    a + b
+}
+
+g <- f
+
+g(1L, 2L)
+
+```
+
+* Environments 
+
+
+
+
+
+Existe orientação a objetos no R, mas não está no escopo deste curso
+
+Note que não há variáveis que armazenam dado escalar, como já vimos.
+
+Dentre os vetores há:
+
+* vetores atômicos (seus elementos são do mesmo tipo primário)
+
+* listas (seus elementos são de tipos primários diferentes)
+
+
+Tipos primários
+
+
+
+
+
 ## A função c()
 
 A função mais usada do R provavelmente é a c(), que cria um vetor. De várias formas.
@@ -191,9 +251,9 @@ Clique em `F1` enquanto tem o cursor em cima da função e veja a ordem dos par�
 ```{r echo=TRUE}
 
 
-seq(1, 10, length.out = 10)
+seq(1L, 10L, length.out = 10L)
 
-seq(1, 10, length.out = 5)
+seq(1L, 10L, length.out = 5L)
 
 ```
 
