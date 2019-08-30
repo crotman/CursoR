@@ -54,8 +54,6 @@ Também amo o Excel, mas amo mais as seguintes vantagens:
 
 * Muitos pesquisadores em métodos quantitativos que estão no estado-da-arte publicam seus métodos em bibliotecas escritas em R
 
-
-
 * Prazeroso programar
 
 
@@ -75,22 +73,9 @@ R é uma linguagem que é interpretada por um [engine](https://cran.r-project.or
 
 ![](imagens/RStudio.png){width=50%}
 
-A princípio ele oferece um console para execução de comandos e a visualização do *environment*, ou seja, as variáveis que ele guarda na sessão atual.
+Na visualização padrão, ele oferece um console para execução de comandos e uma janela com a visualização dos *environments*, ou seja, das variáveis que ele guarda na sessão atual.
 
 
-## Baixando o material do github
-
-Todo o material do curso está hospedado no Github, inclusive esta apresentação, escrita em RMarkdown.
-
-Os exemplos de código, as imagens e os dados mostrados nesta apresentação estão inclusos no repositório do curso.
-
-O repositório fica em [github/crotman/cursoR](https://github.com/crotman/CursoR).
-
-Para baixar este repositório no RStudio, crie um projeto em File/New Project, do tipo Github e use o endereço do repositório: https://github.com/crotman/CursoR.git.
-
-
-# FUNDAMENTOS DA LINGUAGEM
-    
 ## RStudio como console
 
 No console é possível executar comandos, como o que atribui valor a uma variável
@@ -115,6 +100,46 @@ x + 2
 
 Veja o `[1]` no console. O R considera que tudo é um vetor. É uma linguagem muito baseada em operações vetoriais. Isso facilita muito as coisas quando se lida com dados.
 
+## RStudio como IDE para um script
+
+O console serve só para testes, aprendizado de novos comandos, debug, experiências etc.
+
+Para as atividades mais comuns de análise de dados, e para que elas sejam reprodutíveis, é necessária a criação de scripts.
+
+Eles são salvos em um arquivo de extensão ".r"
+
+
+
+## Funcionalidades interessantes do RStudio
+
+* Atalhos de teclado: **ctrl**+**enter**, **ctrl**+**shift**+**enter**, **shift**+**enter**, **ctrl**+**1**, **ctrl**+**2**, **ctrl**+**shift**+**F10** ...
+
+* Refactoring
+
+* Document outline
+
+* Pane: Files/Plots/Packages/Help/Viewer
+
+* Pane: Environment/History/Connections/Git
+
+* Jobs
+
+* Controle de versão integrado com o Github
+
+
+## Baixando o material do github
+
+Todo o material do curso está hospedado no Github, inclusive esta apresentação, escrita em RMarkdown.
+
+Os exemplos de código, as imagens e os dados mostrados nesta apresentação estão inclusos no repositório do curso.
+
+O repositório fica em [github/crotman/cursoR](https://github.com/crotman/CursoR).
+
+Para baixar este repositório no RStudio, crie um projeto em File/New Project, do tipo Github e use o endereço do repositório: https://github.com/crotman/CursoR.git.
+
+
+# FUNDAMENTOS DA LINGUAGEM
+    
 
 ## A função c()
 
@@ -249,7 +274,9 @@ df
 
 ## Controle de fluxo
 
+A linguagem oferece comandos de controle de fluxo similares aos de outras linguagens.
 
+Podemos dividir os comandos de controle de fluxo em dois tipos:
 
 
 
@@ -267,7 +294,7 @@ A linguagem R contém instruções para execução de loops
 ```
 
 
-# TIDY DATA 
+# TIDY DATA (obtenção e organização dos dados)
 
 ## Organizando os dados de forma tidy
 
