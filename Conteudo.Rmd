@@ -6,12 +6,14 @@ output:
     slidy_presentation:
         toc: true
         toc_depth: 3
+        fig_caption: true
 
 ---
 
 ```{r setup, include=FALSE}
 
 library(tidyverse)
+library(rlang)
 
 knitr::opts_chunk$set(echo = FALSE)
 ```
@@ -129,6 +131,8 @@ Eles são salvos em um arquivo de extensão ".r"
 
 * Controle de versão integrado com o Github
 
+* Cheat sheets
+
 
 ## Baixando o material do github
 
@@ -139,6 +143,9 @@ Os exemplos de código, as imagens e os dados mostrados nesta apresentação est
 O repositório fica em [github/crotman/cursoR](https://github.com/crotman/CursoR).
 
 Para baixar este repositório no RStudio, crie um projeto em File/New Project, do tipo Github e use o endereço do repositório: https://github.com/crotman/CursoR.git.
+
+Todo material é disponibilizado sob a licença [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License](https://creativecommons.org/licenses/by-nc-sa/4.0/)
+
 
 
 # FUNDAMENTOS DA LINGUAGEM
@@ -154,8 +161,14 @@ Para o R, simplificando para o escopo deste curso, as variáveis "armazenam" os 
 1L:10L
 ```
 
+```{r, echo=TRUE}
 
-* Data Frames
+list("oi", 1L)
+
+```
+
+* Data Frames / Tibbles
+
 
 ```{r, echo=TRUE}
 tibble(col1 = 1:10, col2 = 11:20 )
@@ -163,7 +176,7 @@ tibble(col1 = 1:10, col2 = 11:20 )
 
 ## Tipos de valores "armazenados" por variáveis (cont.)
 
-* Funções (sim... uma variável pode conter uma função)
+* Funções (sim... uma variável pode "armazenar" uma função)
 
 ```{r, echo=TRUE}
 
@@ -180,8 +193,20 @@ g(1L, 2L)
 
 * Environments 
 
+```{r, echo=TRUE}
 
 
+e1 <- rlang::env(
+    a = 1L,
+    b = "sou o b",
+    c = 1L:20L
+)
+
+get("b", e1)
+
+```
+
+## Tipos de valores "armazenados" por variáveis (cont.)
 
 
 Existe orientação a objetos no R, mas não está no escopo deste curso
@@ -190,14 +215,73 @@ Note que não há variáveis que armazenam dado escalar, como já vimos.
 
 Dentre os vetores há:
 
+
 * vetores atômicos (seus elementos são do mesmo tipo primário)
 
-* listas (seus elementos são de tipos primários diferentes)
+* listas (seus elementos, que são vetores atômicos, são de tipos primários diferentes)
+
+![Tipos de vetores](imagens/summary-tree.png){width=25%}
+
+Fonte: [Advanced R](https://adv-r.hadley.nz/)
 
 
-Tipos primários
+## Tipos de valores "armazenados" por variáveis (cont.)
+
+Os vetores atômicos podem ser dos seguintes tipos:
 
 
+![Tipos primários](imagens/summary-tree-atomic.png){width=25%}
+
+Fonte: [Advanced R](https://adv-r.hadley.nz/)
+
+## Tipos de vetores atômicos
+
+* Logical é um tipo booleano, aceita TRUE ou FALSE
+
+```{r, echo=TRUE}
+
+booleano <- !TRUE 
+
+booleano
+
+```
+
+* Integer é numérico e inteiro. Equivalente ao long do C++
+
+```{r, echo=TRUE}
+
+inteiro <- 8L 
+
+typeof(inteiro + 1L)
+
+typeof(inteiro + 1)
+
+
+```
+
+## Tipos de vetores atômicos (cont.)
+
+* Double é numérico e aceita números decimais. Equivalente ao double do C++
+
+```{r, echo=TRUE}
+
+double <- 0.1
+
+double_cientifico <- 1.5e3
+
+infinito <- Inf 
+```
+
+
+```{r, echo=TRUE}
+
+double
+
+double_cientifico
+
+infinito
+
+```
 
 
 
@@ -265,6 +349,27 @@ seq(20, 100, along.with = 1:10)
 
 ```
 
+## Valores faltantes NA
+
+Valores faltantes ou desconecidos são representados por NA
+
+```{r echo=TRUE}
+
+a <- c(1L,NA)
+
+a
+```
+
+O valor NA contamina os cálculos quase sempre
+
+```{r echo=TRUE}
+
+a <- c(1L,NA)
+
+a
+```
+
+
 ## Programação com vetores
 
 As operações do R são vetoriais. Numa operação entre um vetor e um escalar, a operação com o escalar é aplicada a cada elemento do vetor
@@ -313,11 +418,11 @@ Então... o escalar mostrado no primeiro código do slide anterior é um vetor d
 
 ## Dataframes
 
-Dataframes são uma estrutura muito usada em análises de dados feitas em R.
+Dataframes, e seu primo tibble, são uma estrutura muito usada em análises de dados feitas em R.
 
 O dataframe consiste em um conjunto de vetores nomeados, com o mesmo número de elementos, que formam uma estrutura retangular, onde cada coluna é um vetor e cada linha n contém o n-ésimo elemento dos vetores.
 
-É similar a uma tabela de banco de dados.
+É similar, em muitas características, a uma tabela de banco de dados.
 
 ```{r echo=TRUE}
 
@@ -411,6 +516,10 @@ manobras com vars, starts_with, num_range etc
 # COMUNICANDO OS RESULTADOS
 
 ## Criando relatórios com R Markdown
+
+## Livros
+
+[Referência Bookdown](https://bookdown.org/yihui/bookdown/html.html)
 
 ## Criando visualizações interativas com Shiny
 
