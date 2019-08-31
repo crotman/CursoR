@@ -117,7 +117,7 @@ Eles são salvos em um arquivo de extensão ".r"
 
 ## Funcionalidades interessantes do RStudio
 
-* Atalhos de teclado: **ctrl**+**enter**, **ctrl**+**shift**+**enter**, **shift**+**enter**, **ctrl**+**1**, **ctrl**+**2**, **ctrl**+**shift**+**F10** ...
+* Atalhos de teclado: **ctrl**+**enter** (rodar linhas selecionadas), **ctrl**+**shift**+**enter** (rodar script),  **ctrl**+**1** (foco no script), **ctrl**+**2** ** (foco no console), **ctrl**+**shift**+**F10** ** (reiniciar R), **ctrl**+**shift**+**C** (comentar/descomentar bloco)  ...
 
 * Refactoring
 
@@ -180,8 +180,7 @@ tibble(col1 = 1:10, col2 = 11:20 )
 
 ```{r, echo=TRUE}
 
-f <- function(a, b)
-{
+f <- function(a, b){
     a + b
 }
 
@@ -246,7 +245,7 @@ booleano
 
 ```
 
-* Integer é numérico e inteiro. Equivalente ao long do C++
+* Integer é numérico e inteiro. Equivalente ao long do C++ (por isso o L na declaração)
 
 ```{r, echo=TRUE}
 
@@ -285,9 +284,9 @@ infinito
 
 
 
-## A função c()
+## Cobinando vetores em vetores maiores usando c()
 
-A função mais usada do R provavelmente é a c(), que cria um vetor. De várias formas.
+Uma das funções mais usadas do R é c(), que cria um vetor novo vetor combinando vetores.
 
 ```{r, echo=TRUE}
 
@@ -305,9 +304,11 @@ O operador `:` é usado para gerar um vetor com todos números que estão entre 
 
 ```{r echo=TRUE}
 
-1:10
+1L:10L
 
 1.5:9.1
+
+
 
 ```
 
@@ -351,23 +352,51 @@ seq(20, 100, along.with = 1:10)
 
 ## Valores faltantes NA
 
-Valores faltantes ou desconecidos são representados por NA
+Valores faltantes ou desconecidos são representados por `NA`
 
 ```{r echo=TRUE}
 
 a <- c(1L,NA)
-
 a
 ```
 
-O valor NA contamina os cálculos quase sempre
+O valor NA quase sempre contamina os cálculos
 
 ```{r echo=TRUE}
-
-a <- c(1L,NA)
-
-a
+media <- mean(a)
+media
 ```
+
+
+mas...
+
+```{r echo=TRUE}
+media <- mean(a, na.rm = TRUE)
+media
+```
+
+
+A exceção são expressões que dão sempre o mesmo resultado independentemente do valor da variável
+
+```{r echo=TRUE}
+NA ^ 0
+NA | TRUE
+NA & FALSE
+```
+
+
+A melhor forma de testar se existe um valor `NA` é `is.na`
+
+```{r}
+
+v <- c(1, NA, 2)
+
+is.na(v)
+
+```
+
+
+
 
 
 ## Programação com vetores
@@ -415,10 +444,28 @@ Então... o escalar mostrado no primeiro código do slide anterior é um vetor d
 
 ```
 
+## Estruturas construídas a partir de vetores e listas
 
-## Dataframes
+Existem estruturas mais complexas na linguagem construídas a partir de vetores e listas.
 
-Dataframes, e seu primo tibble, são uma estrutura muito usada em análises de dados feitas em R.
+* Data Frame
+
+* Matrix
+
+* Array
+
+* Factor
+
+* Estruturas que representam datas
+
+* Objetos (no paradigma de orientação a objetos)
+
+Vamos passar pelo Data Frame agora. Depois por Factor e objetos que representam Datas
+
+
+## Data Frames
+
+Data Frames, e seu primo Tibble, são estruturas muito usadas em análises de dados feitas em R.
 
 O dataframe consiste em um conjunto de vetores nomeados, com o mesmo número de elementos, que formam uma estrutura retangular, onde cada coluna é um vetor e cada linha n contém o n-ésimo elemento dos vetores.
 
@@ -432,16 +479,42 @@ df <-
         idade = c(7, 8, 9, 10), 
         altura = c(10, 11)
     )
-
 df
-
 ```
+
+
+Essa estrutura é chave no paradigma "Tidy" que usaremos com as bibliotecas *Tidy*verse
+
+Tibble é uma adaptação do Data Frame para análise de dados. Discutir essas diferenças está fora do escopo do curso. Algumas diferenças serão citadas o longo do material e justificam o uso do Tibble.
+
 
 ## Controle de fluxo
 
 A linguagem oferece comandos de controle de fluxo similares aos de outras linguagens.
 
 Podemos dividir os comandos de controle de fluxo em dois tipos:
+
+* choices: execução alternativa de comandos
+
+* loops: execução repetida de comandos
+
+
+## Choices: `if`, `ifelse`, `switch`
+
+O comando `if` funciona para um valor lógico escalar
+
+
+```{r}
+if (2 + 2 == 4) {
+    "2 mais 2 são 4"
+} else {
+    "2 mais 2 não são 4"
+}
+```
+
+Note o operador de comparação `==` e não `=`
+
+
 
 
 
