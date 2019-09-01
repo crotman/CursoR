@@ -14,8 +14,10 @@ output:
 
 library(tidyverse)
 library(rlang)
+library(bench)
+library(ggbeeswarm)
 
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = TRUE)
 ```
 
 # INTRODUÇÃO
@@ -69,6 +71,14 @@ Também amo o Excel, mas amo mais as seguintes vantagens:
 
 ![](imagens/tidyverse.png){width=50%}
 
+
+## Pequeno exemplo para motivação
+
+É muito comum possuirmos dados gerados em planilhas ou em algum suporte de formarto estruturado. 
+
+Neste exemplo, temos planilhas deste formato formato especificado
+
+[Demo Planel](https://crotman.shinyapps.io/PNE-Planel)
 
 ## Ambiente R/RStudio
 
@@ -499,7 +509,7 @@ Podemos dividir os comandos de controle de fluxo em dois tipos:
 * loops: execução repetida de comandos
 
 
-## Choices: `if`, `ifelse`, `switch`
+## Choices: `if`, `ifelse`
 
 O comando `if` funciona para um valor lógico escalar
 
@@ -514,13 +524,137 @@ if (2 + 2 == 4) {
 
 Note o operador de comparação `==` e não `=`
 
+A função `if_else` (da biblioteca dplyr) funciona de vetorial. `if_else` é mais rápida que a função `ifelse` da biblioteca `base`, mas só aceita argumentos de mesmo tipo no segundo e terceiro parâmetros
+
+```{r}
+jogo_do_pim_silvio_santos <- if_else(
+    condition = 1:40 %% 4 == 0 ,
+    true =  "PIM",
+    false =  as.character(1:40)
+)
+jogo_do_pim_silvio_santos
+```
+
+Note o operador `%%` e a função de coerção de tipo `as.character` 
 
 
+## Choices: `switch` e `case_when`
+
+A cláusula `switch` e a função `dplyr::case_when` evitam que o programador tenha que criar muitos `if else` aninhados
+
+```{r}
+letra <- "b"
+
+switch(
+    letra,
+    "a" = "começa com a",
+    "b" = "começa com b",
+    stop("deu ruim")
+)
+
+```
+
+Note que a condição vai sendo testada na ordem e `stop` gera um erro
+
+case_when serve ao caso vetorial
+
+```{r}
+case_when(
+    1:40 %% 10 == 0 ~ "dezena",
+    1:40 %% 2 == 0 ~ "par",
+    TRUE ~ as.character(1:40)
+)
+```
 
 
-## Loops: cuidado!
+## Loops
 
-A linguagem R contém instruções para execução de loops 
+A cláusula de loop mais usada e mais versátil é `for`
+
+```{r}
+for(i in 1:5){ 
+    print(i^2)
+}
+```
+
+As cláusulas `next` e `break` modificam o comportamento, respectivamente caminhando direto para a próxima iteração e saindo do for
+
+```{r}
+for(i in 1:5){
+    if (i %% 2 == 0){
+        next
+    }
+    print(i)
+}
+```
+
+
+```{r}
+for(i in 1:5){
+    if (i %% 2 == 0){
+        break
+    }
+    print(i)
+}
+```
+
+
+## Loops: coisa do passado
+
+Vamos ver que quase sempre é desnecessário usar loop para as tarefas que vamos executar.
+
+O caráter vetorial da linguagem, aliado a funcionalidades das bibliotecas faz com que a grande maioria dos loops sejam desnecessários.
+
+O código fica mais limpo e expressivo e mais rápido. Às vezes MUITO mais rápido. Isso ocorre por motivos além do escopo do curso (alocação de memória, código interpretado x código compilado em C++ etc.)
+
+O código abaixo usa loop e programação funcinal, respectivamente.
+
+
+```{r warning=FALSE}
+com_loop <- function(n){
+    x <- integer()
+    for (i in 1:n){
+        x <- c(x, i^2)
+    }
+    x
+}
+
+sem_loop <- function(n){
+    x <- 1:n %>% 
+        map_dbl(function(x){x^2})
+    x
+}
+
+```
+
+```{r}
+com_loop(5)
+
+sem_loop(5)
+
+(1:5)^2
+
+```
+
+
+A biblioteca `bench` oferece funções ótimas para avaliara performance de pedaços pequenos de código.
+
+
+```{r  warning=FALSE, cache=TRUE}
+
+resultados_perf <- mark(
+    sem_loop(1e4),
+    com_loop(1e4),
+    (1:1e4)^2
+)
+
+resultados_perf %>% 
+    select(expression, min, median, `itr/sec` )
+
+plot(resultados_perf)
+
+
+```
 
 
 ## Exemplo inicial de visualização de dados
