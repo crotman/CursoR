@@ -16,6 +16,7 @@ library(tidyverse)
 library(rlang)
 library(bench)
 library(ggbeeswarm)
+library(scales)
 
 knitr::opts_chunk$set(echo = TRUE)
 ```
@@ -733,31 +734,105 @@ sum(troca)/n
 sum(fica)/n
 ```
 
-## Outro exemplo de simulação: dá pra passar no CFA sem saber nada?
+## Outra simulação: dá pra passar no CFA sem saber nada?
+
+
+![](imagens/macacocomputador.jpg){width=20%}
+
 
 Vamos ver... mas dá pra simular sem saber quase nada.
+
+Vamos usar uma das funções da família `r<familia de distribuição de prob>()`. Neste caso, a `rbinom`, que simula a distribução binomial (aquela que equivale ao evento de jogar n moedas (ou alguma coisa com dois lados) para cima e ver quantas deram cara).
 
 
 ```{r}
 
-n_simul <- 10000000
+n_simul <- 10000
 n_questoes <- 240
-n_aprovado <- 240 * 0.6
+min_aprovacao <-  0.6
+n_aprovado <- 240 * min_aprovacao
 prob_questao <- 0.2
 
 acertos <- rbinom(n = n_simul, size = n_questoes, prob = prob_questao   )
 
 sum(acertos >= n_aprovado)/n_simul 
 
+```
+
+A chance é praticamente nula.
+
+Na verdade, a grande massa da distribuição fica muito distante.
+
+
+```{r}
+
+dado <- enframe(acertos/n_questoes)
+
+mostra_chances <- function(acertos, n_questoes){
+    ggplot(enframe(acertos/n_questoes)) +
+        geom_density( aes(x = value)) +
+        scale_x_continuous(labels = percent_format(accuracy = 1), limits = c(0,1)) +
+        labs(x ="% Acertos") +
+        geom_vline(xintercept = min_aprovacao, color = "red") +
+        theme_light()
+}
+
+mostra_chances(acertos, n_questoes)
 
 ```
 
-A chance é praicamente nula
 
 
-## Outro exemplo de simulação: dá pra passar no CFA sabendo a um grau x ?
+## Outra simulação: dá pra passar no CFA sabendo a um grau x ?
+
+O exemplo anterior era muito simplista: ninguém chuta tudo.
+
+Imagine que sabemos qual a chance de aparecer uma pergunta onde podemos descartar 0 alternativas, a chance de uma onde descartamos 1 e assim por diante.
 
 
+```{r}
+#definindo a chance podermos eliminar 0, 1, 2, ... 4 alternativas
+fracao_eliminar_questoes <- c( 0.1, 0.1, 0.2, 0.25 , 0.35 ) 
+#definindo o número de questões 
+n_questoes_cada_elimina <- t(rmultinom(n_simul, size = n_questoes, fracao_eliminar_questoes))
+probs_quando_elimina <- 1/(5:1)
+acertos_concatenados <- 
+    rbinom( 
+        n =  n_simul * 5 , 
+        size = as.vector(t(n_questoes_cada_elimina)), 
+        prob = probs_quando_elimina  
+    )
+```
+
+
+```{r}
+n_questoes_cada_elimina[1:4,]
+
+```
+
+
+```{r}
+acertos_concatenados[1:20]
+```
+
+```{r}
+matriz_acertos <- matrix(acertos_concatenados, byrow = TRUE, nrow = n_simul )
+
+matriz_acertos[1:5,]
+```
+
+
+```{r}
+acertos <- rowSums(matriz_acertos)
+sum(acertos > n_aprovado)/n_simul
+
+
+```
+
+
+```{r}
+mostra_chances(acertos, n_questoes)
+```
 
 
 
