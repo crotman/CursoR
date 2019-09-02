@@ -771,7 +771,11 @@ dado <- enframe(acertos/n_questoes)
 mostra_chances <- function(acertos, n_questoes){
     ggplot(enframe(acertos/n_questoes)) +
         geom_density( aes(x = value)) +
-        scale_x_continuous(labels = percent_format(accuracy = 1), limits = c(0,1)) +
+        scale_x_continuous(
+            labels = percent_format(accuracy = 1), 
+            limits = c(0,1),
+            breaks = seq(0, 1, 0.1) 
+            ) +
         labs(x ="% Acertos") +
         geom_vline(xintercept = min_aprovacao, color = "red") +
         theme_light()
@@ -881,6 +885,61 @@ manobras com vars, starts_with, num_range etc
 # VISUALIZAÇÃO DE DADOS 
 
 # PROGRAMAÇÃO FUNCIONAL 
+
+## Simulação CFA com vários parâmetros
+
+
+```{r}
+
+n_simul <- 10000
+n_questoes <- 240
+min_aprovacao <-  0.6
+n_aprovado <- 240 * min_aprovacao
+prob_questao <- 0.2
+
+
+estimar_chance <-  function(...){
+    
+    print("aqui")
+    fracao_eliminar_questoes <- as.vector(...)
+    
+    #definindo o número de questões 
+    n_questoes_cada_elimina <- t(rmultinom(n_simul, size = n_questoes, fracao_eliminar_questoes))
+    probs_quando_elimina <- 1/(5:1)
+    acertos_concatenados <- 
+        rbinom( 
+            n =  n_simul * 5 , 
+            size = as.vector(t(n_questoes_cada_elimina)), 
+            prob = probs_quando_elimina  
+        )
+    
+    matriz_acertos <- matrix(acertos_concatenados, byrow = TRUE, nrow = n_simul )
+    
+    acertos <- rowSums(matriz_acertos)
+    sum(acertos > n_aprovado)/n_simul
+}
+
+
+#definindo a chance podermos eliminar 0, 1, 2, ... 4 alternativas
+resultados <- RandVec(n = 5, m = 100) %>% 
+    .$RandVecOutput %>% 
+    t() %>% 
+    as_tibble() %>% 
+    mutate(id = row_number()) %>% 
+    group_by(id) %>% 
+    nest() %>% 
+    mutate(data_fica = data) %>%     
+    mutate(data = map(data, estimar_chance) ) %>% 
+    unnest()
+
+
+
+
+
+
+
+```
+
 
 ## Aplicação de funções a dataframes (purrr)
 
