@@ -17,6 +17,10 @@ library(rlang)
 library(bench)
 library(ggbeeswarm)
 library(scales)
+library(Surrogate)
+library(gapminder)
+library(wbstats)
+
 
 knitr::opts_chunk$set(echo = TRUE)
 ```
@@ -854,10 +858,100 @@ mostra_chances(acertos, n_questoes)
 
 ## Organizando os dados de forma tidy
 
-![](imagens/tidydata.png)
-## Tratamento de dados em passos: operador Pipe
+Arrumar os dados de forma que as linhas sejam eventos e as colunas sejam atributos do evento ajuda muito a rodar modelos e construir visualizações eficientemente.
 
-## Funções básicas de tratamento (dplyr)
+O que é o evento e o que é o atributo pode variar até para diferentes usos do mesmo dado. Mas a prática ajuda a determinar isso.
+
+![](imagens/tidydata.png){width=70%}
+
+## Tratamento de dados em passos: operador Pipe (`%>%`)
+
+Normalmente os tratamentos de dados são feitos em múltiplos passos encadeados:
+
+
+```{r}
+#dados de exemplo
+head(gapminder)
+
+```
+
+Vamos imaginar que queremos a média de PIB per capita por continente em 2007.
+
+Note quanto código desnecessário há nestas linhas: variáveis que não precisavam ser nomeadas nem passadas explicitamente como parâmetro.
+
+Este código desnecessário causa fadiga no programador e confunde o próprio programador e o leitor posterior do código.
+
+
+```{r}
+#vamos cobrir essas funções de tratamento posteriormente
+gapminder_07 <- filter(gapminder, year == 2007)
+gapminder_07_group_continente <- group_by(gapminder_07, continent)
+gapminder_media_gdp_continente <- summarise(
+    gapminder_07_group_continente, media_gdp = sum(gdpPercap * pop)/sum(pop)
+)
+resultado <- arrange(gapminder_media_gdp_continente, desc(media_gdp))
+
+resultado
+
+```
+
+## Tratamento de dados em passos: operador Pipe (`%>%`) (cont.)
+
+O operador pipe `%>%` faz o seguinte:
+
+x %>% y(z) = y(x,z)
+
+Ou seja, o primeiro operando é enfiado como primeiro parâmetro da função que está no segundo operando.
+
+Isso faz com que possamos escrever o código anterior assim:
+
+```{r}
+
+resultado <- gapminder %>% 
+    filter(year == 2007) %>% 
+    group_by(continent) %>% 
+    summarise(
+        media_gdp = sum(gdpPercap * pop) / sum(pop)
+    ) %>% 
+    arrange(desc(media_gdp))
+    
+resultado
+
+
+```
+
+
+Note que agora podemos interpretar o código facilmente como uma série de comandos de tratamento em cima dos dados. 
+
+Não é por coincidência que as funções de tratamento das bibliotecas tidyverse que veremos adiante são verbos e recebem os dados como primeiro parâmetro.
+
+## Vamos para uma Disneylândia dos dados?
+
+A base do Banco Mundial é um parque de diversões para quem gosta de dados socioeconômicos
+
+Para acessar um indicador precisamos achá-lo na base de indicadores
+
+```{r}
+
+indicadores <- wbsearch()
+
+
+```
+
+
+**Agora o mais importante de tudo: O ATALHO PARA O ` %>% ` É CTRL + SHIFT + M**
+
+## Funções básicas de tratamento (dplyr): filter()
+
+
+```{r}
+
+VC.IHR.PSRC.P5
+
+gini = wb(indicator = "SI.POV.GINI", mrv= 10, POSIXct = TRUE)
+
+```
+
 
 ## Leitura de dados
 
