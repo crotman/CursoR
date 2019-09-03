@@ -1092,8 +1092,86 @@ Bruno Crotman
 <p>Note que agora podemos interpretar o código facilmente como uma série de comandos de tratamento em cima dos dados.</p>
 <p>Não é por coincidência que as funções de tratamento das bibliotecas tidyverse que veremos adiante são verbos e recebem os dados como primeiro parâmetro.</p>
 <p><strong>Agora o mais importante de tudo: O ATALHO PARA O <code>%&gt;%</code> É CTRL + SHIFT + M</strong></p>
-</div><div id="funcoes-basicas-de-tratamento-dplyr" class="slide section level2">
-<h1>Funções básicas de tratamento (dplyr)</h1>
+</div><div id="vamos-para-uma-disneylandia-dos-dados" class="slide section level2">
+<h1>Vamos para uma Disneylândia dos dados?</h1>
+<p>A base do Banco Mundial é um parque de diversões para quem gosta de dados socioeconômicos</p>
+<p>Para acessar um indicador precisamos achá-lo na base de indicadores com a função <code>wbsearch()</code></p>
+<div class="sourceCode" id="cb120"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb120-1" title="1"><span class="co">#pattern é uma expressão regular. \\ serve para dizer que &quot;(&quot; é mesmo &quot;(&quot; </span></a>
+<a class="sourceLine" id="cb120-2" title="2"><span class="co">#e não o ( usado nas operações de expressão regular (fora do escopo do curso)</span></a>
+<a class="sourceLine" id="cb120-3" title="3">indicadores &lt;-<span class="st"> </span><span class="kw">wbsearch</span>(<span class="dt">pattern =</span> <span class="st">&quot;GINI index </span><span class="ch">\\</span><span class="st">(World Bank estimate</span><span class="ch">\\</span><span class="st">)&quot;</span>)</a>
+<a class="sourceLine" id="cb120-4" title="4"></a>
+<a class="sourceLine" id="cb120-5" title="5">indicadores</a></code></pre></div>
+<pre><code>##      indicatorID                        indicator
+## 1348 SI.POV.GINI GINI index (World Bank estimate)</code></pre>
+<p>Sabendo o ID do indicador, podemos consultá-lo com a função <code>wb()</code></p>
+<div class="sourceCode" id="cb122"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb122-1" title="1"><span class="co">#mrv é most recent values. Pode ser usado para buscar os n valores mais recentes</span></a>
+<a class="sourceLine" id="cb122-2" title="2">gini =<span class="st"> </span><span class="kw">wb</span>(<span class="dt">indicator =</span> <span class="st">&quot;SI.POV.GINI&quot;</span>, <span class="dt">mrv=</span> <span class="dv">10</span>, <span class="dt">POSIXct =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb122-3" title="3"></a>
+<a class="sourceLine" id="cb122-4" title="4"><span class="kw">head</span>(gini)</a></code></pre></div>
+<pre><code>##     iso3c date value indicatorID                        indicator iso2c
+## 486   ALB 2012  29.0 SI.POV.GINI GINI index (World Bank estimate)    AL
+## 490   ALB 2008  30.0 SI.POV.GINI GINI index (World Bank estimate)    AL
+## 497   DZA 2011  27.6 SI.POV.GINI GINI index (World Bank estimate)    DZ
+## 530   AGO 2008  42.7 SI.POV.GINI GINI index (World Bank estimate)    AO
+## 541   ARG 2017  40.6 SI.POV.GINI GINI index (World Bank estimate)    AR
+## 542   ARG 2016  42.4 SI.POV.GINI GINI index (World Bank estimate)    AR
+##       country    date_ct granularity
+## 486   Albania 2012-01-01      annual
+## 490   Albania 2008-01-01      annual
+## 497   Algeria 2011-01-01      annual
+## 530    Angola 2008-01-01      annual
+## 541 Argentina 2017-01-01      annual
+## 542 Argentina 2016-01-01      annual</code></pre>
+</div><div id="funcoes-basicas-de-tratamento-dplyr-select" class="slide section level2">
+<h1>Funções básicas de tratamento (dplyr): select()</h1>
+<p>dplyr é uma das bibliotecas que fqzem parte do conjunto tidyverse</p>
+<p>A função <code>select()</code> é usada para selecionar colunas do dataframe/tibble</p>
+<div class="sourceCode" id="cb124"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb124-1" title="1"><span class="kw">glimpse</span>(gini)</a></code></pre></div>
+<pre><code>## Observations: 684
+## Variables: 9
+## $ iso3c       &lt;chr&gt; &quot;ALB&quot;, &quot;ALB&quot;, &quot;DZA&quot;, &quot;AGO&quot;, &quot;ARG&quot;, &quot;ARG&quot;, &quot;ARG&quot;, &quot;...
+## $ date        &lt;chr&gt; &quot;2012&quot;, &quot;2008&quot;, &quot;2011&quot;, &quot;2008&quot;, &quot;2017&quot;, &quot;2016&quot;, &quot;2...
+## $ value       &lt;dbl&gt; 29.0, 30.0, 27.6, 42.7, 40.6, 42.4, 41.4, 41.0, 41...
+## $ indicatorID &lt;chr&gt; &quot;SI.POV.GINI&quot;, &quot;SI.POV.GINI&quot;, &quot;SI.POV.GINI&quot;, &quot;SI.P...
+## $ indicator   &lt;chr&gt; &quot;GINI index (World Bank estimate)&quot;, &quot;GINI index (W...
+## $ iso2c       &lt;chr&gt; &quot;AL&quot;, &quot;AL&quot;, &quot;DZ&quot;, &quot;AO&quot;, &quot;AR&quot;, &quot;AR&quot;, &quot;AR&quot;, &quot;AR&quot;, &quot;A...
+## $ country     &lt;chr&gt; &quot;Albania&quot;, &quot;Albania&quot;, &quot;Algeria&quot;, &quot;Angola&quot;, &quot;Argent...
+## $ date_ct     &lt;date&gt; 2012-01-01, 2008-01-01, 2011-01-01, 2008-01-01, 2...
+## $ granularity &lt;chr&gt; &quot;annual&quot;, &quot;annual&quot;, &quot;annual&quot;, &quot;annual&quot;, &quot;annual&quot;, ...</code></pre>
+<div class="sourceCode" id="cb126"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb126-1" title="1">gini_select &lt;-<span class="st"> </span>gini <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb126-2" title="2"><span class="st">    </span><span class="kw">select</span>(country, date, value, iso3c)</a>
+<a class="sourceLine" id="cb126-3" title="3"></a>
+<a class="sourceLine" id="cb126-4" title="4"><span class="kw">head</span>(gini_select)</a></code></pre></div>
+<pre><code>##       country date value iso3c
+## 486   Albania 2012  29.0   ALB
+## 490   Albania 2008  30.0   ALB
+## 497   Algeria 2011  27.6   DZA
+## 530    Angola 2008  42.7   AGO
+## 541 Argentina 2017  40.6   ARG
+## 542 Argentina 2016  42.4   ARG</code></pre>
+<p>É possível usar a seleção negativa assim como fizemos com vetores</p>
+<div class="sourceCode" id="cb128"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb128-1" title="1">gini_select2 &lt;-<span class="st"> </span>gini_select <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb128-2" title="2"><span class="st">    </span><span class="kw">select</span>(<span class="op">-</span>iso3c)</a>
+<a class="sourceLine" id="cb128-3" title="3"></a>
+<a class="sourceLine" id="cb128-4" title="4"><span class="kw">head</span>(gini_select2)</a></code></pre></div>
+<pre><code>##       country date value
+## 486   Albania 2012  29.0
+## 490   Albania 2008  30.0
+## 497   Algeria 2011  27.6
+## 530    Angola 2008  42.7
+## 541 Argentina 2017  40.6
+## 542 Argentina 2016  42.4</code></pre>
+<div class="sourceCode" id="cb130"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb130-1" title="1">gini_select3 &lt;-<span class="st"> </span>gini <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb130-2" title="2"><span class="st">    </span><span class="kw">select</span>(<span class="kw">starts_with</span>(<span class="st">&quot;iso&quot;</span>))</a>
+<a class="sourceLine" id="cb130-3" title="3"></a>
+<a class="sourceLine" id="cb130-4" title="4"><span class="kw">head</span>(gini_select3)</a></code></pre></div>
+<pre><code>##     iso3c iso2c
+## 486   ALB    AL
+## 490   ALB    AL
+## 497   DZA    DZ
+## 530   AGO    AO
+## 541   ARG    AR
+## 542   ARG    AR</code></pre>
 </div><div id="leitura-de-dados" class="slide section level2">
 <h1>Leitura de dados</h1>
 <p>-read_csv</p>
@@ -1116,46 +1194,46 @@ Bruno Crotman
 <div id="visualizacao-de-dados" class="title-slide slide section level1"><h1>VISUALIZAÇÃO DE DADOS</h1></div>
 <div id="programacao-funcional" class="title-slide slide section level1"><h1>PROGRAMAÇÃO FUNCIONAL</h1></div><div id="simulacao-cfa-com-varios-parametros" class="slide section level2">
 <h1>Simulação CFA com vários parâmetros</h1>
-<div class="sourceCode" id="cb120"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb120-1" title="1">n_simul &lt;-<span class="st"> </span><span class="dv">10000</span></a>
-<a class="sourceLine" id="cb120-2" title="2">n_questoes &lt;-<span class="st"> </span><span class="dv">240</span></a>
-<a class="sourceLine" id="cb120-3" title="3">min_aprovacao &lt;-<span class="st">  </span><span class="fl">0.6</span></a>
-<a class="sourceLine" id="cb120-4" title="4">n_aprovado &lt;-<span class="st"> </span><span class="dv">240</span> <span class="op">*</span><span class="st"> </span>min_aprovacao</a>
-<a class="sourceLine" id="cb120-5" title="5">prob_questao &lt;-<span class="st"> </span><span class="fl">0.2</span></a>
-<a class="sourceLine" id="cb120-6" title="6"></a>
-<a class="sourceLine" id="cb120-7" title="7"></a>
-<a class="sourceLine" id="cb120-8" title="8">estimar_chance &lt;-<span class="st">  </span><span class="cf">function</span>(...){</a>
-<a class="sourceLine" id="cb120-9" title="9">    </a>
-<a class="sourceLine" id="cb120-10" title="10">    <span class="kw">print</span>(<span class="st">&quot;aqui&quot;</span>)</a>
-<a class="sourceLine" id="cb120-11" title="11">    fracao_eliminar_questoes &lt;-<span class="st"> </span><span class="kw">as.vector</span>(...)</a>
-<a class="sourceLine" id="cb120-12" title="12">    </a>
-<a class="sourceLine" id="cb120-13" title="13">    <span class="co">#definindo o número de questões </span></a>
-<a class="sourceLine" id="cb120-14" title="14">    n_questoes_cada_elimina &lt;-<span class="st"> </span><span class="kw">t</span>(<span class="kw">rmultinom</span>(n_simul, <span class="dt">size =</span> n_questoes, fracao_eliminar_questoes))</a>
-<a class="sourceLine" id="cb120-15" title="15">    probs_quando_elimina &lt;-<span class="st"> </span><span class="dv">1</span><span class="op">/</span>(<span class="dv">5</span><span class="op">:</span><span class="dv">1</span>)</a>
-<a class="sourceLine" id="cb120-16" title="16">    acertos_concatenados &lt;-<span class="st"> </span></a>
-<a class="sourceLine" id="cb120-17" title="17"><span class="st">        </span><span class="kw">rbinom</span>( </a>
-<a class="sourceLine" id="cb120-18" title="18">            <span class="dt">n =</span>  n_simul <span class="op">*</span><span class="st"> </span><span class="dv">5</span> , </a>
-<a class="sourceLine" id="cb120-19" title="19">            <span class="dt">size =</span> <span class="kw">as.vector</span>(<span class="kw">t</span>(n_questoes_cada_elimina)), </a>
-<a class="sourceLine" id="cb120-20" title="20">            <span class="dt">prob =</span> probs_quando_elimina  </a>
-<a class="sourceLine" id="cb120-21" title="21">        )</a>
-<a class="sourceLine" id="cb120-22" title="22">    </a>
-<a class="sourceLine" id="cb120-23" title="23">    matriz_acertos &lt;-<span class="st"> </span><span class="kw">matrix</span>(acertos_concatenados, <span class="dt">byrow =</span> <span class="ot">TRUE</span>, <span class="dt">nrow =</span> n_simul )</a>
-<a class="sourceLine" id="cb120-24" title="24">    </a>
-<a class="sourceLine" id="cb120-25" title="25">    acertos &lt;-<span class="st"> </span><span class="kw">rowSums</span>(matriz_acertos)</a>
-<a class="sourceLine" id="cb120-26" title="26">    <span class="kw">sum</span>(acertos <span class="op">&gt;</span><span class="st"> </span>n_aprovado)<span class="op">/</span>n_simul</a>
-<a class="sourceLine" id="cb120-27" title="27">}</a>
-<a class="sourceLine" id="cb120-28" title="28"></a>
-<a class="sourceLine" id="cb120-29" title="29"></a>
-<a class="sourceLine" id="cb120-30" title="30"><span class="co">#definindo a chance podermos eliminar 0, 1, 2, ... 4 alternativas</span></a>
-<a class="sourceLine" id="cb120-31" title="31">resultados &lt;-<span class="st"> </span><span class="kw">RandVec</span>(<span class="dt">n =</span> <span class="dv">5</span>, <span class="dt">m =</span> <span class="dv">100</span>) <span class="op">%&gt;%</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb120-32" title="32"><span class="st">    </span>.<span class="op">$</span>RandVecOutput <span class="op">%&gt;%</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb120-33" title="33"><span class="st">    </span><span class="kw">t</span>() <span class="op">%&gt;%</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb120-34" title="34"><span class="st">    </span><span class="kw">as_tibble</span>() <span class="op">%&gt;%</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb120-35" title="35"><span class="st">    </span><span class="kw">mutate</span>(<span class="dt">id =</span> <span class="kw">row_number</span>()) <span class="op">%&gt;%</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb120-36" title="36"><span class="st">    </span><span class="kw">group_by</span>(id) <span class="op">%&gt;%</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb120-37" title="37"><span class="st">    </span><span class="kw">nest</span>() <span class="op">%&gt;%</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb120-38" title="38"><span class="st">    </span><span class="kw">mutate</span>(<span class="dt">data_fica =</span> data) <span class="op">%&gt;%</span><span class="st">     </span></a>
-<a class="sourceLine" id="cb120-39" title="39"><span class="st">    </span><span class="kw">mutate</span>(<span class="dt">data =</span> <span class="kw">map</span>(data, estimar_chance) ) <span class="op">%&gt;%</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb120-40" title="40"><span class="st">    </span><span class="kw">unnest</span>()</a></code></pre></div>
+<div class="sourceCode" id="cb132"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb132-1" title="1">n_simul &lt;-<span class="st"> </span><span class="dv">10000</span></a>
+<a class="sourceLine" id="cb132-2" title="2">n_questoes &lt;-<span class="st"> </span><span class="dv">240</span></a>
+<a class="sourceLine" id="cb132-3" title="3">min_aprovacao &lt;-<span class="st">  </span><span class="fl">0.6</span></a>
+<a class="sourceLine" id="cb132-4" title="4">n_aprovado &lt;-<span class="st"> </span><span class="dv">240</span> <span class="op">*</span><span class="st"> </span>min_aprovacao</a>
+<a class="sourceLine" id="cb132-5" title="5">prob_questao &lt;-<span class="st"> </span><span class="fl">0.2</span></a>
+<a class="sourceLine" id="cb132-6" title="6"></a>
+<a class="sourceLine" id="cb132-7" title="7"></a>
+<a class="sourceLine" id="cb132-8" title="8">estimar_chance &lt;-<span class="st">  </span><span class="cf">function</span>(...){</a>
+<a class="sourceLine" id="cb132-9" title="9">    </a>
+<a class="sourceLine" id="cb132-10" title="10">    <span class="kw">print</span>(<span class="st">&quot;aqui&quot;</span>)</a>
+<a class="sourceLine" id="cb132-11" title="11">    fracao_eliminar_questoes &lt;-<span class="st"> </span><span class="kw">as.vector</span>(...)</a>
+<a class="sourceLine" id="cb132-12" title="12">    </a>
+<a class="sourceLine" id="cb132-13" title="13">    <span class="co">#definindo o número de questões </span></a>
+<a class="sourceLine" id="cb132-14" title="14">    n_questoes_cada_elimina &lt;-<span class="st"> </span><span class="kw">t</span>(<span class="kw">rmultinom</span>(n_simul, <span class="dt">size =</span> n_questoes, fracao_eliminar_questoes))</a>
+<a class="sourceLine" id="cb132-15" title="15">    probs_quando_elimina &lt;-<span class="st"> </span><span class="dv">1</span><span class="op">/</span>(<span class="dv">5</span><span class="op">:</span><span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb132-16" title="16">    acertos_concatenados &lt;-<span class="st"> </span></a>
+<a class="sourceLine" id="cb132-17" title="17"><span class="st">        </span><span class="kw">rbinom</span>( </a>
+<a class="sourceLine" id="cb132-18" title="18">            <span class="dt">n =</span>  n_simul <span class="op">*</span><span class="st"> </span><span class="dv">5</span> , </a>
+<a class="sourceLine" id="cb132-19" title="19">            <span class="dt">size =</span> <span class="kw">as.vector</span>(<span class="kw">t</span>(n_questoes_cada_elimina)), </a>
+<a class="sourceLine" id="cb132-20" title="20">            <span class="dt">prob =</span> probs_quando_elimina  </a>
+<a class="sourceLine" id="cb132-21" title="21">        )</a>
+<a class="sourceLine" id="cb132-22" title="22">    </a>
+<a class="sourceLine" id="cb132-23" title="23">    matriz_acertos &lt;-<span class="st"> </span><span class="kw">matrix</span>(acertos_concatenados, <span class="dt">byrow =</span> <span class="ot">TRUE</span>, <span class="dt">nrow =</span> n_simul )</a>
+<a class="sourceLine" id="cb132-24" title="24">    </a>
+<a class="sourceLine" id="cb132-25" title="25">    acertos &lt;-<span class="st"> </span><span class="kw">rowSums</span>(matriz_acertos)</a>
+<a class="sourceLine" id="cb132-26" title="26">    <span class="kw">sum</span>(acertos <span class="op">&gt;</span><span class="st"> </span>n_aprovado)<span class="op">/</span>n_simul</a>
+<a class="sourceLine" id="cb132-27" title="27">}</a>
+<a class="sourceLine" id="cb132-28" title="28"></a>
+<a class="sourceLine" id="cb132-29" title="29"></a>
+<a class="sourceLine" id="cb132-30" title="30"><span class="co">#definindo a chance podermos eliminar 0, 1, 2, ... 4 alternativas</span></a>
+<a class="sourceLine" id="cb132-31" title="31">resultados &lt;-<span class="st"> </span><span class="kw">RandVec</span>(<span class="dt">n =</span> <span class="dv">5</span>, <span class="dt">m =</span> <span class="dv">100</span>) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb132-32" title="32"><span class="st">    </span>.<span class="op">$</span>RandVecOutput <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb132-33" title="33"><span class="st">    </span><span class="kw">t</span>() <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb132-34" title="34"><span class="st">    </span><span class="kw">as_tibble</span>() <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb132-35" title="35"><span class="st">    </span><span class="kw">mutate</span>(<span class="dt">id =</span> <span class="kw">row_number</span>()) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb132-36" title="36"><span class="st">    </span><span class="kw">group_by</span>(id) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb132-37" title="37"><span class="st">    </span><span class="kw">nest</span>() <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb132-38" title="38"><span class="st">    </span><span class="kw">mutate</span>(<span class="dt">data_fica =</span> data) <span class="op">%&gt;%</span><span class="st">     </span></a>
+<a class="sourceLine" id="cb132-39" title="39"><span class="st">    </span><span class="kw">mutate</span>(<span class="dt">data =</span> <span class="kw">map</span>(data, estimar_chance) ) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb132-40" title="40"><span class="st">    </span><span class="kw">unnest</span>()</a></code></pre></div>
 <pre><code>## Warning: `as_tibble.matrix()` requires a matrix with column names or a `.name_repair` argument. Using compatibility `.name_repair`.
 ## This warning is displayed once per session.</code></pre>
 <pre><code>## [1] &quot;aqui&quot;
