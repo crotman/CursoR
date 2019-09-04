@@ -17,9 +17,16 @@ library(bench)
 library(ggbeeswarm)
 library(scales)
 library(Surrogate)
-library(gapminder)
 library(wbstats)
 library(tidyverse)
+library(magrittr)
+library(knitr)
+library(kableExtra)
+library(DT)
+
+library(electionsBR)
+library(worldmet)
+library(gapminder)
 
 
 knitr::opts_chunk$set(echo = TRUE)
@@ -928,9 +935,15 @@ Não é por coincidência que as funções de tratamento das bibliotecas tidyver
 **Agora o mais importante de tudo: O ATALHO PARA O ` %>% ` É CTRL + SHIFT + M**
 
 
-## Vamos para uma Disneylândia dos dados?
+## CRAN: uma Disneylândia dos dados?
 
-A base do Banco Mundial é um parque de diversões para quem gosta de dados socioeconômicos
+CRAN é o repositório de bibliotecas mantido pelo R com contribuição de populares.
+
+Além de funcionalidades estatísticas e funcionalidades para lidar com dados, há dados e funcionalidades para buscar dados online.
+
+Usaremos várias das bases como exemplo.
+
+A primeira é a do Banco Mundial, muito rica para quem gosta de dados socioeconômicos
 
 Para acessar um indicador precisamos achá-lo na base de indicadores com a função `wbsearch()`
 
@@ -992,25 +1005,45 @@ head(gini_select2)
 
 ```
 
+## Funções básicas de tratamento (dplyr): select() (cont.)
 
+Algumas funções *helpers* nos ajudam a usar a função `select` e são muito úteis para tratamentos mais elaborados.
+
+Pra mostrar mais funcionalidades da função `select`, vamos usar uma base com dados eleitorais brasileiros, que retorna mais colunas
+
+
+```{r, cache=TRUE}
+
+candidatos <- candidate_fed(2018)
+
+glimpse(candidatos)
+
+```
+
+## Funções básicas de tratamento (dplyr): select() - helpers
 
 
 ```{r }
 
-gini_select3 <- gini %>% 
-    select(starts_with("iso"))
+candidatos_select <- candidatos %>% 
+    select(starts_with("NOME"))
 
-head(gini_select3)
+datatable(head(candidatos_select))
+    
 
 
 ```
 
-## Funções básicas de tratamento (dplyr): select() (cont.)
-
-Algumas funções *helpers* nos ajudam a usar a função select e são muito úteis para tratamentos mais elaborados
 
 ```{r }
 
+candidatos_select <- candidatos %>% 
+    select(ends_with("candidato"))
+
+kable(head(candidatos_select)) %>% 
+    kable_styling(bootstrap_options = c("striped"))
+    
+    
 
 
 ```
