@@ -1040,15 +1040,103 @@ datatable(head(candidatos_select))
 candidatos_select <- candidatos %>% 
     select(ends_with("candidato"))
 
-kable(head(candidatos_select)) %>% 
-    kable_styling(bootstrap_options = c("striped"))
-    
+datatable(head(candidatos_select))
     
 
 
 ```
 
+```{r}
 
+candidatos_select <- candidatos %>% 
+    select(contains("municipio"))
+
+datatable(head(candidatos_select))
+
+
+```
+
+```{r}
+
+candidatos_select <- candidatos %>% 
+    select(ends_with("candidato"))
+
+datatable(head(candidatos_select))
+
+
+```
+
+
+## Funções básicas de tratamento (dplyr): select() - helpers (cont.)
+
+
+A função *helper* num_range ajuda a encontrar colunas do tipo `prefixo_n`. Isso é muito comum em bases de dados
+
+A biblioteca `worldmet` retorna dados de estações meteorológicas espalhadas pelo planeta 
+
+Primeiro é necessário encontrar o código da base desejada
+
+```{r}
+
+estacao <- getMeta("heathrow", returnMap = TRUE)
+
+estacao
+    
+
+```
+
+
+## Funções básicas de tratamento (dplyr): select() - helpers (cont.)
+
+A função abaixo retorna os dados de uma estação. Veja que alguns campos têm um sufixo _n 
+
+```{r}
+dados_heathrow <- importNOAA(code = "037720-99999", year = 2019,
+precip = TRUE, PWC = FALSE, parallel = TRUE)
+
+
+glimpse(dados_heathrow)
+
+
+```
+
+```{r}
+
+dados_heathrow_select <- dados_heathrow %>% 
+    select( 
+        date, 
+        num_range("cl_", 1:3 ), 
+        num_range("precip_", c(6, 12))  
+    )
+
+
+head(dados_heathrow_select)
+
+```
+
+
+```{r}
+
+dados_heathrow_select <- dados_heathrow %>% 
+    select( 
+        date, 
+        air_temp,
+        everything() 
+    )
+
+
+glimpse(dados_heathrow_select)
+
+
+
+
+```
+
+
+## Funções básicas de tratamento (dplyr) `arrange()`:
+
+
+## Funções básicas de tratamento (dplyr) `group_by()`:
 
 
 
