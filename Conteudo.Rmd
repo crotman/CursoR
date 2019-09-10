@@ -24,6 +24,7 @@ library(knitr)
 library(kableExtra)
 library(DT)
 library(lubridate)
+library(cumstats)
 
 library(electionsBR)
 library(worldmet)
@@ -1212,18 +1213,52 @@ series
 
 ```
 
-
+No código abaixo, calculamos o retorno da série, a volatilidade histórica e a volatilidade EWMA
 
 ```{r}
 
 dolar <- BETSget(1) 
 
 dolar_com_vol <- dolar %>% 
+    filter(date > ymd("1994-07-01")) %>% 
     arrange(date) %>% 
-    mutate(retorno = (value - lag(value))/value  ) %>% 
-    mutate(vol = sqrt(cumvar()) )
+    mutate(
+        retorno = (value - lag(value))/value,
+        retorno_quad = retorno^2,
+        dia = row_number(),
+        fator_ewma = (1/0.94)^dia*1e-20
+    ) %>% 
+    filter(!is.na(retorno)) %>% 
+    mutate(vol = sqrt(cumvar(retorno)) * sqrt(252) ) %>% 
+    mutate(vol_ewma = sqrt(cumsum(retorno_quad * fator_ewma)/cumsum(fator_ewma)) * sqrt(252) ) %>% 
+    rename(dolar = value) %>% 
+    select(
+        date,
+        dolar,
+        retorno,
+        vol,
+        vol_ewma
+    )
 
-dolar_com_vol
+datatable(dolar_com_vol) %>% 
+    formatPercentage(c("retorno", "vol", "vol_ewma"), 2)
+
+
+```
+
+
+```{r}
+
+dolar_ajeitado <- dolar_com_vol %>% 
+    gather(variavel, valor, - date)
+
+
+dolar_ajeitado %>% 
+    ggplot() +
+    geom_line(aes(x = date, y = valor)) +
+    facet_grid( variavel ~ . , scales = "free") +
+    theme_light() 
+
 
 
 ```
