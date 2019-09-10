@@ -28,6 +28,7 @@ library(lubridate)
 library(electionsBR)
 library(worldmet)
 library(gapminder)
+library(BETS)
 
 
 knitr::opts_chunk$set(echo = TRUE)
@@ -1184,11 +1185,45 @@ head(candidatos_com_data)
 ## Funções básicas de tratamento (dplyr): `mutate()`
 
 
-funções derivadas da `mutate` possibilitam a alteração de várias colunas ao mesmo tempo, usando os mesmos helpers que jã vimos para a `select` e  
+funções derivadas da `mutate` possibilitam a alteração de várias colunas ao mesmo tempo, usando os mesmos helpers que jã vimos para a `select` e uma função à escolha
 
 
 ```{r}
 
+candidatos_com_data <- candidatos %>% 
+    mutate_at(vars(starts_with("DATA_")), dmy ) %>% 
+    select(starts_with("DATA_"))
+
+
+head(candidatos_com_data)
+
+
+```
+
+## Funções básicas de tratamento (dplyr) `mutate()` (cont.):
+
+Outras funções úteis são as que fazem operações acumuladas e as operações de `lag()` e `lead()`
+
+```{r}
+
+series <- BETSsearch("exchange dollar")
+
+series
+
+```
+
+
+
+```{r}
+
+dolar <- BETSget(1) 
+
+dolar_com_vol <- dolar %>% 
+    arrange(date) %>% 
+    mutate(retorno = (value - lag(value))/value  ) %>% 
+    mutate(vol = sqrt(cumvar()) )
+
+dolar_com_vol
 
 
 ```
@@ -1284,6 +1319,8 @@ gini_agrupado %<>% mutate(
 datatable(gini_agrupado)
 
 ```
+
+
 
 ## Funções básicas de tratamento (dplyr) `group_by()` (cont.):
 
