@@ -23,6 +23,7 @@ library(magrittr)
 library(knitr)
 library(kableExtra)
 library(DT)
+library(lubridate)
 
 library(electionsBR)
 library(worldmet)
@@ -1100,6 +1101,11 @@ glimpse(dados_heathrow)
 
 ```
 
+
+A função *helper* `num_range` ajuda a selecionar essas colunas com prefixo comum e um sufixo numérico 
+
+
+
 ```{r}
 
 dados_heathrow_select <- dados_heathrow %>% 
@@ -1113,6 +1119,8 @@ dados_heathrow_select <- dados_heathrow %>%
 head(dados_heathrow_select)
 
 ```
+
+Outra função útil é a `everything`, que ajuda, por exemplo, a passar algumas colunas para o início do *tibble*.
 
 
 ```{r}
@@ -1131,12 +1139,164 @@ glimpse(dados_heathrow_select)
 
 
 ```
+## Funções básicas de tratamento (dplyr): `mutate()`
+
+A função mutate é usada para criar novas colunas no tibble
+
+Notando que a coluna DATA_ELEICAO é um caracter, vamos criar uma coluna de tipo data.
+
+```{r}
+
+typeof(candidatos$DATA_ELEICAO)
+
+
+```
+
+
+O jeito mais fácil de fazer isso é usando uma das funções da biblioteca `lubridate` que veremos em detalhes em seguida
+
+
+```{r}
+
+candidatos_com_data <- candidatos %>% 
+    mutate(DATA_ELEICAO_TIPO_DATA = dmy(DATA_ELEICAO)) %>% 
+    select(DATA_ELEICAO, DATA_ELEICAO_TIPO_DATA)
+
+head(candidatos_com_data)
+
+```
+
+
+É possível substituir a um campo existente
+
+
+```{r}
+
+candidatos_com_data <- candidatos %>% 
+    mutate(DATA_ELEICAO = dmy(DATA_ELEICAO)) %>% 
+    select(DATA_ELEICAO)
+
+head(candidatos_com_data)
+
+```
+
+
+## Funções básicas de tratamento (dplyr): `mutate()`
+
+
+funções derivadas da `mutate` possibilitam a alteração de várias colunas ao mesmo tempo, usando os mesmos helpers que jã vimos para a `select` e  
+
+
+```{r}
+
+
+
+```
+
 
 
 ## Funções básicas de tratamento (dplyr) `arrange()`:
 
+A função `arrange` serve para ordenar o tibble.
+
+
+```{r}
+
+dados_ordenados <- dados_heathrow %>% 
+    arrange(date)
+
+head(dados_ordenados)
+
+```
+
+A função `desc()` permite a ordenação decrescente
+
+
+```{r}
+
+dados_ordenados <- dados_heathrow %>% 
+    arrange(desc(date))
+
+head(dados_ordenados)
+
+
+
+```
+
+
+
 
 ## Funções básicas de tratamento (dplyr) `group_by()`:
+
+
+A função `group_by` será bastante usada..
+
+Quem conhece SQL pode estranhar um pouco o comportamento desta função, pois ela não agrupa os dados diminuindo o número de linhas imediatamente.
+
+Mas veja que ela indica que há agrupamento
+
+
+```{r}
+
+gini_agrupado <- gini %>% 
+    select(country, date, value) %>% 
+    group_by(country) 
+    
+gini_agrupado
+
+
+```
+
+
+## Funções básicas de tratamento (dplyr) `group_by()` (cont.):
+
+Para várias operações, entretanto, o agrupamento faz com que o comportamento seja diferente
+
+Uma operação bastante usada é numerar as linhas de um tibble.
+
+No tibble agrupado, essa operação acontece em cada grupo.
+
+```{r}
+
+gini_agrupado %<>% arrange(country, date) %>% 
+    mutate(linha = row_number())
+
+
+datatable(gini_agrupado)
+
+
+```
+
+
+
+## Funções básicas de tratamento (dplyr) `group_by()` (cont.):
+
+
+Outras funções muito usadas são a `lag()` e `lead()`, que acessam a linha anterior do tibble.
+
+```{r}
+
+gini_agrupado %<>% mutate(
+    value_ant = lag(value),
+    delta_value = value - value_ant
+    )
+
+datatable(gini_agrupado)
+
+```
+
+## Funções básicas de tratamento (dplyr) `group_by()` (cont.):
+
+
+A função `group_by` só leva a uma sumarização, ou seja, só transforma o tibble em um tibble com o número de linhas igual ao número de grupos quando executamos a função `summarise()`
+
+
+```{r}
+
+
+
+
+```
 
 
 
