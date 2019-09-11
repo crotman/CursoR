@@ -1415,15 +1415,11 @@ ggplot(maiores_temp_dia) +
 ```
 
 
+## Leitura de dados de arquivos
 
+Até agora acessamos dados que estavam disponíveis em bibliotecas, mas muitas vezes encontramos dados em arquivos.
 
-## Leitura de dados
-
--read_csv
-
--read_fwf
-
--read_excel
+De modo geral, as funções da biblioteca `readr` são mas rápidas do que as da biblioteca base, e também mostram barra de progresso no console. É possível reconhecê-las pelo `_` ao invés de `.` 
 
 
 ## Funções de junção (dplyr)
