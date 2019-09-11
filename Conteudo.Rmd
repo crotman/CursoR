@@ -1342,7 +1342,7 @@ datatable(gini_agrupado)
 ## Funções básicas de tratamento (dplyr) `group_by()` (cont.):
 
 
-Outras funções muito usadas são a `lag()` e `lead()`, que acessam a linha anterior do tibble.
+As funções `lag()` e `lead()` funcionam dentro de cada grupo (o primeiro value de um grupo não acessa o valor do outro grupo com `lag()` .
 
 ```{r}
 
@@ -1360,10 +1360,54 @@ datatable(gini_agrupado)
 ## Funções básicas de tratamento (dplyr) `group_by()` (cont.):
 
 
-A função `group_by` só leva a uma sumarização, ou seja, só transforma o tibble em um tibble com o número de linhas igual ao número de grupos quando executamos a função `summarise()`
+A função `group_by` só leva a uma sumarização, ou seja, só transforma o tibble em um tibble com o número de linhas igual ao número de grupos, quando executamos a função `summarise()`
 
 
 ```{r}
+
+maiores_temp_dia <- dados_heathrow %>% 
+    group_by(date(date)) %>% 
+    summarise(
+        maxima = max(air_temp),
+        minima = min(air_temp),
+        media = mean(air_temp)
+    )
+
+
+datatable(maiores_temp_dia) %>% 
+    formatRound(c("maxima", "minima", "media"), 1)
+
+
+```
+
+
+
+A função `top_n` retorna os n maiores valores. Se o tibble estiver agrupado, pra cada grupo.
+
+
+
+```{r}
+
+
+maiores_temp_dia <- dados_heathrow %>% 
+    group_by(date(date)) %>% 
+    top_n(1, air_temp) %>% 
+    ungroup() %>% 
+    mutate(
+        hora = hour(date),
+        estacao = 
+            case_when(
+                month(date) %in% 1:3 ~ "Inverno",
+                month(date) %in% 7:9 ~ "Verão",
+                TRUE ~ "Outono/Primavera"
+                
+            )
+    ) %>% 
+    select(hora, estacao, air_temp)
+
+ggplot(maiores_temp_dia) +
+    geom_density( aes(x = hora, color = estacao )) +
+    theme_light()
 
 
 
