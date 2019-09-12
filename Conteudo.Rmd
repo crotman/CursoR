@@ -1421,6 +1421,92 @@ Até agora acessamos dados que estavam disponíveis em bibliotecas, mas muitas v
 
 De modo geral, as funções da biblioteca `readr` são mas rápidas do que as da biblioteca base, e também mostram barra de progresso no console. É possível reconhecê-las pelo `_` ao invés de `.` 
 
+O portal da CVM é uma das minas de ouro de dados
+
+
+O código abaixo baixa os dados que ainda não estão na nossa base
+
+```{r}
+
+existem <- tibble(arquivo = list.files("dados/fundos"))
+
+
+salva <- function(dado){
+    
+    endereco <- pull(dado, endereco)
+    arquivo <- pull(dado, arquivo)
+    
+    print(endereco)
+    conteudo <- read_csv2(endereco)
+    
+    write_csv(conteudo, paste0("dados/fundos/",arquivo))
+    
+}
+
+
+
+baixa_faltantes <- tibble(data_dado = seq(ymd("2017-01-01"), by = "month", ymd(today()) )) %>% 
+    mutate(data_formato = stamp_date("999912")(data_dado)) %>% 
+    mutate(
+        endereco = paste0(
+            "http://dados.cvm.gov.br/dados/FI/DOC/INF_DIARIO/DADOS/",
+            "inf_diario_fi_",
+            data_formato,
+            ".csv")) %>% 
+    mutate(arquivo = paste("inf_diario_fi_",data_formato,".csv")) %>% 
+    anti_join(existem, by = c("arquivo" = "arquivo")) %>% 
+    select(-data_formato) %>% 
+    group_by(data_dado) %>% 
+    nest() %>% 
+    mutate(data = map(data, salva ))
+
+
+le_arquivo <- function(lista_arquivo){
+    
+    arquivo <- pull(lista_arquivo, arquivo)
+    
+    conteudo <- read_csv(arquivo)
+    
+    print(arquivo)
+    
+    conteudo
+    
+}
+
+
+todos_os_fundos <- tibble(arquivo = list.files("dados/fundos")) %>%
+    mutate(arquivo = paste0("dados/fundos/",arquivo )) %>% 
+    group_by(row_number()) %>% 
+    nest() %>% 
+    mutate(data = map(data, le_arquivo)) %>% 
+    unnest()
+
+
+head(todos_os_fundos)
+
+```
+
+
+
+
+
+```{r}
+
+cadastro_fundos <- read_csv2("http://dados.cvm.gov.br/dados/FIE/CAD/DADOS/inf_cadastral_fie.csv", locale =  locale(encoding = "latin1") )
+
+
+```
+
+
+```{r}
+
+cotas_spx <- todos_os_fundos %>% 
+    filter(CNPJ_FUNDO == "12.798.221/0001-36" )
+
+
+```
+
+
 
 ## Funções de junção (dplyr)
 
