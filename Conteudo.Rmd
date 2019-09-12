@@ -1500,9 +1500,11 @@ cadastro_fundos <- read_csv2("http://dados.cvm.gov.br/dados/FIE/CAD/DADOS/inf_ca
 
 ```{r}
 
-cotas_spx <- todos_os_fundos %>% 
-    filter(CNPJ_FUNDO == "12.798.221/0001-36" )
+cotas_verde <- todos_os_fundos %>% 
+    filter(CNPJ_FUNDO == "07.455.507/0001-89" )
 
+
+cotas_verde
 
 ```
 
