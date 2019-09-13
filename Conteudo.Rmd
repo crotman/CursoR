@@ -38,6 +38,11 @@ knitr::opts_chunk$set(echo = TRUE)
 # INTRODUÇÃO
 
 
+## A máquina de escrever do meu avô
+
+![](imagens/olivetti.jpg){width=50%} 
+
+
 ## Objetivos do curso
 
 Meta final: que vários dos processos de análise de dados da empresa passem a ser feitos dentro do fluxo de trabalho do R.
@@ -110,7 +115,7 @@ Na visualização padrão, ele oferece um console para execução de comandos e 
 
 No console é possível executar comandos, como o que atribui valor a uma variável
 
-```{r,  echo=TRUE}
+```{r atribuicao,  echo=TRUE}
 
 x <- 1
 
@@ -122,7 +127,7 @@ Note que a atribuição é feita com `<-` e não com `=` como na maioria das lin
 
 Os comandos que não atribuem valor a uma variável são ecoados na tela
 
-```{r,  echo=TRUE}
+```{r atribuicao2,  echo=TRUE}
 
 x + 2
 
@@ -182,11 +187,11 @@ Para o R, simplificando para o escopo deste curso, as variáveis "armazenam" os 
 
 * Vetores (vetores atômicos e listas)
 
-```{r, echo=TRUE}
+```{r seq_int, echo=TRUE}
 1L:10L
 ```
 
-```{r, echo=TRUE}
+```{r list, echo=TRUE}
 
 list("oi", 1L)
 
@@ -195,7 +200,7 @@ list("oi", 1L)
 * Data Frames / Tibbles
 
 
-```{r, echo=TRUE}
+```{r dataframe, echo=TRUE}
 tibble(col1 = 1:10, col2 = 11:20 )
 ```
 
@@ -203,7 +208,7 @@ tibble(col1 = 1:10, col2 = 11:20 )
 
 * Funções (sim... uma variável pode "armazenar" uma função)
 
-```{r, echo=TRUE}
+```{r funcoes, echo=TRUE}
 
 f <- function(a, b){
     a + b
@@ -217,7 +222,7 @@ g(1L, 2L)
 
 * Environments 
 
-```{r, echo=TRUE}
+```{r env, echo=TRUE}
 
 
 e1 <- rlang::env(
@@ -262,7 +267,7 @@ Fonte: [Advanced R](https://adv-r.hadley.nz/)
 
 * Logical é um tipo booleano, aceita TRUE ou FALSE
 
-```{r, echo=TRUE}
+```{r bool, echo=TRUE}
 
 booleano <- !TRUE 
 
@@ -272,7 +277,7 @@ booleano
 
 * Integer é numérico e inteiro. Equivalente ao long do C++ (por isso o L na declaração)
 
-```{r, echo=TRUE}
+```{r integer, echo=TRUE}
 
 inteiro <- 8L 
 
@@ -287,7 +292,7 @@ typeof(inteiro + 1)
 
 * Double é numérico e aceita números decimais. Equivalente ao double do C++
 
-```{r, echo=TRUE}
+```{r double, echo=TRUE}
 
 double <- 0.1
 
@@ -297,7 +302,7 @@ infinito <- Inf
 ```
 
 
-```{r, echo=TRUE}
+```{r, double_valor, echo=TRUE}
 
 double
 
@@ -313,7 +318,7 @@ infinito
 
 Uma das funções mais usadas do R é c(), que cria um vetor novo vetor combinando vetores.
 
-```{r, echo=TRUE}
+```{r c, echo=TRUE}
 
 c(1, 2, 3)
 
@@ -327,7 +332,7 @@ c(1, 2, 3, c(4, 5, 6))
 
 O operador `:` é usado para gerar um vetor com todos números que estão entre os operandos e são formados somando números inteiros ao primeiro operando.
 
-```{r echo=TRUE}
+```{r dois_pontos, echo=TRUE}
 
 1L:10L
 
@@ -342,7 +347,7 @@ A função `seq()` é usada para criar um vetor de várias formas.
 Numa das formas especifica-se o valor inicial, o valor final e o incremento entre elementos do vetor. 
 
 
-```{r echo=TRUE}
+```{r seq, echo=TRUE}
 
 seq(1, 9.99, 0.1)
 
@@ -358,7 +363,7 @@ Mas no R também é possível passar parâmetros de forma nomeada.
 
 Clique em `F1` enquanto tem o cursor em cima da função e veja a ordem dos parâmetros. Veja que outros parâmetros que não utilizamos. Podemos usar `length.out` ao invés de `by`:
 
-```{r echo=TRUE}
+```{r seq_nome, echo=TRUE}
 
 
 seq(1L, 10L, length.out = 10L)
@@ -369,7 +374,7 @@ seq(1L, 10L, length.out = 5L)
 
 Outro parâmetro, `along.with`, deixa que criemos um vetor num intervalo determinado e o mesmo número de elementos do vetor passado por este parâmetro. 
 
-```{r echo=TRUE}
+```{r along, echo=TRUE}
 
 seq(20, 100, along.with = 1:10)
 
@@ -379,7 +384,7 @@ seq(20, 100, along.with = 1:10)
 
 Valores faltantes ou desconecidos são representados por `NA`
 
-```{r echo=TRUE}
+```{r na, echo=TRUE}
 
 a <- c(1L,NA)
 a
@@ -387,7 +392,7 @@ a
 
 O valor NA quase sempre contamina os cálculos
 
-```{r echo=TRUE}
+```{r na_contamina, echo=TRUE}
 media <- mean(a)
 media
 ```
@@ -395,7 +400,7 @@ media
 
 mas...
 
-```{r echo=TRUE}
+```{r narm, echo=TRUE}
 media <- mean(a, na.rm = TRUE)
 media
 ```
@@ -403,7 +408,7 @@ media
 
 A exceção são expressões que dão sempre o mesmo resultado independentemente do valor da variável
 
-```{r echo=TRUE}
+```{r na_exc, echo=TRUE}
 NA ^ 0
 NA | TRUE
 NA & FALSE
@@ -412,7 +417,7 @@ NA & FALSE
 
 A melhor forma de testar se existe um valor `NA` é `is.na`
 
-```{r}
+```{r isna}
 
 v <- c(1, NA, 2)
 
@@ -429,14 +434,14 @@ is.na(v)
 As operações do R são vetoriais. Numa operação entre um vetor e um escalar, a operação com o escalar é aplicada a cada elemento do vetor
 
 
-```{r echo=TRUE}
+```{r vetor, echo=TRUE}
 
 1:5 * 2
 
 ```
 
 
-```{r echo=TRUE}
+```{r  vetor2, echo=TRUE}
 
 1:10 / 10
 
@@ -446,7 +451,7 @@ As operações do R são vetoriais. Numa operação entre um vetor e um escalar,
 Numa operação com vetores do mesmo tamanho, os elementos são pareados
 
 
-```{r echo=TRUE}
+```{r vetor_pareado, echo=TRUE}
 
 1:10 * 1:10
 
@@ -463,7 +468,7 @@ Lembra que toda variável no R é um vetor?
 Então... o escalar mostrado no primeiro código do slide anterior é um vetor de 1 elemento que sofre *recycling*
 
 
-```{r echo=TRUE}
+```{r recycling, echo=TRUE}
 
 1:10 * 1:2
 
@@ -501,7 +506,7 @@ Essa estrutura é chave no paradigma "Tidy" que usaremos com as bibliotecas **Ti
 Tibble é uma adaptação do Data Frame para análise de dados. Discutir essas diferenças está fora do escopo do curso. Algumas diferenças serão citadas o longo do material e justificam o uso do Tibble.
 
 
-```{r echo=TRUE}
+```{r dataframetibble, echo=TRUE}
 
 df <- 
     data.frame(
@@ -542,7 +547,7 @@ Podemos dividir os comandos de controle de fluxo em dois tipos:
 O comando `if` funciona para um valor lógico escalar
 
 
-```{r}
+```{r if}
 if (2 + 2 == 4) {
     "2 mais 2 são 4"
 } else {
@@ -554,7 +559,7 @@ Note o operador de comparação `==` e não `=`
 
 A função `if_else` (da biblioteca dplyr) funciona de vetorial. `if_else` é mais rápida que a função `ifelse` da biblioteca `base`, mas só aceita argumentos de mesmo tipo no segundo e terceiro parâmetros
 
-```{r}
+```{r jogo_pim}
 jogo_do_pim_silvio_santos <- if_else(
     condition = 1:40 %% 4 == 0 ,
     true =  "PIM",
@@ -570,7 +575,7 @@ Note o operador `%%` e a função de coerção de tipo `as.character`
 
 A cláusula `switch` e a função `dplyr::case_when` evitam que o programador tenha que criar muitos `if else` aninhados
 
-```{r}
+```{r switch}
 letra <- "b"
 
 switch(
@@ -586,7 +591,7 @@ Note que a condição vai sendo testada na ordem e `stop` gera um erro
 
 case_when serve ao caso vetorial
 
-```{r}
+```{r case}
 case_when(
     1:40 %% 10 == 0 ~ "dezena",
     1:40 %% 2 == 0 ~ "par",
@@ -599,7 +604,7 @@ case_when(
 
 A cláusula de loop mais usada e mais versátil é `for`
 
-```{r}
+```{r for}
 for(i in 1:5){ 
     print(i^2)
 }
@@ -607,7 +612,7 @@ for(i in 1:5){
 
 As cláusulas `next` e `break` modificam o comportamento, respectivamente caminhando direto para a próxima iteração e saindo do for
 
-```{r}
+```{r next}
 #next vai pra próxima iteração
 for(i in 1:5){
     if (i %% 2 == 0){
@@ -618,7 +623,7 @@ for(i in 1:5){
 ```
 
 
-```{r}
+```{r break}
 #next sai do loop
 for(i in 1:5){
     if (i %% 2 == 0){
@@ -640,7 +645,7 @@ O código fica mais limpo e expressivo e mais rápido. Às vezes MUITO mais ráp
 O código abaixo usa loop e programação funcional, respectivamente. Programação funcional será abordada posteriormente no material. 
 
 
-```{r warning=FALSE}
+```{r com_loop, warning=FALSE}
 com_loop <- function(n){
     x <- integer()
     for (i in 1:n){
@@ -661,7 +666,7 @@ sem_loop <- function(n){
 Abaixo as três formas de fazer a mesma conta que terão a performance avaliada
 
 
-```{r}
+```{r compara_loop}
 com_loop(5)
 
 sem_loop(5)
@@ -676,7 +681,7 @@ sem_loop(5)
 A biblioteca `bench` oferece funções ótimas para avaliar a performance de pedaços pequenos de código.
 
 
-```{r  warning=FALSE, cache=TRUE}
+```{r bench_loop, warning=FALSE, cache=TRUE}
 
 resultados_perf <- mark(
     sem_loop(1e4),
@@ -712,7 +717,7 @@ O que vocês acham? Melhor trocar, manter a escolha original ou tanto faz?
 
 Note o que há de interessante no código (comentado)
 
-```{r}
+```{r monty_hall}
 set.seed(88)
 
 joga_monty_hall <- function(troca){
@@ -743,7 +748,7 @@ fica  <- replicate(n = n, joga_monty_hall(troca = FALSE))
 
 Resultados:
 
-```{r}
+```{r result_monty_hall}
 sum(troca)/n
 sum(fica)/n
 ```
@@ -759,7 +764,7 @@ Vamos ver... mas dá pra simular sem saber quase nada.
 Vamos usar uma das funções da família `r<familia de distribuição de prob>()`. Neste caso, a `rbinom`, que simula a distribução binomial (aquela que equivale ao evento de jogar n moedas (ou alguma coisa com dois lados) para cima e ver quantas deram cara).
 
 
-```{r}
+```{r cfa}
 
 n_simul <- 10000
 n_questoes <- 240
@@ -778,7 +783,7 @@ A chance é praticamente nula.
 Na verdade, a grande massa da distribuição fica muito distante.
 
 
-```{r}
+```{r mostra_cfa}
 
 dado <- enframe(acertos/n_questoes)
 
@@ -808,7 +813,7 @@ O exemplo anterior era muito simplista: ninguém chuta tudo.
 Imagine que sabemos qual a chance de aparecer uma pergunta onde podemos descartar 0 alternativas, a chance de uma onde descartamos 1 e assim por diante.
 
 
-```{r}
+```{r cfa_mais}
 #definindo a chance podermos eliminar 0, 1, 2, ... 4 alternativas
 fracao_eliminar_questoes <- c( 0.1, 0.1, 0.2, 0.25 , 0.35 ) 
 #definindo o número de questões 
@@ -823,24 +828,24 @@ acertos_concatenados <-
 ```
 
 
-```{r}
+```{r cfa_1}
 n_questoes_cada_elimina[1:4,]
 
 ```
 
 
-```{r}
+```{r cfa_2}
 acertos_concatenados[1:20]
 ```
 
-```{r}
+```{r cfa_3}
 matriz_acertos <- matrix(acertos_concatenados, byrow = TRUE, nrow = n_simul )
 
 matriz_acertos[1:5,]
 ```
 
 
-```{r}
+```{r cfa_4}
 acertos <- rowSums(matriz_acertos)
 sum(acertos > n_aprovado)/n_simul
 
@@ -848,7 +853,7 @@ sum(acertos > n_aprovado)/n_simul
 ```
 
 
-```{r}
+```{r cfa_5}
 mostra_chances(acertos, n_questoes)
 ```
 
@@ -857,7 +862,7 @@ mostra_chances(acertos, n_questoes)
 ## Exemplo inicial de visualização de dados
 
 
-```{r, eval=TRUE, code = readLines("exemplos\\exemplo_inicial_ggplot.r")}
+```{r ggplot, eval=TRUE, code = readLines("exemplos\\exemplo_inicial_ggplot.r")}
 
 
 
@@ -879,7 +884,7 @@ O que é o evento e o que é o atributo pode variar até para diferentes usos do
 Normalmente os tratamentos de dados são feitos em múltiplos passos encadeados:
 
 
-```{r}
+```{r gapminder}
 #dados de exemplo
 head(gapminder)
 
@@ -892,7 +897,7 @@ Note quanto código desnecessário há nestas linhas: variáveis que não precis
 Este código desnecessário causa fadiga no programador e confunde o próprio programador e o leitor posterior do código.
 
 
-```{r}
+```{r sem_pipe }
 #vamos cobrir essas funções de tratamento posteriormente
 gapminder_07 <- filter(gapminder, year == 2007)
 gapminder_07_group_continente <- group_by(gapminder_07, continent)
@@ -915,7 +920,7 @@ Ou seja, o primeiro operando é enfiado como primeiro parâmetro da função que
 
 Isso faz com que possamos escrever o código anterior assim:
 
-```{r}
+```{r pipe}
 
 resultado <- gapminder %>% 
     filter(year == 2007) %>% 
@@ -950,7 +955,7 @@ A primeira é a do Banco Mundial, muito rica para quem gosta de dados socioecon�
 
 Para acessar um indicador precisamos achá-lo na base de indicadores com a função `wbsearch()`
 
-```{r}
+```{r banco_mundial}
 
 #pattern é uma expressão regular. \\ serve para dizer que "(" é mesmo "(" 
 #e não o ( usado nas operações de expressão regular (fora do escopo do curso)
@@ -964,7 +969,7 @@ indicadores
 Sabendo o ID do indicador, podemos consultá-lo com a função `wb()`
 
 
-```{r}
+```{r banco_mundial_2}
 
 #mrv é most recent values. Pode ser usado para buscar os n valores mais recentes
 gini = wb(indicator = "SI.POV.GINI", mrv= 10, POSIXct = TRUE)
@@ -982,13 +987,13 @@ dplyr é uma das bibliotecas que fqzem parte do conjunto tidyverse
 A função `select()` é usada para selecionar colunas do dataframe/tibble
 
 
-```{r}
+```{r gini}
 
 glimpse(gini)
 
 ```
 
-```{r}
+```{r gini_select}
 
 gini_select <- gini %>% 
     select(country, date, value, iso3c)
@@ -999,7 +1004,7 @@ head(gini_select)
 
 É possível usar a seleção negativa assim como fizemos com vetores
 
-```{r}
+```{r gini_negativa}
 
 gini_select2 <- gini_select %>% 
     select(-iso3c)
@@ -1015,7 +1020,7 @@ Algumas funções *helpers* nos ajudam a usar a função `select` e são muito �
 Pra mostrar mais funcionalidades da função `select`, vamos usar uma base com dados eleitorais brasileiros, que retorna mais colunas
 
 
-```{r, cache=TRUE}
+```{r  candidatos , cache=TRUE}
 
 candidatos <- candidate_fed(2018)
 
@@ -1026,7 +1031,7 @@ glimpse(candidatos)
 ## Funções básicas de tratamento (dplyr): select() - helpers
 
 
-```{r }
+```{r candidatos_select}
 
 candidatos_select <- candidatos %>% 
     select(starts_with("NOME"))
@@ -1038,7 +1043,7 @@ datatable(head(candidatos_select))
 ```
 
 
-```{r }
+```{r candidatos_select_ends }
 
 candidatos_select <- candidatos %>% 
     select(ends_with("candidato"))
@@ -1049,7 +1054,7 @@ datatable(head(candidatos_select))
 
 ```
 
-```{r}
+```{r contains }
 
 candidatos_select <- candidatos %>% 
     select(contains("municipio"))
@@ -1059,7 +1064,7 @@ datatable(head(candidatos_select))
 
 ```
 
-```{r}
+```{r ends_2}
 
 candidatos_select <- candidatos %>% 
     select(ends_with("candidato"))
@@ -1079,7 +1084,7 @@ A biblioteca `worldmet` retorna dados de estações meteorológicas espalhadas p
 
 Primeiro é necessário encontrar o código da base desejada
 
-```{r}
+```{r estacao, cache=TRUE}
 
 estacao <- getMeta("heathrow", returnMap = TRUE)
 
@@ -1093,7 +1098,7 @@ estacao
 
 A função abaixo retorna os dados de uma estação. Veja que alguns campos têm um sufixo _n 
 
-```{r}
+```{r estacao_import, cache=TRUE }
 dados_heathrow <- importNOAA(code = "037720-99999", year = 2019,
 precip = TRUE, PWC = FALSE, parallel = TRUE)
 
@@ -1108,7 +1113,7 @@ A função *helper* `num_range` ajuda a selecionar essas colunas com prefixo com
 
 
 
-```{r}
+```{r num_range}
 
 dados_heathrow_select <- dados_heathrow %>% 
     select( 
@@ -1125,7 +1130,7 @@ head(dados_heathrow_select)
 Outra função útil é a `everything`, que ajuda, por exemplo, a passar algumas colunas para o início do *tibble*.
 
 
-```{r}
+```{r everything}
 
 dados_heathrow_select <- dados_heathrow %>% 
     select( 
@@ -1147,7 +1152,7 @@ A função mutate é usada para criar novas colunas no tibble
 
 Notando que a coluna DATA_ELEICAO é um caracter, vamos criar uma coluna de tipo data.
 
-```{r}
+```{r typeof}
 
 typeof(candidatos$DATA_ELEICAO)
 
@@ -1158,7 +1163,7 @@ typeof(candidatos$DATA_ELEICAO)
 O jeito mais fácil de fazer isso é usando uma das funções da biblioteca `lubridate` que veremos em detalhes em seguida
 
 
-```{r}
+```{r lubridate}
 
 candidatos_com_data <- candidatos %>% 
     mutate(DATA_ELEICAO_TIPO_DATA = dmy(DATA_ELEICAO)) %>% 
@@ -1172,7 +1177,7 @@ head(candidatos_com_data)
 É possível substituir a um campo existente
 
 
-```{r}
+```{r mutate_mesmo}
 
 candidatos_com_data <- candidatos %>% 
     mutate(DATA_ELEICAO = dmy(DATA_ELEICAO)) %>% 
@@ -1189,7 +1194,7 @@ head(candidatos_com_data)
 funções derivadas da `mutate` possibilitam a alteração de várias colunas ao mesmo tempo, usando os mesmos helpers que jã vimos para a `select` e uma função à escolha
 
 
-```{r}
+```{r mutate_at}
 
 candidatos_com_data <- candidatos %>% 
     mutate_at(vars(starts_with("DATA_")), dmy ) %>% 
@@ -1205,7 +1210,7 @@ head(candidatos_com_data)
 
 Outras funções úteis são as que fazem operações acumuladas e as operações de `lag()` e `lead()`
 
-```{r}
+```{r bets, cache = TRUE}
 
 series <- BETSsearch("exchange dollar")
 
@@ -1215,7 +1220,7 @@ series
 
 No código abaixo, calculamos o retorno da série, a volatilidade histórica e a volatilidade EWMA
 
-```{r}
+```{r bets_vol, cache = TRUE}
 
 dolar <- BETSget(1) 
 
@@ -1247,7 +1252,7 @@ datatable(dolar_com_vol) %>%
 ```
 
 
-```{r}
+```{r dolar_vol, cache=TRUE}
 
 dolar_ajeitado <- dolar_com_vol %>% 
     gather(variavel, valor, - date)
@@ -1270,7 +1275,7 @@ dolar_ajeitado %>%
 A função `arrange` serve para ordenar o tibble.
 
 
-```{r}
+```{r arrange}
 
 dados_ordenados <- dados_heathrow %>% 
     arrange(date)
@@ -1282,7 +1287,7 @@ head(dados_ordenados)
 A função `desc()` permite a ordenação decrescente
 
 
-```{r}
+```{r desc}
 
 dados_ordenados <- dados_heathrow %>% 
     arrange(desc(date))
@@ -1306,7 +1311,7 @@ Quem conhece SQL pode estranhar um pouco o comportamento desta função, pois el
 Mas veja que ela indica que há agrupamento
 
 
-```{r}
+```{r group_by}
 
 gini_agrupado <- gini %>% 
     select(country, date, value) %>% 
@@ -1326,7 +1331,7 @@ Uma operação bastante usada é numerar as linhas de um tibble.
 
 No tibble agrupado, essa operação acontece em cada grupo.
 
-```{r}
+```{r row_number}
 
 gini_agrupado %<>% arrange(country, date) %>% 
     mutate(linha = row_number())
@@ -1344,7 +1349,7 @@ datatable(gini_agrupado)
 
 As funções `lag()` e `lead()` funcionam dentro de cada grupo (o primeiro value de um grupo não acessa o valor do outro grupo com `lag()` .
 
-```{r}
+```{r lag}
 
 gini_agrupado %<>% mutate(
     value_ant = lag(value),
@@ -1363,7 +1368,7 @@ datatable(gini_agrupado)
 A função `group_by` só leva a uma sumarização, ou seja, só transforma o tibble em um tibble com o número de linhas igual ao número de grupos, quando executamos a função `summarise()`
 
 
-```{r}
+```{r summarise}
 
 maiores_temp_dia <- dados_heathrow %>% 
     group_by(date(date)) %>% 
@@ -1386,7 +1391,7 @@ A função `top_n` retorna os n maiores valores. Se o tibble estiver agrupado, p
 
 
 
-```{r}
+```{r top_n}
 
 
 maiores_temp_dia <- dados_heathrow %>% 
@@ -1426,7 +1431,7 @@ O portal da CVM é uma das minas de ouro de dados
 
 O código abaixo baixa os dados que ainda não estão na nossa base
 
-```{r}
+```{r fundos, warning=FALSE, cache=TRUE}
 
 existem <- tibble(arquivo = list.files("dados/fundos"))
 
@@ -1490,7 +1495,7 @@ head(todos_os_fundos)
 
 
 
-```{r}
+```{r cadastro_fundos, cache=TRUE, warning=FALSE}
 
 cadastro_fundos <- read_csv2("http://dados.cvm.gov.br/dados/FIE/CAD/DADOS/inf_cadastral_fie.csv", locale =  locale(encoding = "latin1") )
 
@@ -1498,7 +1503,7 @@ cadastro_fundos <- read_csv2("http://dados.cvm.gov.br/dados/FIE/CAD/DADOS/inf_ca
 ```
 
 
-```{r}
+```{r cotas_verde, cache=TRUE }
 
 cotas_verde <- todos_os_fundos %>% 
     filter(CNPJ_FUNDO == "07.455.507/0001-89" )
