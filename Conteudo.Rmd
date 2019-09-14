@@ -43,6 +43,23 @@ knitr::opts_chunk$set(echo = TRUE)
 ![](imagens/olivetti.jpg){width=50%} 
 
 
+## Nem um Nobel escapa... 
+
+
+...da maldição do erro operacional
+
+
+![](imagens/erroexcel1.jpg)
+
+
+## Homem foi a Lua há 50 anos
+
+...e ainda...
+
+
+![](imagens/erroexcel2.jpg)
+
+
 ## Objetivos do curso
 
 Meta final: que vários dos processos de análise de dados da empresa passem a ser feitos dentro do fluxo de trabalho do R.
@@ -1431,7 +1448,7 @@ O portal da CVM é uma das minas de ouro de dados
 
 O código abaixo baixa os dados que ainda não estão na nossa base
 
-```{r fundos, warning=FALSE, cache=TRUE}
+```{r fundos, warning=FALSE}
 
 existem <- tibble(arquivo = list.files("dados/fundos"))
 

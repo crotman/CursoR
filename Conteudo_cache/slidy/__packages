@@ -20,3 +20,9 @@ wbstats
 electionsBR
 worldmet
 magrittr
+knitr
+kableExtra
+DT
+lubridate
+cumstats
+BETS
