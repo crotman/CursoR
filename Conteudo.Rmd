@@ -1453,7 +1453,7 @@ O portal da CVM é uma das minas de ouro de dados
 
 O código abaixo baixa os dados que ainda não estão na nossa base
 
-```{r fundos, warning=FALSE}
+```{r fundos, message=FALSE, warning=FALSE}
 
 existem <- tibble(arquivo = list.files("dados/fundos"))
 
@@ -1494,8 +1494,7 @@ le_arquivo <- function(lista_arquivo){
     
     conteudo <- read_csv(arquivo)
     
-    print(arquivo)
-    
+
     conteudo
     
 }
@@ -1515,9 +1514,7 @@ head(todos_os_fundos)
 
 
 
-
-
-```{r cadastro_fundos, cache=TRUE, warning=FALSE}
+```{r cadastro_fundos, cache=TRUE, warning=FALSE, message=FALSE}
 
 cadastro_fundos <- read_csv2("http://dados.cvm.gov.br/dados/FIE/CAD/DADOS/inf_cadastral_fie.csv", locale =  locale(encoding = "latin1") )
 
@@ -1584,7 +1581,7 @@ A biblioteca `rvest` possibilita a extração destes elementos.
 Munidos de uma função que faz download e salva um arquivo, podemos caminhar pelas planilhas e salvá-las
 
 
-```{r rvest , warning=FALSE}
+```{r rvest , warning=FALSE, message=FALSE }
 
 existem <- tibble(arquivo = list.files("dados/titulos"))
 
@@ -1597,7 +1594,7 @@ salva_planilha <- function(dado){
     download.file(
         arquivo, 
         paste0("dados/titulos/",destino,".xls" ),
-        mode = "wb" ##PRA ARQ
+        mode = "wb" ##PRA ARQUIVOS BINÁRIOS,
         )
     
 }
@@ -1624,7 +1621,7 @@ links <- read_html("https://sisweb.tesouro.gov.br/apex/f?p=2031:2:0::::") %>%
 ## Leitura de conteúdo de planilhas Excel
 
 
-Agora amos organizar as planilhas que lemos do site do tesouro.
+Agora Vamos organizar as planilhas que lemos do site do tesouro.
 
 Vamos usar a biblioteca `read_xl`.
 
@@ -1633,7 +1630,7 @@ Precisamos ler todas as sheets de todos os arquivos em um diretório (onde baixa
 A função abaixo lê as sheets de um arquivo.
 
 
-```{r le_sheets }
+```{r le_sheets, warning=FALSE  }
 le_sheets <- function(dados){
     
     arquivo <- pull(dados, arquivo)
@@ -1646,7 +1643,7 @@ le_sheets <- function(dados){
 A função abaixo lê o conteúdo de cada sheet
 
 
-```{r le_conteudo_sheets}
+```{r le_conteudo_sheets, warning=FALSE }
 le_conteudo_sheet <- function(dados){
     
     arquivo <- pull(dados, arquivo)
@@ -1662,8 +1659,12 @@ le_conteudo_sheet <- function(dados){
 }
 ```
 
+## Leitura de conteúdo de planilhas Excel (cont.)
+
+
 Munidos destas duas funções, podemos guardar tudo em um só dataframe.
 
+Primeiro, definindo as sheets a ler
 
 ```{r arruma_titulos, warning=FALSE, cache=TRUE}
 sheets_pra_ler <- list.files("dados/titulos") %>% 
@@ -1676,9 +1677,13 @@ sheets_pra_ler <- list.files("dados/titulos") %>%
     rename(
         arquivo = arquivo_out,
         sheet = data
-    ) 
+    )
+```
+
+Depois lendo as sheets para um dataframe
 
 
+```{r arruma_titulos_1, warning=FALSE, cache=TRUE, message=FALSE }
 sheets_lidas <- sheets_pra_ler %>% 
     mutate(titulo = str_extract(sheet,"[^[0-9]]*" )) %>% 
     mutate(vencimento = str_extract(sheet,"[0-9]{6}" )) %>% 
@@ -1696,7 +1701,10 @@ sheets_lidas <- sheets_pra_ler %>%
 
 ```
 
+## Leitura de conteúdo de planilhas Excel (cont.)
 
+
+Uma última arrumada
 
 
 ```{r arruma_titulos_2, warning=FALSE, cache=TRUE}
@@ -1745,6 +1753,8 @@ taxas_titulos <- sheets_lidas %>%
 
 ```
 
+## Leitura de conteúdo de planilhas Excel (cont.)
+
 
 Aí fica fácil fazer a análise que desejarmos
 
@@ -1767,12 +1777,256 @@ ggplot(ntnb_2045) +
         labels = date_format("%m/%y")
     ) +
     scale_y_continuous(
-        labels = percent_format()
+        labels = percent_format(accuracy = 0.1)
     ) + 
+    labs(y = "NTN-B Principal 2045", x = "Data") +
     theme_light()
 
 
 ```
+
+## E quando o desenvolvedor da página web tá manguaçado?
+
+Nem todas as páginas são fáceis de ler.
+
+A [página que mostra os DIs na BMF](http://www2.bmf.com.br/pages/portal/bmfbovespa/boletim1/SistemaPregao1.asp?pagetype=pop&caminho=Resumo%20Estat%EDstico%20-%20Sistema%20Preg%E3o&Data=10/01/2017&Mercadoria=DI1), por exemplo é esquisita:
+
+O nosso objeto de interesse aparece na ferramenta chamada por F12, mas não é encontrada pela `rvest` ao ler o HTML
+
+![](imagens/pagina_bmf.png)
+
+## Lendo páginas difíceis
+
+Existem duas técnicas para o Web Scraping:
+
+* Simular a navegação num browser emulado (fora do escopo deste curso)
+
+* Interpretar páginas com base no conteúdo recebido
+
+Na página que visualizamos da BMF, o conteúdo recebido inclui um script javascript que popula a tabela, por isso não conseguimos reconhecer o conteúdo da tabela de pronto, pois ela só é carregada pela execução do script.
+
+
+![](imagens/script_bmf.png)
+
+
+## Lendo páginas difíceis (cont.)
+
+
+Conseguimos, no entanto, extrair do script as informações de que precisamos
+
+
+![](imagens/script_bmf2.png)
+
+
+## Lendo páginas difíceis (cont.)
+
+O código abaixo extrai da página as informações de que precisamos.
+
+Para extrair as informações, ele usa expressões regulares.
+
+Repare na função que silencia um possível erro. Este erro pode acontecer se passarmos um dia que não tem dados. Precisamos disso pois vamos buscar todas as datas possíveis.
+
+Essa não é a melhor forma de tratar um erro deste tipo. Veremos mais adiante
+
+
+```{r le_bmf, warning=FALSE, message= FALSE}
+
+
+cotacoes <- tibble(
+    id = 0:10,
+    cotacao = c(
+        "ajuste_ant",
+        "ajuste_corrig",
+        "preco_abert",
+        "preco_min",
+        "preco_max",
+        "preco_med",
+        "ult_preco",
+        "ajuste",
+        "var_pontos",
+        "ult_of_compra",
+        "ult_of_venda",
+    )
+)
+
+#QUEM INVENTOU ISSO?
+siglas_mes <- tibble(
+    sigla_mes = c(
+        "F",
+        "G",
+        "H",
+        "J",
+        "K",
+        "M",
+        "N",
+        "Q",
+        "U",
+        "V",
+        "X",
+        "Z"
+        ),
+    mes = 1:12
+)
+
+
+
+pagina <- NA
+
+try( 
+    {pagina <- read_html("http://www2.bmf.com.br/pages/portal/bmfbovespa/boletim1/SistemaPregao1.asp?pagetype=pop&caminho=Resumo%20Estat%EDstico%20-%20Sistema%20Preg%E3o&Data=10/01/2017&Mercadoria=DI1") %>% 
+    html_nodes("script") %>% 
+    extract2(13) %>% 
+    html_text()}
+    ,
+    silent = TRUE
+)
+
+
+linhas_impares <- str_extract_all(pagina, "MercFut1 \\+ '<td ALIGN=\"right\" CLASS=\"tabelaConteudo1\">[0-9.,]*") %>% 
+    extract2(1) %>% 
+    enframe() %>% 
+    mutate(
+        ativo = (row_number()-1) %/% 11 * 2,
+        tipo_cotacao = (row_number() - 1) %% 11
+    )
+
+
+linhas_pares <- str_extract_all(pagina, "MercFut1 \\+ '<td ALIGN=\"right\" CLASS=\"tabelaConteudo2\">[0-9.,]*") %>% 
+    extract2(1) %>% 
+    enframe() %>% 
+    mutate(
+        ativo = (row_number()-1) %/% 11 * 2 + 1,
+        tipo_cotacao = (row_number() - 1) %% 11
+    )
+
+
+linhas <- linhas_impares %>% 
+    bind_rows(linhas_pares) %>%
+    arrange(ativo) %>% 
+    mutate(valor = str_extract_all(value, ">[0-9.,]*")) %>% 
+    mutate(valor = str_sub(valor, 2)) %>% 
+    select(ativo, tipo_cotacao, valor)
+
+
+
+ativos <- str_extract_all(pagina, "MercFut3 = MercFut3 \\+ '</tr><td ALIGN=\"center\" CLASS=\"tabelaConteudo[0-9]\">[A-Z][0-9][0-9]") %>%
+    extract2(1) %>% 
+    enframe() %>% 
+    mutate(
+        nome_ativo = str_sub(value,-3),
+        id = name - 1
+    ) %>% 
+    select(
+        id,
+        nome_ativo
+    )
+
+
+linhas %<>% left_join(ativos, by = c("ativo" = "id")) %>% 
+    select(nome_ativo, tipo_cotacao, valor) %>% 
+    mutate(
+        sigla_mes = str_sub(nome_ativo, 1,1),
+        ano = str_sub(nome_ativo, 2,4)
+    )
+
+
+
+
+
+
+
+
+datatable(final)
+
+```
+
+Agora vamos executar para todos os dias desde janeiro de 2017
+
+
+```{r echo = TRUE, warning= FALSE, message= FALSE}
+
+
+le_uma_pagina_bmf <- function(dados){
+    
+    
+    
+    data <- pull(dados, data_in) %>% 
+        stamp_date("31/01/2017")(.)
+    
+    print(data)
+        
+    
+    pagina <- NA
+
+    try( 
+        {pagina <- read_html(paste0("http://www2.bmf.com.br/pages/portal/bmfbovespa/boletim1/SistemaPregao1.asp?pagetype=pop&caminho=Resumo%20Estat%EDstico%20-%20Sistema%20Preg%E3o&Data=",data,"&Mercadoria=DI1")) %>% 
+        html_nodes("script") %>% 
+        extract2(13) %>% 
+        html_text()}
+        ,
+        silent = TRUE
+    )
+        
+    
+        
+    if (!is.na(pagina)){
+        
+        
+        
+        linhas_impares <- str_extract_all(pagina, "MercFut1 \\+ '<td ALIGN=\"right\" CLASS=\"tabelaConteudo1\">[0-9.,]*") %>% 
+            extract2(1) %>% 
+            enframe() %>% 
+            mutate(
+                linha = (row_number()-1) %/% 11 * 2,
+                ativo = (row_number() - 1) %% 11
+            )
+        
+        
+        linhas_pares <- str_extract_all(pagina, "MercFut1 \\+ '<td ALIGN=\"right\" CLASS=\"tabelaConteudo2\">[0-9.,]*") %>% 
+            extract2(1) %>% 
+            enframe() %>% 
+            mutate(
+                linha = (row_number()-1) %/% 11 * 2 + 1,
+                ativo = (row_number() - 1) %% 11
+            )
+        
+        
+        linhas <- linhas_impares %>% 
+            bind_rows(linhas_pares) %>%
+            arrange(linha) %>% 
+            mutate(valor = str_extract_all(value, ">[0-9.,]*")) %>% 
+            mutate(valor = str_sub(valor, 2)) %>% 
+            select(linha, ativo, valor)
+        
+        linhas
+    }
+    else
+    {
+        tibble(dia_inutil = TRUE )
+    }
+}
+
+```
+
+
+```{r}
+
+dados_todas_as_datas <- seq.Date(
+        ymd("2017-01-01"), 
+        to = ymd("2017-01-10"), 
+        by = "day") %>% 
+    enframe() %>% 
+    rename(data_out = value) %>% 
+    mutate(data_in = data_out) %>% 
+    group_by(data_out, name) %>% 
+    nest() %>% 
+    mutate(data = map(data, le_uma_pagina_bmf)) %>% 
+    unnest() %>% 
+    View()
+
+
+```
+
 
 
 

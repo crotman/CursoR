@@ -26,3 +26,6 @@ DT
 lubridate
 cumstats
 BETS
+xml2
+rvest
+readxl
