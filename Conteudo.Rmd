@@ -25,6 +25,9 @@ library(kableExtra)
 library(DT)
 library(lubridate)
 library(cumstats)
+library(rvest)
+library(readxl)
+
 
 library(electionsBR)
 library(worldmet)
@@ -50,6 +53,8 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 ![](imagens/erroexcel1.jpg)
+
+PS.: ele não é Nobel...
 
 
 ## Homem foi a Lua há 50 anos
@@ -1437,7 +1442,7 @@ ggplot(maiores_temp_dia) +
 ```
 
 
-## Leitura de dados de arquivos
+## Leitura de dados de arquivos 
 
 Até agora acessamos dados que estavam disponíveis em bibliotecas, mas muitas vezes encontramos dados em arquivos.
 
@@ -1529,6 +1534,247 @@ cotas_verde <- todos_os_fundos %>%
 cotas_verde
 
 ```
+
+
+## Leitura de conteúdo de páginas WEB
+
+Uma página WEB pode ser representada por uma árvore de objetos, também chamada de DOM (Document Object Model).
+
+Esta árvore de objetos é definida pelo conteúdo de linguagem html que existe na página (e pode ser modificado por scripts em javascript e definições de estilo do CSS).
+
+Podem existir objetos de vários tipos em uma página: links, inputs de dados, tabelas, células de tabelas, parágrafos, cabeçalhos etc.
+
+![](imagens/dom.gif)
+
+
+## Leitura de conteúdo de páginas WEB (cont.)
+
+
+Para retirar da página web o conteúdo de que precisamos, temos que analisar como é esta árvore de objetos e que nós desta árvore nos interessam.
+
+Imagine que queremos buscar dados na página de [histórico de preços e taxas dos títulos brasileiros](https://sisweb.tesouro.gov.br/apex/f?p=2031:2:0::::)
+
+A tecla F12 do Chrome nos permite ver a árvore DOM da página em que estamos navegando.
+
+![](imagens/f12.png){width=70%}
+
+
+## Leitura de conteúdo de páginas WEB (cont.)
+
+É possível clicar com o botão direito e inspecionar um elementos específico de forma a saber onde ele está na árvore e que tipo de elemento ele é (mesmo que você saiba pouco de html).
+
+O mais importante é saber que uma tag html que define um elemento tem a sintaxe:
+
+`<tipo_elemento nome_atributo=valor_attributo>texto do elemento</tipo_elemento>`
+
+Mesmo sem saber hmtl, fica claro que queremos esse tal de atributo `href` dos tais elementos `a` seja lá o que diabos isso seja (`a` é um link e `href` é o destino do link).
+
+
+
+![](imagens/f12_2.png){width=70%}
+
+
+## Leitura de conteúdo de páginas WEB (cont.)
+
+
+A biblioteca `rvest` possibilita a extração destes elementos.
+
+É possível caminhar pela árvore DOM até os nós desejados e atributos que queremos usando `html_nodes` e `html_attr`. 
+
+Munidos de uma função que faz download e salva um arquivo, podemos caminhar pelas planilhas e salvá-las
+
+
+```{r rvest , warning=FALSE}
+
+existem <- tibble(arquivo = list.files("dados/titulos"))
+
+
+salva_planilha <- function(dado){
+    
+    arquivo <- pull(dado, endereco)
+    destino <- pull(dado, name_in)
+    
+    download.file(
+        arquivo, 
+        paste0("dados/titulos/",destino,".xls" ),
+        mode = "wb" ##PRA ARQ
+        )
+    
+}
+
+
+links <- read_html("https://sisweb.tesouro.gov.br/apex/f?p=2031:2:0::::") %>% 
+    html_nodes("body") %>% 
+    html_nodes("a") %>% 
+    html_attr("href") %>% 
+    enframe(value = "endereco") %>%
+    filter(str_detect(endereco, "cosis/sistd/obtem_arquivo/")) %>%
+    mutate(destino = paste0(name,".xls")) %>% 
+    anti_join(existem, by = c("destino" = "arquivo")) %>%
+    select(-destino) %>% 
+    mutate(endereco = paste0("https://sisweb.tesouro.gov.br/apex/",endereco) ) %>% 
+    mutate(name_in = name) %>% 
+    group_by(name) %>% 
+    nest() %>% 
+    mutate(data = map(data, salva_planilha ))
+
+```
+
+
+## Leitura de conteúdo de planilhas Excel
+
+
+Agora amos organizar as planilhas que lemos do site do tesouro.
+
+Vamos usar a biblioteca `read_xl`.
+
+Precisamos ler todas as sheets de todos os arquivos em um diretório (onde baixamos os arquivos excel do site do tesouro).
+
+A função abaixo lê as sheets de um arquivo.
+
+
+```{r le_sheets }
+le_sheets <- function(dados){
+    
+    arquivo <- pull(dados, arquivo)
+    excel_sheets(paste0("dados/titulos/",arquivo)) 
+    
+}
+```
+
+
+A função abaixo lê o conteúdo de cada sheet
+
+
+```{r le_conteudo_sheets}
+le_conteudo_sheet <- function(dados){
+    
+    arquivo <- pull(dados, arquivo)
+    sheet <- pull(dados, sheet)
+    read_excel(
+        paste0("dados/titulos/",arquivo),
+        sheet = sheet,
+        skip = 2,
+        col_names = FALSE,
+        col_types = "text"
+    ) 
+    
+}
+```
+
+Munidos destas duas funções, podemos guardar tudo em um só dataframe.
+
+
+```{r arruma_titulos, warning=FALSE, cache=TRUE}
+sheets_pra_ler <- list.files("dados/titulos") %>% 
+    enframe(value = "arquivo") %>%
+    mutate(arquivo_out = arquivo) %>% 
+    group_by(name, arquivo_out) %>% 
+    nest() %>% 
+    mutate(data = map(data, le_sheets)) %>% 
+    unnest() %>% 
+    rename(
+        arquivo = arquivo_out,
+        sheet = data
+    ) 
+
+
+sheets_lidas <- sheets_pra_ler %>% 
+    mutate(titulo = str_extract(sheet,"[^[0-9]]*" )) %>% 
+    mutate(vencimento = str_extract(sheet,"[0-9]{6}" )) %>% 
+    mutate(vencimento = dmy(vencimento)) %>%
+    mutate(
+        arquivo_out = arquivo,
+        sheet_out = sheet
+    ) %>% 
+    group_by(name, titulo, vencimento, arquivo_out, sheet_out) %>% 
+    nest() %>% 
+    mutate(data = map(data, le_conteudo_sheet)) %>% 
+    unnest() %>% 
+    ungroup()
+
+
+```
+
+
+
+
+```{r arruma_titulos_2, warning=FALSE, cache=TRUE}
+taxas_titulos <- sheets_lidas %>% 
+    rename(
+        data = 6,
+        taxa_compra_manha = 7,
+        taxa_venda_manha = 8,
+        pu_compra_manha = 9,
+        pu_venda_manha = 10,
+        pu_base_manha = 11
+    ) %>% 
+    mutate(
+        data = if_else(
+            str_detect(data, "/"),
+            dmy(data),
+            as.numeric(data) + ymd("1899-12-31")
+        )
+    ) %>% 
+    mutate(
+        titulo = str_trim(titulo), 
+        taxa_compra_manha = as.numeric(taxa_compra_manha),
+        taxa_venda_manha = as.numeric(taxa_venda_manha),
+        pu_compra_manha = as.numeric(pu_compra_manha),
+        pu_venda_manha = as.numeric(pu_venda_manha),
+        pu_base_manha = as.numeric(pu_base_manha)
+    ) %>% 
+    select(
+        titulo,
+        vencimento,
+        data,
+        taxa_compra_manha,
+        taxa_venda_manha,
+        pu_compra_manha,
+        pu_venda_manha,
+        pu_base_manha
+    ) %>% 
+    mutate(
+        titulo = if_else(
+            titulo == "NTN-B Principal", 
+            "NTN-B Princ", 
+            titulo
+        )
+    )
+
+
+```
+
+
+Aí fica fácil fazer a análise que desejarmos
+
+```{r}
+
+ntnb_2045 <- taxas_titulos %>% 
+    filter(
+        titulo == "NTN-B Princ",
+        vencimento == ymd("2045-05-15")
+    ) %>% 
+    mutate(taxa = (taxa_compra_manha +taxa_venda_manha)/2 )
+
+
+
+ggplot(ntnb_2045) +
+    geom_line(aes(x = data, y = taxa) ) +
+    scale_x_date(
+        date_breaks = "3 months",
+        limits = c(ymd("2016-12-01"),NA),
+        labels = date_format("%m/%y")
+    ) +
+    scale_y_continuous(
+        labels = percent_format()
+    ) + 
+    theme_light()
+
+
+```
+
+
 
 
 
