@@ -1829,6 +1829,7 @@ Repare na função que silencia um possível erro. Este erro pode acontecer se p
 Essa não é a melhor forma de tratar um erro deste tipo. Veremos mais adiante
 
 
+
 ```{r le_bmf, warning=FALSE, message= FALSE}
 
 
@@ -1845,7 +1846,7 @@ cotacoes <- tibble(
         "ajuste",
         "var_pontos",
         "ult_of_compra",
-        "ult_of_venda",
+        "ult_of_venda"
     )
 )
 
@@ -1926,24 +1927,52 @@ linhas %<>% left_join(ativos, by = c("ativo" = "id")) %>%
     select(nome_ativo, tipo_cotacao, valor) %>% 
     mutate(
         sigla_mes = str_sub(nome_ativo, 1,1),
-        ano = str_sub(nome_ativo, 2,4)
+        ano = as.numeric(str_sub(nome_ativo, 2,4)) + 2000
+    ) %>% 
+    left_join(cotacoes, by = c("tipo_cotacao" = "id") ) %>% 
+    left_join(siglas_mes, by = c("sigla_mes")) %>% 
+    mutate(vencimento = make_date(ano, mes, 1)) %>%
+    mutate(
+        valor = parse_number(
+            valor, 
+            locale = locale(
+                decimal_mark = ",", 
+                grouping_mark = "." 
+            )
+        )
+    ) %>% 
+    select(
+        nome_ativo,
+        vencimento,
+        cotacao,
+        valor
     )
 
 
 
 
+```
 
 
 
+```{r}
 
-datatable(final)
+
+datatable(linhas)
 
 ```
 
-Agora vamos executar para todos os dias desde janeiro de 2017
 
 
-```{r echo = TRUE, warning= FALSE, message= FALSE}
+## Lendo páginas difíceis (cont.)
+
+
+Agora vamos executar para todos os dias desde janeiro de 2017.
+
+Preparamos a função...
+
+
+```{r funcao_le_di , warning=FALSE, message=FALSE}
 
 
 le_uma_pagina_bmf <- function(dados){
@@ -1953,8 +1982,7 @@ le_uma_pagina_bmf <- function(dados){
     data <- pull(dados, data_in) %>% 
         stamp_date("31/01/2017")(.)
     
-    print(data)
-        
+
     
     pagina <- NA
 
@@ -1977,8 +2005,8 @@ le_uma_pagina_bmf <- function(dados){
             extract2(1) %>% 
             enframe() %>% 
             mutate(
-                linha = (row_number()-1) %/% 11 * 2,
-                ativo = (row_number() - 1) %% 11
+                ativo = (row_number()-1) %/% 11 * 2,
+                tipo_cotacao = (row_number() - 1) %% 11
             )
         
         
@@ -1986,17 +2014,57 @@ le_uma_pagina_bmf <- function(dados){
             extract2(1) %>% 
             enframe() %>% 
             mutate(
-                linha = (row_number()-1) %/% 11 * 2 + 1,
-                ativo = (row_number() - 1) %% 11
+                ativo = (row_number()-1) %/% 11 * 2 + 1,
+                tipo_cotacao = (row_number() - 1) %% 11
             )
         
         
         linhas <- linhas_impares %>% 
             bind_rows(linhas_pares) %>%
-            arrange(linha) %>% 
+            arrange(ativo) %>% 
             mutate(valor = str_extract_all(value, ">[0-9.,]*")) %>% 
             mutate(valor = str_sub(valor, 2)) %>% 
-            select(linha, ativo, valor)
+            select(ativo, tipo_cotacao, valor)
+        
+        
+        
+        ativos <- str_extract_all(pagina, "MercFut3 = MercFut3 \\+ '</tr><td ALIGN=\"center\" CLASS=\"tabelaConteudo[0-9]\">[A-Z][0-9][0-9]") %>%
+            extract2(1) %>% 
+            enframe() %>% 
+            mutate(
+                nome_ativo = str_sub(value,-3),
+                id = name - 1
+            ) %>% 
+            select(
+                id,
+                nome_ativo
+            )
+        
+        
+        linhas %<>% left_join(ativos, by = c("ativo" = "id")) %>% 
+            select(nome_ativo, tipo_cotacao, valor) %>% 
+            mutate(
+                sigla_mes = str_sub(nome_ativo, 1,1),
+                ano = as.numeric(str_sub(nome_ativo, 2,4)) + 2000
+            ) %>% 
+            left_join(cotacoes, by = c("tipo_cotacao" = "id") ) %>% 
+            left_join(siglas_mes, by = c("sigla_mes")) %>% 
+            mutate(vencimento = make_date(ano, mes, 1)) %>%
+            mutate(
+                valor = parse_number(
+                    valor, 
+                    locale = locale(
+                        decimal_mark = ",", 
+                        grouping_mark = "." 
+                    )
+                )
+            ) %>% 
+            select(
+                nome_ativo,
+                vencimento,
+                cotacao,
+                valor
+            )
         
         linhas
     }
@@ -2008,12 +2076,14 @@ le_uma_pagina_bmf <- function(dados){
 
 ```
 
+E executamos para todos os dias.
 
-```{r}
+
+```{r le_di,  warning=FALSE, message=FALSE, cache=TRUE}
 
 dados_todas_as_datas <- seq.Date(
         ymd("2017-01-01"), 
-        to = ymd("2017-01-10"), 
+        to = today(), 
         by = "day") %>% 
     enframe() %>% 
     rename(data_out = value) %>% 
@@ -2021,13 +2091,54 @@ dados_todas_as_datas <- seq.Date(
     group_by(data_out, name) %>% 
     nest() %>% 
     mutate(data = map(data, le_uma_pagina_bmf)) %>% 
-    unnest() %>% 
-    View()
+    unnest() 
+
 
 
 ```
 
+## Lendo páginas difíceis (cont.)
 
+
+O dataframe com todos os dados ficou assim.
+
+Veja como as funções da biblioteca `kable` e `kableExtra` dão mais controle na criação das tabelas.
+
+
+```{r}
+
+dados_todas_as_datas %>%
+    ungroup() %>% 
+    filter(is.na(dia_inutil)) %>% 
+    select(-dia_inutil, - name) %>% 
+    head(n = 200) %>% 
+    mutate(
+        data_out = stamp_date("31/12/2010")(data_out),
+        vencimento = stamp_date("12/%Y")(vencimento),
+        valor = number(valor, accuracy = 0.001, decimal.mark = ",", big.mark = ".")
+    ) %>% 
+    kable(
+        col.names = 
+            c(
+                "Data",
+                "Ativo",
+                "Vencimento",
+                "Tipo Cotação",
+                "Cotação"
+            ),
+        align = 
+            c("l","l","l","l","r")
+        
+    ) %>% 
+    row_spec(
+        seq(2, 200, 2),
+        background = "#eeeeee"
+    ) 
+
+
+
+
+```
 
 
 
