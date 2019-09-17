@@ -2169,6 +2169,15 @@ Isso porque é extremamente comum fazermos contas com mais de uma informação d
 ![](imagens/tidydata.png){width=70%}
 
 
+## Tidyr: pivot_longer e pivot_wider
+
+O pacote Tidyr ajuda a arrumar os data frames dessas formas. O hex sticker dele é bem explicativo.
+
+
+![](imagens/tidyr.png){width=70%}
+
+
+Os nomes das principais funções mudaram em setembro de 201. Antes se chamavam `gather()` e `spread()`
 
 
 
