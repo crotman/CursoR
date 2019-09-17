@@ -7,6 +7,7 @@ output:
         toc: true
         toc_depth: 3
         fig_caption: true
+        css: styles.css
 
 ---
 
@@ -27,6 +28,7 @@ library(lubridate)
 library(cumstats)
 library(rvest)
 library(readxl)
+library(tables)
 
 
 library(electionsBR)
@@ -892,6 +894,15 @@ mostra_chances(acertos, n_questoes)
 
 
 # TIDY DATA (obtenção e organização dos dados)
+
+## A habilidade mais subestimada
+
+Dentro de todo o hype envolvendo Data Science, surgem as buzz words mais mirabolantes: machine learning, AI, Deep Learning... 
+
+Tudo isso é legal, mas a habilidade de preparar os dados para os modelos, preparar os hiperparâmetros e especificações alternativas ainda melhora muito a análise. Anote mais uma buzz word: **FEATURE ENGINEERING**
+
+A agilidade de se tentar abordagens alterativas com os dados cresce muito quando dominamos a arte de manipular os dataframes. Por isso o peso grande dado neste curso. 
+
 
 ## Organizando os dados de forma tidy
 
@@ -2104,8 +2115,11 @@ O dataframe com todos os dados ficou assim.
 
 Veja como as funções da biblioteca `kable` e `kableExtra` dão mais controle na criação das tabelas.
 
+Note como ele ainda não está "Tidy". Por quê?
 
-```{r}
+
+```{r resultado_pagina_dificil  , warning=FALSE, message=FALSE}
+
 
 dados_todas_as_datas %>%
     ungroup() %>% 
@@ -2128,6 +2142,8 @@ dados_todas_as_datas %>%
             ),
         align = 
             c("l","l","l","l","r")
+    ) %>% 
+    kable_styling(
         
     ) %>% 
     row_spec(
@@ -2139,6 +2155,19 @@ dados_todas_as_datas %>%
 
 
 ```
+
+
+## Pivoteando
+
+
+Reparamos que o dataframe no slide anterior não está "Tidy", ou seja não está de forma que **cada linha represente um evento** e **cada coluna represente um atributo do evento**.
+
+Para nós, neste caso, um evento é formado por **todas** as informações de um ativo em um dia e não **uma só** das informações de um ativo em um dia.
+
+Isso porque é extremamente comum fazermos contas com mais de uma informação do ativo em um dia (máxima - mínima, por exemplo)
+
+![](imagens/tidydata.png){width=70%}
+
 
 
 
