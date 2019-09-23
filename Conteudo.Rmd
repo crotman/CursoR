@@ -1,7 +1,7 @@
 ---
 title: "R para Análise de Dados"
 author: "Bruno Crotman"
-date: "17/08/2019"
+date: "22/09/2019"
 output: 
     slidy_presentation:
         toc: true
@@ -116,13 +116,23 @@ Também amo o Excel, mas amo mais as seguintes vantagens:
 ![](imagens/tidyverse.png){width=50%}
 
 
-## Pequeno exemplo para motivação
+## Exemplos de onde vamos chegar
 
 É muito comum possuirmos dados gerados em planilhas ou em algum suporte de formarto estruturado. 
 
 Neste exemplo, temos planilhas deste formato formato especificado
 
 [Demo Planel](https://crotman.shinyapps.io/PNE-Planel)
+
+[Impacto da temperatura no consumo de energia elétrica](https://crotman.shinyapps.io/EfeitoTemperaturaCarga)
+
+[Localização de empresas e dutos](https://crotman.shinyapps.io/Empresas/)
+
+[Estimador de posição de fundos multimercado](http://crotman.shinyapps.io/posicaofundos)
+
+
+
+
 
 ## Ambiente R/RStudio
 
@@ -2100,9 +2110,9 @@ dados_todas_as_datas <- seq.Date(
     rename(data_out = value) %>% 
     mutate(data_in = data_out) %>% 
     group_by(data_out, name) %>% 
-    nest() %>% 
+    nest_legacy() %>% 
     mutate(data = map(data, le_uma_pagina_bmf)) %>% 
-    unnest() 
+    unnest_legacy() 
 
 
 
@@ -2174,10 +2184,67 @@ Isso porque é extremamente comum fazermos contas com mais de uma informação d
 O pacote Tidyr ajuda a arrumar os data frames dessas formas. O hex sticker dele é bem explicativo.
 
 
-![](imagens/tidyr.png){width=70%}
+![](imagens/tidyr.png){width=40%}
 
 
-Os nomes das principais funções mudaram em setembro de 201. Antes se chamavam `gather()` e `spread()`
+Os nomes das principais funções mudaram em setembro de 2019 (quando saiu a versão 1.0.0). Antes se chamavam `gather()` e `spread()` e agora se chamam `pivot_wider()` e `pivot_longer()`, o que é mais intuitivo.
+
+
+## Pivoteando nosso data frame com muitas linhas
+
+O nosso data frame tem cada tipo de cotação em cada linha e gostaríamos que essas linhas fossem transformadas em colunas.
+
+A função que faz isso se chama `pivot_wider()`
+
+Seus parâmetros mais usados são: 
+
+* `data`, que é o data frame a ser tratado
+
+* `names_from`, que é o atributo de onde vêm os nomes para os novos atributos
+
+* `values_from`, o atributo de onde vêm os valores dos novos atributos
+
+```{r pivot_wider , warning=FALSE, message=FALSE, cache=TRUE}
+
+dados_todas_as_datas %>% 
+    pivot_wider(
+        names_from = cotacao,
+        values_from = valor
+    ) %>% 
+    str()
+
+
+
+```
+
+
+## Pivoteando nosso data frame com muitas colunas
+
+
+É muito comum recebermos os dados com colunas que deviam ser valores de um atributo, e não um atributo em si.
+
+O exemplo clássico é a colocação de datas nas colunas do dado, como nos dados retirados do site `Datasus`
+
+
+```{r exemplo_datasus, cache=TRUE, warning=FALSE, message = FALSE}
+
+read_csv2(
+    "dados/siab/cadastro_numero_familias.csv", 
+    skip = 3,
+    locale = locale(encoding = "latin1" ) 
+    ) %>% 
+    glimpse()
+    
+
+
+```
+
+
+## Pivoteando nosso data frame com muitas colunas
+
+
+Acontece que "2009" não é um atributo, mas sim o valor de um atributo que deveria ser data
+
 
 
 
