@@ -105,7 +105,7 @@ Também amo o Excel, mas amo mais as seguintes vantagens:
 
 * Muitos pesquisadores em métodos quantitativos que estão no estado-da-arte publicam seus métodos em bibliotecas escritas em R
 
-* Prazeroso programar
+* Prazeroso programar (Tidyverse, Shiny, R Markdown...)
 
 
 ## Fluxo de trabalho
@@ -118,9 +118,11 @@ Também amo o Excel, mas amo mais as seguintes vantagens:
 
 ## Exemplos de onde vamos chegar
 
-É muito comum possuirmos dados gerados em planilhas ou em algum suporte de formarto estruturado. 
+É muito comum possuirmos dados gerados em planilhas ou em algum suporte de formato estruturado ou semi-estruturado. 
 
-Neste exemplo, temos planilhas deste formato formato especificado
+Estes dados podem ser organizados de forma "tidy" para análise
+
+Após a possível execução de modelos, podemos publicar os resultados.
 
 [Demo Planel](https://crotman.shinyapps.io/PNE-Planel)
 
@@ -2240,15 +2242,89 @@ read_csv2(
 ```
 
 
-## Pivoteando nosso data frame com muitas colunas
+## Pivoteando nosso data frame com muitas colunas (cont.)
 
 
 Acontece que "2009" não é um atributo, mas sim o valor de um atributo que deveria ser data
 
+A função `pivot_longe()` faz a operação de que precisamos.
 
+* `data`, que é o data frame a ser tratado
+
+* `names_from`, que é o atributo de onde vêm os nomes para os novos atributos
+
+* `values_from`, o atributo de onde vêm os valores dos novos atributos
+
+Note também a função `separate()`, que divide colunas de acordo com caracteres separadores. 
+
+
+```{r pivot_longer, warning=FALSE, message=FALSE }
+
+siab_familias <- read_csv2(
+    "dados/siab/cadastro_numero_familias.csv", 
+    skip = 3,
+    locale = locale(encoding = "latin1" ) 
+    ) %>% 
+    pivot_longer(
+        cols = -`Município`,
+        names_to = "data",
+        values_to = "familias"
+    ) %>% 
+    rename(
+        municipio = `Município`
+    ) %>% 
+    separate(
+        col = municipio,
+        into = c("cod_municipio", "municipio"),
+        sep = " ",
+        extra = "merge"  
+    ) %>% 
+    mutate(
+        cod_municipio = as.integer(cod_municipio),
+        data = as.integer(data),
+        familias = as.integer(familias)
+    )
+
+
+head(siab_familias)
+
+
+```
+
+
+## Pivoteando nosso data frame com muitas colunas (cont.)
+
+Para pegar as UFs dos municipios, vamos pegar mais informações na Wikipedia 
+
+
+```{r le_municipios, message=FALSE, warning=FALSE}
+
+municipios <- read_html("https://pt.wikipedia.org/wiki/Lista_de_munic%C3%ADpios_do_Brasil_por_popula%C3%A7%C3%A3o") %>%
+    html_nodes("table") %>% 
+    extract2(2) %>% 
+    html_table() %>% 
+    rename(
+        cod_municipio = `Código IBGE`,
+        municipio = `Município`,
+        UF = `Unidade federativa`,
+        populacao = `População`
+    ) %>% 
+    mutate(
+        populacao = str_remove_all(populacao,"[^0-9]") 
+    ) %>% 
+    mutate(populacao = as.integer(populacao))
+
+glimpse(municipios)
+
+
+```
 
 
 ## Funções de junção (dplyr)
+
+Para juntar as informações de 
+
+
 
 ## Funções de pivot (tidyr)
 
