@@ -590,6 +590,10 @@ if (2 + 2 == 4) {
 }
 ```
 
+
+
+
+
 Note o operador de comparação `==` e não `=`
 
 A função `if_else` (da biblioteca dplyr) funciona de vetorial. `if_else` é mais rápida que a função `ifelse` da biblioteca `base`, mas só aceita argumentos de mesmo tipo no segundo e terceiro parâmetros
@@ -781,6 +785,80 @@ v2 <-  c(1, 2, 3, 4) + c(0, 1)
 ## Revisão: controle de fluxo
 
 ![](diagramas/controlefluxo.png){width=90%}
+
+## Revisão: if
+
+
+Complete a lacuna:
+
+
+```{r, eval=FALSE}
+
+
+
+if (n_pessoas ____ 0 ){
+    print("Não há pessoas")
+}
+else{
+    print("Há pessoas")
+}
+    
+    
+
+```
+
+
+## Revisão: if_else
+
+Complete a lacuna:
+
+
+```{r, eval= FALSE}
+x <- 1:10
+
+if_else(
+    _________,
+    "par",
+    "impar"
+)
+
+
+
+```
+
+
+## Revisão: if_else
+
+Qual o valor de x ?
+
+
+```{r}
+
+times <- c("Flamengo", "Fluminense", "Bahia", "Vasco")
+
+x <- case_when(
+    times == "Flamengo" ~ "Flamengo",
+    times == "Bahia" ~ "Bahia",
+    TRUE ~ "Flumifogo da Gama"
+)
+
+
+```
+
+
+## Revisão: for
+
+Complete a lacuna para imprimir os quadrados dos números de 1 a 10
+
+
+```{r, eval=FALSE}
+for ____{
+    print(x^2)
+}
+
+```
+
+
 
 
 
@@ -1038,6 +1116,12 @@ Não é por coincidência que as funções de tratamento das bibliotecas tidyver
 **Agora o mais importante de tudo: O ATALHO PARA O ` %>% ` É CTRL + SHIFT + M**
 
 
+## Um mapa conceitual da bibioteca de transformação de dados `dplyr`
+
+
+![](imagens/conceptual_dplyr.jpg){width=70%}
+
+
 ## CRAN: uma Disneylândia dos dados?
 
 CRAN é o repositório de bibliotecas mantido pelo R com contribuição de populares.
@@ -1075,9 +1159,14 @@ head(gini)
 ```
 
 
+## dplyr: Modificar -> Colunas
+
+![](diagramas/dplyr_select.png)
+
+
+
 ## Funções básicas de tratamento (dplyr): select()
 
-dplyr é uma das bibliotecas que fqzem parte do conjunto tidyverse
 
 A função `select()` é usada para selecionar colunas do dataframe/tibble
 
@@ -1108,7 +1197,14 @@ head(gini_select2)
 
 ```
 
+## Funções básicas de tratamento (dplyr): select() : helpers
+
+
+
+
+
 ## Funções básicas de tratamento (dplyr): select() (cont.)
+
 
 Algumas funções *helpers* nos ajudam a usar a função `select` e são muito úteis para tratamentos mais elaborados.
 
@@ -1242,6 +1338,8 @@ glimpse(dados_heathrow_select)
 
 ```
 ## Funções básicas de tratamento (dplyr): `mutate()`
+
+
 
 A função mutate é usada para criar novas colunas no tibble
 
@@ -2347,11 +2445,10 @@ head(siab_familias)
 Para pegar as UFs dos municipios, vamos pegar mais informações na Wikipedia 
 
 
-```{r le_municipios, message=FALSE, warning=FALSE}
-
+```{r le_municipios, message=FALSE, warning=FALSE, cache=TRUE}
 municipios <- read_html("https://pt.wikipedia.org/wiki/Lista_de_munic%C3%ADpios_do_Brasil_por_popula%C3%A7%C3%A3o") %>%
     html_nodes("table") %>% 
-    extract2(2) %>% 
+    extract2(1) %>% 
     html_table() %>% 
     rename(
         cod_municipio = `Código IBGE`,
