@@ -1050,7 +1050,7 @@ Arrumar os dados de forma que as linhas sejam eventos e as colunas sejam atribut
 
 O que é o evento e o que é o atributo pode variar até para diferentes usos do mesmo dado. Mas a prática ajuda a determinar isso.
 
-![](imagens/tidydata.png){width=70%}
+![](imagens/tidydata.png)
 
 ## Tratamento de dados em passos: operador Pipe (`%>%`)
 
@@ -1119,7 +1119,7 @@ Não é por coincidência que as funções de tratamento das bibliotecas tidyver
 ## Um mapa conceitual da bibioteca de transformação de dados `dplyr`
 
 
-![](imagens/conceptual_dplyr.jpg){width=70%}
+![](imagens/conceptual_dplyr.jpg)
 
 
 ## CRAN: uma Disneylândia dos dados?
@@ -1159,7 +1159,7 @@ head(gini)
 ```
 
 
-## dplyr: Modificar -> Colunas
+## dplyr: Modificar -> Colunas -> Nomes e posições
 
 ![](diagramas/dplyr_select.png)
 
@@ -1196,10 +1196,6 @@ gini_select2 <- gini_select %>%
 head(gini_select2)
 
 ```
-
-## Funções básicas de tratamento (dplyr): select() : helpers
-
-
 
 
 
@@ -1337,11 +1333,55 @@ glimpse(dados_heathrow_select)
 
 
 ```
+
+## Funções básicas de tratamento (dplyr): `rename()`
+
+`rename()` é usada para modificar os nomes das colunas. Ela renomeia as colunas indicadas e mantném as outras.
+
+![](diagramas/dplyr_rename.png)
+
+## Funções básicas de tratamento (dplyr): `rename()`
+
+```{r}
+
+dados_heathrow %>% 
+    rename(
+        data = date,
+        estacao = station,
+        temperatura = air_temp
+    ) %>% 
+    head()
+
+```
+
+## Funções básicas de tratamento (dplyr): `rename()` x `select()`
+
+
+`select()` também pode ser usado para renomear colunas, mas mantém apenas as colunas citadas
+
+```{r}
+
+dados_heathrow %>% 
+    select(
+        data = date,
+        estacao = station,
+        temperatura = air_temp
+    ) %>% 
+    head()
+
+
+```
+
+
+## dplyr: Modificar -> Colunas -> Valores
+
+
+A função mutate é usada para criar novas colunas no tibble, mantendo as outras.
+![](diagramas/dplyr_mutate.png)
+
+
 ## Funções básicas de tratamento (dplyr): `mutate()`
 
-
-
-A função mutate é usada para criar novas colunas no tibble
 
 Notando que a coluna DATA_ELEICAO é um caracter, vamos criar uma coluna de tipo data.
 
@@ -1367,7 +1407,7 @@ head(candidatos_com_data)
 ```
 
 
-É possível substituir a um campo existente
+É possível substituir um campo existente
 
 
 ```{r mutate_mesmo}
@@ -1384,7 +1424,7 @@ head(candidatos_com_data)
 ## Funções básicas de tratamento (dplyr): `mutate()`
 
 
-funções derivadas da `mutate` possibilitam a alteração de várias colunas ao mesmo tempo, usando os mesmos helpers que jã vimos para a `select` e uma função à escolha
+funções derivadas da `mutate` possibilitam a alteração de várias colunas ao mesmo tempo, usando os mesmos helpers que já vimos para a `select` e uma função à escolha
 
 
 ```{r mutate_at}
@@ -1462,10 +1502,38 @@ dolar_ajeitado %>%
 ```
 
 
+## Funções básicas de tratamento (dplyr) `transmute()`:
+
+`transmute()` cria colunas e mantém apenas as colunas citadas
+
+
+![](diagramas/dplyr_transmute.png)
+
+
+```{r}
+
+gapminder %>% 
+  transmute(
+    ano = year,
+    pais = country,
+    pib = gdpPercap * pop
+  ) %>% 
+  head()
+
+
+
+```
+
+## dplyr: Modificar -> Linhas -> Posição
+
+
+A função `arrange` serve para ordenar as linhas do tibble.
+
+![](diagramas/dplyr_arrange.png)
+
 
 ## Funções básicas de tratamento (dplyr) `arrange()`:
 
-A função `arrange` serve para ordenar o tibble.
 
 
 ```{r arrange}
@@ -1492,16 +1560,135 @@ head(dados_ordenados)
 ```
 
 
+## Funções básicas de tratamento (dplyr) `filter()`:
+
+`filter()` seleciona colunas de acordo com os seus valores
+
+![](diagramas/dplyr_filter.png)
+
+## Funções básicas de tratamento (dplyr) `filter()` (cont.):
+
+
+Filtrando países (note o operador `%in%`)
+
+
+```{r}
+
+gapminder %>% 
+  filter(country %in% c("Brazil", "Argentina", "Chile")) %>% 
+  ggplot() +
+    geom_line(aes(x = year, y = gdpPercap, color = country )) +
+    geom_point(aes(x = year, y = gdpPercap, color = country )) +
+    theme_light()
+  
+
+```
+
+
+## Funções básicas de tratamento (dplyr) `top_n()`:
+
+`top_n` seleciona as `n` linhas maiores de acordo com uma das colunas.
+
+![](diagramas/dplyr_top_n.png)
+
+## Funções básicas de tratamento (dplyr) `top_n()` (cont.):
+
+Selecionando os países mais ricos em 2007.
+
+Depois aprenderemos como ordenar essas barras
+
+
+```{r}
+
+gapminder %>% 
+  filter(year == 2007) %>% 
+  top_n(5, gdpPercap) %>% 
+  ggplot() +
+    geom_col(aes(x = country, y = gdpPercap)) +
+    theme_light() 
+
+```
+
+## Funções básicas de tratamento (dplyr) `top_frac()`:
+
+
+![](diagramas/dplyr_top_frac.png)
+
+
+## Funções básicas de tratamento (dplyr) `top_frac()`:
+
+
+
+
+```{r}
+
+ricos <- gapminder %>% 
+  filter(year == 2007) %>% 
+  top_frac(.2, gdpPercap ) %>% 
+  mutate(categoria = "Rico")
+
+pobres <-  gapminder %>% 
+  filter(year == 2007) %>% 
+  top_frac(.2, desc(gdpPercap) ) %>% 
+  mutate(categoria = "Pobre")
+
+bind_rows(ricos, pobres) %>% 
+  ggplot(aes(x = gdpPercap, y = lifeExp)) +
+  geom_point( aes(color = continent)) +
+  facet_grid(. ~ categoria, scales = "free_x") +
+  geom_smooth(method = "lm", se = FALSE) +
+  theme_light()
+  
+
+
+
+
+```
+
+
+## Funções básicas de tratamento (dplyr) `slice()`:
+
+
+![](diagramas/dplyr_slice.png)
+
+
+## Funções básicas de tratamento (dplyr) `slice()`:
+
+
+```{r}
+
+classificacao_brasileirao <- read_html("https://pt.wikipedia.org/wiki/Campeonato_Brasileiro_de_Futebol_de_2019_-_S%C3%A9rie_A") %>% 
+  html_nodes("table") %>% 
+  extract2(8) %>% 
+  html_table()
+
+
+limbo <- classificacao_brasileirao %>% 
+  slice(12:16) %>% 
+  select(time = Equipes )
+
+limbo
+
+
+```
 
 
 ## Funções básicas de tratamento (dplyr) `group_by()`:
 
 
-A função `group_by` será bastante usada..
+![](diagramas/dplyr_group_by.png)
+
+
+## Funções básicas de tratamento (dplyr) `group_by()`:
+
+
+A função `group_by` será bastante usada.
 
 Quem conhece SQL pode estranhar um pouco o comportamento desta função, pois ela não agrupa os dados diminuindo o número de linhas imediatamente.
 
 Mas veja que ela indica que há agrupamento
+
+Ela particiona o tibble. As operações passam a ser executadas em cada partição.
 
 
 ```{r group_by}
@@ -1518,7 +1705,7 @@ gini_agrupado
 
 ## Funções básicas de tratamento (dplyr) `group_by()` (cont.):
 
-Para várias operações, entretanto, o agrupamento faz com que o comportamento seja diferente
+Para várias operações, o agrupamento faz com que o comportamento seja diferente.
 
 Uma operação bastante usada é numerar as linhas de um tibble.
 
@@ -1554,11 +1741,18 @@ datatable(gini_agrupado)
 ```
 
 
+## Funções básicas de tratamento (dplyr) `summarise()` (cont.):
+
+
+![](diagramas/dplyr_summarise.png)
+
 
 ## Funções básicas de tratamento (dplyr) `group_by()` (cont.):
 
 
 A função `group_by` só leva a uma sumarização, ou seja, só transforma o tibble em um tibble com o número de linhas igual ao número de grupos, quando executamos a função `summarise()`
+
+Se executarmos `summarise` sem particionar o tibble, a operação resulta em uma linha.
 
 
 ```{r summarise}
@@ -1618,6 +1812,18 @@ ggplot(maiores_temp_dia) +
 Até agora acessamos dados que estavam disponíveis em bibliotecas, mas muitas vezes encontramos dados em arquivos.
 
 De modo geral, as funções da biblioteca `readr` são mas rápidas do que as da biblioteca base, e também mostram barra de progresso no console. É possível reconhecê-las pelo `_` ao invés de `.` 
+
+## Leitura de dados de arquivos 
+
+O caso mais comum é ler dados em formato de tabela para um tibble
+
+![](imagens/readr.png)
+
+
+
+
+## Leitura de dados de arquivos - Exemplo: CVM
+
 
 O portal da CVM é uma das minas de ouro de dados
 
@@ -2329,15 +2535,20 @@ Isso porque é extremamente comum fazermos contas com mais de uma informação d
 ![](imagens/tidydata.png){width=70%}
 
 
-## Tidyr: pivot_longer e pivot_wider
+## Tidyr
 
 O pacote Tidyr ajuda a arrumar os data frames dessas formas. O hex sticker dele é bem explicativo.
 
 
 ![](imagens/tidyr.png){width=40%}
 
+## Tidyr - `pivot_longer()` e `pivot_wider()`
+
 
 Os nomes das principais funções mudaram em setembro de 2019 (quando saiu a versão 1.0.0). Antes se chamavam `gather()` e `spread()` e agora se chamam `pivot_wider()` e `pivot_longer()`, o que é mais intuitivo.
+
+![](diagramas/tidyr.png)
+
 
 
 ## Pivoteando nosso data frame com muitas linhas
@@ -2467,9 +2678,51 @@ glimpse(municipios)
 ```
 
 
-## Funções de junção (dplyr)
+## Combinando tibbles (dplyr)
 
-Para juntar as informações de 
+Para juntar as informações de dois tibbles em um só, podemos fazer isso de três formas
+
+![](diagramas/combinando.png)
+
+## Combinando tibbles (tidyr): funções de join
+
+![](imagens/join.png)
+
+## Combinando tibbles (tidyr): exemplo funções de join:
+
+Anteriormente, pegamos informações do cadastro de famílias...
+
+```{r}
+
+head(siab_familias)
+
+```
+
+E de municípios
+
+
+```{r}
+
+head(municipios)
+
+
+```
+
+Os códigos são diferentes, mas 
+
+```{r, warning=FALSE, message=FALSE }
+
+de_para_codigos <- read_csv2(
+  "http://blog.mds.gov.br/redesuas/wp-content/uploads/2018/06/Lista_Munic%C3%ADpios_com_IBGE_Brasil_Versao_CSV.csv",
+  locale = locale(encoding = "latin1")
+  ) %>% 
+  select(IBGE, IBGE7) %>% 
+  mutate(IBGE7 = IBGE7 %% 100000)
+
+
+head(de_para_codigos)
+
+```
 
 
 
