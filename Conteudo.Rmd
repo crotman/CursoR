@@ -532,7 +532,7 @@ Vamos passar pelo Data Frame agora. Depois por Factor e objetos que representam 
 
 Data Frames, e seu primo Tibble, são estruturas muito usadas em análises de dados feitas em R.
 
-O dataframe consiste em um conjunto de vetores nomeados, com o mesmo número de elementos, que formam uma estrutura retangular, onde cada coluna é um vetor e cada linha n contém o n-ésimo elemento dos vetores.
+O data frame consiste em um conjunto de vetores nomeados, com o mesmo número de elementos, que formam uma estrutura retangular, onde cada coluna é um vetor e cada linha n contém o n-ésimo elemento dos vetores.
 
 É similar, em muitas características, a uma tabela de banco de dados.
 
@@ -741,7 +741,7 @@ plot(resultados_perf)
 
 ## Revisão: tipos de vetores
 
-![](diagramas/vetores.png){width=90%}
+![](diagramas/vetores.png)
 
 
 ## Revisão: operações vetoriais
@@ -778,7 +778,7 @@ v2 <-  c(1, 2, 3, 4) + c(0, 1)
 ## Revisão: data frames
 
 
-![](diagramas/dataframes.png){width=90%}
+![](diagramas/dataframes.png)
 
 
 
@@ -1041,7 +1041,7 @@ Dentro de todo o hype envolvendo Data Science, surgem as buzz words mais mirabol
 
 Tudo isso é legal, mas a habilidade de preparar os dados para os modelos, preparar os hiperparâmetros e especificações alternativas ainda melhora muito a análise. Anote mais uma buzz word: **FEATURE ENGINEERING**
 
-A agilidade de se tentar abordagens alterativas com os dados cresce muito quando dominamos a arte de manipular os dataframes. Por isso o peso grande dado neste curso. 
+A agilidade de se tentar abordagens alterativas com os dados cresce muito quando dominamos a arte de manipular os data frames. Por isso o peso grande dado neste curso. 
 
 
 ## Organizando os dados de forma tidy
@@ -1168,7 +1168,7 @@ head(gini)
 ## Funções básicas de tratamento (dplyr): select()
 
 
-A função `select()` é usada para selecionar colunas do dataframe/tibble
+A função `select()` é usada para selecionar colunas do data frame/tibble
 
 
 ```{r gini}
@@ -2039,7 +2039,7 @@ le_conteudo_sheet <- function(dados){
 ## Leitura de conteúdo de planilhas Excel (cont.)
 
 
-Munidos destas duas funções, podemos guardar tudo em um só dataframe.
+Munidos destas duas funções, podemos guardar tudo em um só data frame.
 
 Primeiro, definindo as sheets a ler
 
@@ -2057,7 +2057,7 @@ sheets_pra_ler <- list.files("dados/titulos") %>%
     )
 ```
 
-Depois lendo as sheets para um dataframe
+Depois lendo as sheets para um data frame
 
 
 ```{r arruma_titulos_1, warning=FALSE, cache=TRUE, message=FALSE }
@@ -2477,7 +2477,7 @@ dados_todas_as_datas <- seq.Date(
 ## Lendo páginas difíceis (cont.)
 
 
-O dataframe com todos os dados ficou assim.
+O data frame com todos os dados ficou assim.
 
 Veja como as funções da biblioteca `kable` e `kableExtra` dão mais controle na criação das tabelas.
 
@@ -2526,7 +2526,7 @@ dados_todas_as_datas %>%
 ## Pivoteando
 
 
-Reparamos que o dataframe no slide anterior não está "Tidy", ou seja não está de forma que **cada linha represente um evento** e **cada coluna represente um atributo do evento**.
+Reparamos que o data frame no slide anterior não está "Tidy", ou seja não está de forma que **cada linha represente um evento** e **cada coluna represente um atributo do evento**.
 
 Para nós, neste caso, um evento é formado por **todas** as informações de um ativo em um dia e não **uma só** das informações de um ativo em um dia.
 
@@ -2653,27 +2653,43 @@ head(siab_familias)
 
 ## Pivoteando nosso data frame com muitas colunas (cont.)
 
-Para pegar as UFs dos municipios, vamos pegar mais informações na Wikipedia 
+Para pegar mais informações dos municipios, vamos ler um arquivo baixado do iBGE 
 
 
 ```{r le_municipios, message=FALSE, warning=FALSE, cache=TRUE}
-municipios <- read_html("https://pt.wikipedia.org/wiki/Lista_de_munic%C3%ADpios_do_Brasil_por_popula%C3%A7%C3%A3o") %>%
-    html_nodes("table") %>% 
-    extract2(1) %>% 
-    html_table() %>% 
-    rename(
-        cod_municipio = `Código IBGE`,
-        municipio = `Município`,
-        UF = `Unidade federativa`,
-        populacao = `População`
-    ) %>% 
-    mutate(
-        populacao = str_remove_all(populacao,"[^0-9]") 
-    ) %>% 
-    mutate(populacao = as.integer(populacao))
 
-glimpse(municipios)
+municipios <- read_excel("dados/ibge/populacao.xlsx", skip = 2, col_names = TRUE) 
 
+
+head(municipios, n = 30)
+
+
+```
+
+Ops... células mescladas
+
+Não deixe o ódio tomar você...
+
+
+```{r, message=FALSE, warning=FALSE  }
+
+municipios_ajeitado <- municipios %>%  
+  rename(
+    cod_municipio = 1,
+    nome_municipio = 2,
+    ano = 3,
+    populacao = 4
+  ) %>% 
+  fill(cod_municipio, .direction = "down") %>% 
+  fill(nome_municipio, .direction = "down") %>% 
+  mutate(UF = str_extract(nome_municipio,"\\([A-Z]{2}\\)")) %>%
+  mutate(UF = str_extract(UF,"[A-Z]{2}")) %>% 
+  mutate(
+    cod_municipio = as.integer(cod_municipio),
+    ano = as.integer(ano)
+  )
+
+head(municipios_ajeitado)
 
 ```
 
@@ -2703,7 +2719,7 @@ E de municípios
 
 ```{r}
 
-head(municipios)
+head(municipios_ajeitado)
 
 
 ```
@@ -2716,8 +2732,7 @@ de_para_codigos <- read_csv2(
   "http://blog.mds.gov.br/redesuas/wp-content/uploads/2018/06/Lista_Munic%C3%ADpios_com_IBGE_Brasil_Versao_CSV.csv",
   locale = locale(encoding = "latin1")
   ) %>% 
-  select(IBGE, IBGE7) %>% 
-  mutate(IBGE7 = IBGE7 %% 100000)
+  select(IBGE, IBGE7)
 
 
 head(de_para_codigos)
@@ -2725,12 +2740,44 @@ head(de_para_codigos)
 ```
 
 
+Agora juntamos as informações do Siab com as informações dos municípios 
 
-## Funções de pivot (tidyr)
 
-## Funções de pivot (tidyselect)
+```{r}
 
-manobras com vars, starts_with, num_range etc
+
+siab_familias %>% 
+  inner_join(de_para_codigos, by = c("cod_municipio" = "IBGE")) %>%
+  inner_join(municipios_ajeitado, by = c("IBGE7" = "cod_municipio", "data" = "ano") ) %>%
+  View()
+
+head(siab_familias)
+
+
+```
+
+
+Seria legal saber qual o tamanho médio das famílias
+
+
+```{r}
+
+numero_medio_familias <- read_excel("dados/ibge/pessoas_por_familia.xlsx", skip = 2) %>% 
+  select(c(1, 3, 7)) %>% 
+  rename(
+    cod_municipio = 1,
+    pessoas = 2,
+    numero = 3
+  ) %>% 
+  
+  View()
+
+
+
+```
+
+
+
 
 ## Tratamento de strings (caracteres) com stringr
 
@@ -2797,7 +2844,7 @@ resultados <- RandVec(n = 5, m = 100) %>%
 ```
 
 
-## Aplicação de funções a dataframes (purrr)
+## Aplicação de funções a data frames (purrr)
 
 ## map-reduce
 
