@@ -28,7 +28,9 @@ library(cumstats)
 library(rvest)
 library(readxl)
 library(tables)
-
+library(socviz)
+library(ggrepel)
+library(extrafont)
 
 library(electionsBR)
 library(worldmet)
@@ -2786,6 +2788,165 @@ numero_medio_familias <- read_excel("dados/ibge/pessoas_por_familia.xlsx", skip 
 ## Tratamento de dados categóricos (forcats) 
 
 # VISUALIZAÇÃO DE DADOS 
+
+## NÃO!!! Distorções
+
+![](imagens/doria.png)
+
+
+## NÃO!!! Distorções II
+
+Às vezes mesmo sem querer (será?)
+
+PS. gráfico de 2014
+
+
+![](imagens/gnews.jpg)
+
+
+
+
+## NÃO!!! Estilos que atrapalham
+
+
+Gráfico com sombra, 3D, estilos que dificultam a interpretação
+
+
+![](imagens/graficoruim.png)
+
+
+## NÃO!!! 3D indiscriminado
+
+
+O pessoal que usa Excel muitas vezes ama 3D, mas...
+
+
+![](imagens/excel.png)
+
+
+![](imagens/excel2.png)
+
+
+![](imagens/excel3.png)
+
+
+
+## NÃO!!! Pizza maior que 100%
+
+
+![](imagens/tortamaisque100.jpg )
+
+
+## NÃO!!! Pizza só meio a meio
+
+Assim como os restaurantes devemos servir pizzas de dois sabores no máximo
+
+Tentem descobrir qual a menor e a menor categoria em cada caso
+
+
+![](imagens/torta.png)
+
+## NÃO!!! Pizza só meio a meio (cont.)
+
+
+![](imagens/barranaopizza.png)
+
+
+
+
+## Dicas para uma boa visualização
+
+
+* Enfatize o dado relevante
+
+* Integre texto e gráfico
+
+* Use fontes e cores diferentes do padrão 
+
+* Principalmente em colunas e barras, faça o eixo começar de ZERO
+
+
+
+```{r enfatize, warning=FALSE, message=FALSE}
+
+loadfonts(device = "win")
+
+by_country <- organdata %>% group_by(consent_law, country) %>%
+    summarize_if(is.numeric, list(mean = mean, sd = sd), na.rm = TRUE) %>%
+    ungroup()
+
+
+p <- ggplot(data = by_country,
+            mapping = aes(x = gdp_mean, y = health_mean))
+
+p + geom_point( color = "coral4") +
+    geom_text_repel(data = subset(by_country, gdp_mean > 25000),
+                    mapping = aes(label = country), 
+                    size = 3,
+                    color = "coral4",
+                    family="Bookman Old Style"
+
+                    
+                    
+                    ) +
+
+  labs(y = "Gastos com saúde per cap.", x = "PIB per cap." ) +
+  scale_x_continuous(
+    labels = number_format(decimal.mark = ",", big.mark = "."),
+    limits = c(0,NA)
+  ) +
+  scale_y_continuous(
+    labels = number_format(decimal.mark = ",", big.mark = "."),
+    limits = c(0,NA)
+  ) +
+  theme_minimal(
+  ) +
+  ggtitle(
+    label = "Gastos em saúde x PIB"
+  ) +
+  theme(
+    text=element_text(family="Bookman Old Style", color = "coral4"),
+    axis.text =  element_text(colour = "coral4"),
+    panel.background = element_rect(fill = "beige"),
+    panel.grid.minor =   element_line(colour = "bisque1"),
+    panel.grid.major =  element_line(colour = "bisque3")
+  )
+  
+
+
+
+```
+
+
+## Dicas para uma boa visualização
+
+
+```{r, out.width="90%"}
+
+#("azure2", "chocolate", "steelblue4", "darkslategray", "slategray3", "slategray4")
+
+p <- ggplot(data = gapminder, mapping = aes(x = year, y = gdpPercap))
+p + geom_line(color="chocolate", aes(group = country)) +
+    geom_smooth(size = 1.1, method = "loess", se = FALSE, color = "tan4") +
+    scale_y_log10(labels=scales::dollar) +
+    facet_wrap(~ continent, ncol = 5) +
+    labs(x = "Year",
+         y = "GDP per capita",
+         title = "GDP per capita on Five Continents")+
+  theme_minimal() +
+  theme(
+    text=element_text(family="Bookman Old Style", color = "darkslategray", size = 6),
+    axis.text =  element_text(colour = "darkslategray"),
+    panel.background = element_rect(fill = "azure2"),
+    panel.grid.minor =   element_line(colour = "slategray2"),
+    panel.grid.major =  element_line(colour = "slategray2"),
+    aspect.ratio = 1
+  )
+
+
+```
+
+
 
 # PROGRAMAÇÃO FUNCIONAL 
 
