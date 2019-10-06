@@ -1,13 +1,16 @@
 ---
 title: "R para Análise de Dados"
 author: "Bruno Crotman"
-date: "22/09/2019"
+date: "06/10/2019"
 output: 
     slidy_presentation: 
       css: styles.css
       fig_caption: yes
       toc: yes
       toc_depth: 3
+      
+bibliography: bibliography.bib
+      
 ---
 
 ```{r setup, include=FALSE}
@@ -31,6 +34,7 @@ library(tables)
 library(socviz)
 library(ggrepel)
 library(extrafont)
+library(wesanderson)
 
 library(electionsBR)
 library(worldmet)
@@ -57,6 +61,8 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ![](imagens/erroexcel1.jpg)
 
+Fonte: [@error_rogoff]
+
 PS.: ele não é Nobel...
 
 
@@ -67,12 +73,16 @@ PS.: ele não é Nobel...
 
 ![](imagens/erroexcel2.jpg)
 
+Fonte: [@genetic]
+
 
 ## Objetivos do curso
 
 Meta final: que vários dos processos de análise de dados da empresa passem a ser feitos dentro do fluxo de trabalho do R.
 
 ![](imagens/tidyverse.png)
+
+Fonte:[@tidyversebig]
 
 Ao fim do curso o objetivo é que todos os fios da meada sejam puxados para que o aluno consiga continuar por si só usando a vasta documentação disponível.
 
@@ -113,8 +123,12 @@ Também amo o Excel, mas amo mais as seguintes vantagens:
 
 ![](imagens/tidyverse_simplificado.png){width=50%} 
 
+Fonte:[@wickham2016r]
+
 
 ![](imagens/tidyverse.png){width=50%}
+
+Fonte: [@tidyversebig]
 
 
 ## Exemplos de onde vamos chegar
@@ -288,8 +302,7 @@ Dentre os vetores há:
 
 ![Tipos de vetores](imagens/summary-tree.png){width=25%}
 
-Fonte: [Advanced R](https://adv-r.hadley.nz/)
-
+Fonte: [@wickham2014advanced]
 
 ## Tipos de valores "armazenados" por variáveis (cont.)
 
@@ -298,7 +311,7 @@ Os vetores atômicos podem ser dos seguintes tipos:
 
 ![Tipos primários](imagens/summary-tree-atomic.png){width=25%}
 
-Fonte: [Advanced R](https://adv-r.hadley.nz/)
+Fonte: [@wickham2014advanced]
 
 ## Tipos de vetores atômicos
 
@@ -1123,6 +1136,8 @@ Não é por coincidência que as funções de tratamento das bibliotecas tidyver
 
 ![](imagens/conceptual_dplyr.jpg)
 
+Fonte: [@dplyrrberlin]
+
 
 ## CRAN: uma Disneylândia dos dados?
 
@@ -1821,6 +1836,7 @@ O caso mais comum é ler dados em formato de tabela para um tibble
 
 ![](imagens/readr.png)
 
+Fonte: [@cheatsheetimport]
 
 
 
@@ -2706,6 +2722,9 @@ Para juntar as informações de dois tibbles em um só, podemos fazer isso de tr
 
 ![](imagens/join.png)
 
+Fonte: [@cheatsheettransform]
+
+
 ## Combinando tibbles (tidyr): exemplo funções de join:
 
 Anteriormente, pegamos informações do cadastro de famílias...
@@ -2794,6 +2813,9 @@ numero_medio_familias <- read_excel("dados/ibge/pessoas_por_familia.xlsx", skip 
 ![](imagens/doria.png)
 
 
+Fonte: [@doria]
+
+
 ## NÃO!!! Distorções II
 
 Às vezes mesmo sem querer (será?)
@@ -2804,7 +2826,7 @@ PS. gráfico de 2014
 ![](imagens/gnews.jpg)
 
 
-
+Fonte: [@gnews]
 
 ## NÃO!!! Estilos que atrapalham
 
@@ -2815,6 +2837,10 @@ Gráfico com sombra, 3D, estilos que dificultam a interpretação
 ![](imagens/graficoruim.png)
 
 
+Fonte: [@healy2018data]
+
+
+
 ## NÃO!!! 3D indiscriminado
 
 
@@ -2822,6 +2848,8 @@ O pessoal que usa Excel muitas vezes ama 3D, mas...
 
 
 ![](imagens/excel.png)
+
+[@healy2018data]
 
 
 ![](imagens/excel2.png)
@@ -2837,7 +2865,9 @@ O pessoal que usa Excel muitas vezes ama 3D, mas...
 ![](imagens/tortamaisque100.jpg )
 
 
-## NÃO!!! Pizza só meio a meio
+Fonte: [@mais100]
+
+## MELHOR AINDA: Pizza só meio a meio
 
 Assim como os restaurantes devemos servir pizzas de dois sabores no máximo
 
@@ -2846,11 +2876,28 @@ Tentem descobrir qual a menor e a menor categoria em cada caso
 
 ![](imagens/torta.png)
 
+Fonte: [@pie]
+
+
 ## NÃO!!! Pizza só meio a meio (cont.)
 
 
 ![](imagens/barranaopizza.png)
 
+
+Fonte: [@pie]
+
+## Com muita parcimônia: gráficos de linhas com dois eixos
+
+Gráficos de dois eixos podem mostrar relações espúrias muito facilmente. E elas dependem da escolha da escala e dos limites dos eixos.
+
+![](imagens/2eixos.png)
+
+Fonte [@twoaxis]
+
+O mesmo dado pode levar aos seguintes gráficos (e suas soluções)
+
+![](imagens/2eixos-2.png)
 
 
 
@@ -2867,7 +2914,7 @@ Tentem descobrir qual a menor e a menor categoria em cada caso
 
 
 
-```{r enfatize, warning=FALSE, message=FALSE}
+```{r enfatize, warning=FALSE, message=FALSE, out.width="70%"}
 
 loadfonts(device = "win")
 
@@ -2920,6 +2967,8 @@ p + geom_point( color = "coral4") +
 
 ## Dicas para uma boa visualização
 
+Use small multiples: divida o gráfico em gráficos iguais menores cada um com parte dos dados, seguindo uma regra categórica
+
 
 ```{r, out.width="90%"}
 
@@ -2946,6 +2995,174 @@ p + geom_line(color="chocolate", aes(group = country)) +
 
 
 ```
+
+
+## GGPLOT2
+
+
+GGPLOT2 é a biblioteca de visualização de dados moderna mais usada no R.
+
+Muitos dos problemas listados anteriormente são tratados por ela. É até difícil causar alguns dos problemas anteriores, por exemplo as distorções. É preciso muito malabarismo para produzir um gráfico com 2 eixos.
+
+Por outro lado, a biblioteca facilita muito a criação de small multiples, a criação de gráficos personalizados e complexos
+
+
+## Filosofia
+
+
+GGPLOT é baseada na filosofia de Tufte [@tufte1973visual] e Wilkinson [@wilkinsongrammar], em que os gráficos são construídos a partir de dois princípios:
+
+* Um gráfico é uma construção em camadas
+
+* Os dados ganham sentido a partir de mapeamentos a escalas, que são mapeadas a geometrias
+
+## Camadas da GGPLOT2
+
+A GGPLOT2 parece mais complicada de usar do que funções como a `plot()` da biblioteca base do R.
+
+Talvez porque as pessoas não são sempre apresentadas às camadas da gramática "Grammar of Graphics" que fundamenta a biblioteca.
+
+![](imagens/camadas_ggplot.png)
+
+
+Fonte: [@datacampggplot2]
+
+## Descrição das camadas
+
+- **Dados (data)**
+
+- **Aesthetics (aes())**: mapeamento das colunas dos dados a escalas
+
+- **Geometries geoms_()**: elementos visuais que mostram os dados nas escalas
+
+- **Facets**: small multiples
+
+- **Statistics**: representações do dados transformadas por operações matemáticas
+
+- **Coordinates**
+
+- **Themes**: "non-data ink", ou seja, os elementos que não são diretamente plotados pela existência de dados 
+
+## Elementos das camadas
+
+![](imagens/elementos_ggplot.png)
+
+Fonte: [@datacampggplot2]
+
+
+## Montando o gráfico
+
+Usando as camadas, vamos montando o gráfico
+
+Vamos usar para este exemplo um dataset clássico, de espécimes de flores: `iris`
+
+```{r}
+
+glimpse(iris)
+
+```
+
+## Montando o gráfico: data, aes, geom
+
+![](imagens/geom_aes_data.png)
+
+
+```{r}
+
+ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width)) +     
+  geom_point(alpha = 0.6)
+
+
+```
+
+Veja que, pela variável ser representada de forma discreta (uma casa decimal), há sobreposição de pontos. para dar a real impressão de quantos pontos existem, o ideal é inserir um ruído.
+
+```{r}
+
+ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width)) +     
+  geom_jitter(alpha = 0.6)
+
+
+```
+
+## Montando o gráfico: data, aes, geom, facet
+
+
+![](imagens/geom_aes_data_facet.png)
+
+
+```{r}
+
+ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width)) +     
+  geom_jitter(alpha = 0.6) +
+  facet_grid(. ~ Species)
+
+
+```
+
+## Montando o gráfico: data, aes, geom, facet, statistics
+
+
+![](imagens/geom_aes_data_facet_stat.png)
+
+
+
+```{r}
+
+ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width)) +     
+  geom_jitter(alpha = 0.6) +     
+  facet_grid(. ~ Species) +
+  stat_smooth(method = "lm", se = F, col = "red")
+
+```
+
+
+## Montando o gráfico: data, aes, geom, facet, statistics, coord
+
+![](imagens/geom_aes_data_facet_stat_coord.png)
+
+
+
+```{r}
+
+ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width)) +     
+  geom_jitter(alpha = 0.6) +     
+  facet_grid(. ~ Species) +
+  stat_smooth(method = "lm", se = F, col = "red") +
+  coord_flip()
+
+
+```
+
+
+## Montando o gráfico: data, aes, geom, facet, statistics, coord, theme
+
+![](imagens/geom_aes_data_facet_stat_coord_theme.png)
+
+
+```{r}
+
+wes <- wes_palette("Royal2", 5, "discrete")
+
+ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width)) +     
+  geom_jitter(alpha = 0.6, color = wes[1]) +     
+  facet_grid(. ~ Species) +
+  stat_smooth(method = "lm", se = F, col = wes[1]) +
+  coord_flip() +
+  theme_minimal() +
+  theme(
+    text=element_text(family="Bradley Hand ITC", color = wes[1], size = 16),
+    axis.text =  element_text(colour = wes[1]),
+    panel.background = element_rect(fill = "white"),
+    panel.grid.minor =   element_line(colour = wes[2]),
+    panel.grid.major =  element_line(colour = wes[3]),
+    strip.text = element_text(family="Bradley Hand ITC", color = wes[1]),
+    panel.border = element_rect(colour = wes[4], fill = NA)
+  )
+
+```
+
+
 
 
 
@@ -3034,8 +3251,9 @@ resultados <- RandVec(n = 5, m = 100) %>%
 
 ## Criando visualizações interativas com Shiny
 
+# REFERÊNCIAS
 
-
+## Bibliografia
 
 
 
