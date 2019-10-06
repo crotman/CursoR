@@ -2935,11 +2935,12 @@ p + geom_line(color="chocolate", aes(group = country)) +
          title = "GDP per capita on Five Continents")+
   theme_minimal() +
   theme(
-    text=element_text(family="Bookman Old Style", color = "darkslategray", size = 6),
+    text=element_text(family="CMU Serif", color = "darkslategray", size = 8),
     axis.text =  element_text(colour = "darkslategray"),
     panel.background = element_rect(fill = "azure2"),
     panel.grid.minor =   element_line(colour = "slategray2"),
     panel.grid.major =  element_line(colour = "slategray2"),
+    strip.text = element_text(family="CMU Serif", colour = "darkslategray"),
     aspect.ratio = 1
   )
 
