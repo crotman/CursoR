@@ -36,6 +36,7 @@ library(ggrepel)
 library(extrafont)
 library(wesanderson)
 library(fitdistrplus)
+library(ggridges)
 
 library(electionsBR)
 library(worldmet)
@@ -3169,7 +3170,7 @@ ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width)) +
 ![](diagramas/graficos.png)
 
 
-## Escolhendo o melhor gráfico: distribuição
+## Escolhendo o melhor gráfico: distribuição (variável discreta)
 
 
 ![](diagramas/graficos.png)
@@ -3214,12 +3215,14 @@ real_simulado <- gols %>%
   mutate(tipo = "real" ) %>% 
   bind_rows(pois)
 
-ggplot(real_simulado) + 
+ggplot() + 
   geom_histogram(
-    aes(x = gols, fill = tipo),
+    data = real_simulado,
+    aes(x = gols, group = tipo, fill = tipo),
     binwidth = 1,
-    position = "dodge"
-    
+    show.legend = TRUE,
+    position = "identity",
+    alpha = 0.5
   ) +
   scale_x_continuous(breaks = 0:10, minor_breaks = c()) +
   geom_vline(aes(xintercept = result$estimate)) +
@@ -3230,7 +3233,211 @@ ggplot(real_simulado) +
 ```
 
 
-## Escolhendo o melhor gráfico: distribuição (com uma brincadeirinha)
+## Escolhendo o melhor gráfico: acumulada empírica
+
+
+O gráfico mostrando a função de probablidade acumulada empírica mostra propriedades que o histograma não mostra
+
+
+```{r}
+
+ggplot(gols, aes(x = gols)) +
+  stat_ecdf(geom = "step") +
+  scale_x_continuous(breaks = 0:10, minor_breaks = c()) +
+  theme_minimal()
+
+
+
+```
+
+## Escolhendo o melhor gráfico: distribuição de variável contínua
+
+
+Para variáveis contínuas, faz sentido usar o gráfico de densidade
+
+
+```{r, message=FALSE, warning=FALSE}
+
+ufc_pesos <- read_csv("dados/ufc/data.csv") %>% 
+  filter(weight_class == "Heavyweight") %>% 
+  select(
+    R_Height_cms,
+    B_Height_cms,
+    Winner
+  ) %>% 
+  transmute(
+    altura_vencedor = if_else(Winner == "Red", R_Height_cms, B_Height_cms  ),
+    altura_perdedor = if_else(Winner == "Red", B_Height_cms, R_Height_cms  )
+  ) %>% 
+  pivot_longer(cols = everything(), names_to = "resultado", values_to = "altura")
+
+
+ggplot(ufc_pesos) + 
+  geom_density(aes(x = altura)) +
+  theme_minimal()
+
+
+
+
+
+
+```
+
+## Escolhendo o melhor gráfico: distribuição de variável contínua. ECF
+
+
+Mais uma vez a distribuição empírica nos deixa ver mais coisa: os quantis
+
+
+```{r}
+
+ggplot(ufc_pesos) + 
+  stat_ecdf(aes(x = altura), geom = "density" ) +
+  theme_minimal()
+
+
+```
+
+
+## Escolhendo o melhor gráfico: comparando distribuições
+
+
+
+```{r}
+
+ggplot(ufc_pesos) + 
+  geom_density(aes(x = altura, color = resultado)) +
+  theme_minimal()
+
+
+```
+
+
+
+```{r}
+
+ggplot(ufc_pesos) + 
+  stat_ecdf(aes(x = altura, color = resultado), geom = "density" ) +
+  theme_minimal()
+
+
+
+```
+
+
+## Escolhendo o melhor gráfico: comparando muitas distribuições
+
+
+
+```{r, message=FALSE, warning=FALSE }
+
+ufc_pesos <- read_csv("dados/ufc/data.csv") %>% 
+  select(
+    weight_class,
+    R_Height_cms,
+    B_Height_cms,
+    Winner
+  ) %>% 
+  transmute(
+    weight_class,
+    altura_vencedor = if_else(Winner == "Red", R_Height_cms, B_Height_cms  ),
+    altura_perdedor = if_else(Winner == "Red", B_Height_cms, R_Height_cms  )
+  ) %>% 
+  pivot_longer(cols = -weight_class, names_to = "resultado", values_to = "altura")
+
+
+ggplot(ufc_pesos) +
+  geom_density_ridges(aes(x = altura, y = weight_class ), fill = "lightblue") +
+  theme_ridges() +
+  scale_x_continuous(breaks = seq(150,by = 5, to = 220))
+
+
+
+```
+
+
+Legal a ideia, mas não queremos comparar mulheres também 
+
+
+## Introduzindo stringr
+
+
+A biblioteca `stringr`facilita muio lidar com strings. Por exemplo detectar um pedaço de string em outra
+
+
+```{r, message=FALSE, warning= FALSE }
+
+ufc_pesos <- read_csv("dados/ufc/data.csv") %>% 
+  filter(!str_detect(weight_class, "Women")) %>% 
+  select(
+    weight_class,
+    R_Height_cms,
+    B_Height_cms,
+    Winner
+  ) %>% 
+  transmute(
+    weight_class,
+    altura_vencedor = if_else(Winner == "Red", R_Height_cms, B_Height_cms  ),
+    altura_perdedor = if_else(Winner == "Red", B_Height_cms, R_Height_cms  )
+  ) %>% 
+  pivot_longer(cols = -weight_class, names_to = "resultado", values_to = "altura")
+
+
+ggplot(ufc_pesos) +
+  geom_density_ridges(aes(x = altura, y = weight_class ), fill = "lightblue") +
+  theme_ridges() +
+  scale_x_continuous(breaks = seq(150,by = 5, to = 220))
+
+
+
+```
+
+Melhorou, mas ainda á estranho. Melhor seria se as classes de peso estivessem em ordem
+
+
+## Introduzindo forcats
+
+No R, as variáveis categóricas são chamadas de `fatores`. Cada valor possível de um fator é representadas internamente com um identificador numérico, e não com a própria string.
+
+Cada valor possível da variável categórica também é chamada de `level`
+
+Podemos manipular essas representações facilmente com a `forcats`.
+
+No caso, queremos ordenar nosso fator com a ordem as classes de peso no UFC
+
+A função `fct_relevel` possibilita a ordenação manual de uma variável `factor`
+
+
+```{r, message=FALSE, warning= FALSE}
+
+ufc_pesos_ordem <- ufc_pesos %>% 
+  mutate(
+    weight_class = fct_relevel(weight_class,
+      c(
+      "Flyweight",
+      "Bantamweight",
+      "Featherweight",
+      "Lightweight",
+      "Welterweight",
+      "Middleweight",
+      "Light Heavyweight",
+      "Heavyweight",
+      "Catch Weight",
+      "Open Weight"
+      )
+    )  
+  )
+
+
+ggplot(ufc_pesos_ordem) +
+  geom_density_ridges(aes(x = altura, y = weight_class ), fill = "lightblue") +
+  theme_ridges() +
+  scale_x_continuous(breaks = seq(150,by = 5, to = 220))
+
+
+
+```
+
 
 
 
