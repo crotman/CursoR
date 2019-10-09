@@ -37,6 +37,7 @@ library(extrafont)
 library(wesanderson)
 library(fitdistrplus)
 library(ggridges)
+library(countrycode)
 
 library(electionsBR)
 library(worldmet)
@@ -3438,10 +3439,174 @@ ggplot(ufc_pesos_ordem) +
 
 ```
 
+## Relação entre variáveis: scatter plot
+
+
+Os gráficos do tipo scatter plot
+
+
+Vamos brincar um pouco com os dados do Banco Mundial
+
+
+```{r, message=FALSE, warning=FALSE, cache=TRUE  }
+
+ 
+
+taxa_homicidios <- wb("VC.IHR.PSRC.P5", country = "all", mrv = 10, POSIXct = TRUE ) %>% 
+  select(iso3c, value, date) %>% 
+  group_by(iso3c) %>% 
+  top_n(1, date) %>% 
+  rename(homicidios = value)
+
+gini <- wb("SI.POV.GINI", country = "all", mrv = 10, POSIXct = TRUE ) %>% 
+  select(iso3c, value, date) %>% 
+  group_by(iso3c) %>% 
+  top_n(1, date) %>% 
+  rename(desigualdade = value)
+
+pib_per_capita <- wb("NY.GDP.PCAP.PP.KD", country = "all", mrv = 10, POSIXct = TRUE ) %>% 
+  select(iso3c, value, date) %>% 
+  group_by(iso3c) %>% 
+  top_n(1, date) %>% 
+  rename(riqueza = value)
+
+pib_gini_homi <- taxa_homicidios %>% 
+  inner_join(gini, by = c("iso3c")) %>% 
+  inner_join(pib_per_capita, by = c("iso3c")) %>% 
+  left_join(codelist, by = c("iso3c") ) %>% 
+  select(riqueza, desigualdade, homicidios, continent, region) %>% 
+  pivot_longer(cols = c("riqueza", "desigualdade"), names_to = "tipo_indice", values_to = "indice" ) %>% 
+  mutate(tipo_indice = str_to_title(tipo_indice))
 
 
 
 
+```
+
+
+
+
+```{r warning=FALSE, message=FALSE, out.width="80%"  }
+
+ggplot(pib_gini_homi, aes(y = homicidios, x = indice)) +
+  geom_point(alpha = 0.4) +
+  facet_wrap(~tipo_indice, scales = "free", ncol = 1) +
+  geom_smooth() +
+  theme_minimal() +
+  labs(x = "", y = "Homicídios por 100 mil") +
+  scale_x_continuous(labels = number_format(decimal.mark = ",", big.mark = ".")) 
+  
+
+
+```
+
+## Relação entre variáveis: scatter plot (cont.)
+
+
+É possível visualizar os eixos em log na base 10
+
+
+```{r, message=FALSE, warning=FALSE, out.width="80%"}
+
+
+ggplot(pib_gini_homi, aes(y = homicidios, x = indice)) +
+  geom_point(alpha = 0.4) +
+  facet_wrap(~tipo_indice, scales = "free", ncol = 1) +
+  geom_smooth() +
+  theme_minimal() +
+  labs(x = "", y = "Homicídios por 100 mil") +
+  scale_x_continuous(labels = number_format(decimal.mark = ",", big.mark = ".")) +
+  scale_y_log10() 
+
+
+
+
+```
+
+
+## Relação entre variáveis: scatter plot (cont.)
+
+
+É possível também usar as cores para olhar uma terceira característica
+
+
+
+```{r, message=FALSE, warning=FALSE, out.width="80%"}
+
+ggplot(pib_gini_homi, aes(y = homicidios, x = indice)) +
+  geom_point(alpha = 0.4, aes(color = continent )) +
+  facet_wrap(~tipo_indice, scales = "free", ncol = 1) +
+  geom_smooth() +
+  theme_minimal() +
+  labs(x = "", y = "Homicídios por 100 mil") +
+  scale_x_continuous(labels = number_format(decimal.mark = ",", big.mark = ".")) +
+  scale_y_log10()  +
+  theme(legend.position = "top")
+
+
+```
+
+
+A linha de regressão também pode ser estimada para cada grupo. Neste caso vamos usar o método de regressão linear, pois o LOESS original nao funciona nada bem com muito poucos dados (nem a linear, mas...)
+
+
+
+```{r, message=FALSE, warning=FALSE, out.width="80%"}
+
+ggplot(pib_gini_homi, aes(y = homicidios, x = indice, color = continent)) +
+  geom_point(alpha = 0.4 ) +
+  facet_wrap(~tipo_indice, scales = "free", ncol = 1) +
+  geom_smooth(se = FALSE, method = "lm") +
+  theme_minimal() +
+  labs(x = "", y = "Homicídios por 100 mil") +
+  scale_x_continuous(labels = number_format(decimal.mark = ",", big.mark = ".")) +
+  scale_y_log10() 
+
+
+
+```
+
+
+
+
+```{r, message=FALSE, warning=FALSE, out.width="80%"}
+
+analise_desigualdade <- pib_gini_homi %>% 
+  filter(tipo_indice == "Desigualdade")
+
+ggplot(analise_desigualdade, aes(y = homicidios, x = indice, color = continent)) +
+  geom_point(alpha = 0.4) +
+  facet_wrap(~tipo_indice, ncol = 1) +
+  geom_smooth(se = FALSE, method = "lm") +
+  theme_minimal() +
+  labs(x = "Índice de Gini", y = "Homicídios por 100 mil") +
+  scale_x_continuous(labels = number_format(decimal.mark = ",", big.mark = ".")) +
+  scale_y_log10() +
+  facet_wrap(~continent)  +
+  theme(legend.position = "top")
+
+
+
+
+```
+
+```{r, message=FALSE, warning=FALSE, out.width="80%"}
+
+
+ggplot(analise_desigualdade, aes(y = homicidios, x = indice, color = continent)) +
+  geom_text(aes(label = iso3c), size = 2) +
+  facet_wrap(~tipo_indice, ncol = 1) +
+  geom_smooth(se = FALSE, method = "lm") +
+  theme_minimal() +
+  labs(x = "Índice de Gini", y = "Homicídios por 100 mil") +
+  scale_x_continuous(labels = number_format(decimal.mark = ",", big.mark = ".")) +
+  scale_y_log10() +
+  facet_wrap(~continent) +
+  theme(legend.position = "top")
+
+
+
+```
 
 
 # PROGRAMAÇÃO FUNCIONAL 
