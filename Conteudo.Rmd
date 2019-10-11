@@ -38,6 +38,7 @@ library(wesanderson)
 library(fitdistrplus)
 library(ggridges)
 library(countrycode)
+library(tabulizer)
 
 library(electionsBR)
 library(worldmet)
@@ -3607,6 +3608,83 @@ ggplot(analise_desigualdade, aes(y = homicidios, x = indice, color = continent))
 
 
 ```
+
+## Três variáveis contínuas
+
+
+Podemos avaliar três variáveis contínuas usando um gráfico de bolhas
+
+Primeiro vamos colocar em wide as duas variáveis que tínhamos deixado long.
+
+```{r}
+
+pib_gini_homi_wide <- pib_gini_homi %>% 
+  pivot_wider(names_from = tipo_indice, values_from = indice )
+  
+
+head(pib_gini_homi_wide)
+
+
+```
+
+
+A escala de cor usada abaixo, Viridis, oferece a mesma sensação para olorido e preto e branco e é feita para ajudar daltônicos.
+
+
+O log foi usado aqui para evitar que os valores extremos dificultem a visualização da escala de cores.
+
+
+
+```{r}
+
+
+ggplot(pib_gini_homi_wide) +
+  geom_point(aes(color = homicidios, x = Desigualdade , y = Riqueza )) +
+  scale_color_viridis_c(trans = "log10", direction = -1, option = "inferno") +
+  theme_minimal()
+
+
+```
+
+
+## Três variáveis contínuas
+
+
+```{r}
+
+hdi <- read_csv("dados/hdi/atlas.csv")
+
+violencia <- extract_text("dados/atlasviolencia/8099-tabelamunicipiostodossite.pdf", encoding = "UTF-8") %>% 
+  str_split(pattern = fixed("\n")) %>% 
+  unlist() %>% 
+  enframe( value = "linha") %>% 
+  mutate(
+    UF = str_extract(linha, "[A-Z]{2}") ,
+    municipio = str_extract(linha, "(?<=[A-Z]{2} ).+?(?=[0-9])"),
+    numeros = str_extract_all(linha, "(?<= )[0-9 ,.]*") 
+  ) %>% 
+  unnest_legacy() %>% 
+  filter(str_length(numeros)>1) %>% 
+  mutate(
+    numeros = str_trim(numeros)
+  ) %>% 
+  separate(
+    col = numeros,
+    into = c("populacao", "homicidios", "ocultos", "taxa_homicidios"),
+    sep = " "
+  )
+  
+  
+  
+
+
+
+
+```
+
+
+
+
 
 
 # PROGRAMAÇÃO FUNCIONAL 
