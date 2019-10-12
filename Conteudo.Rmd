@@ -15,6 +15,7 @@ bibliography: bibliography.bib
 
 ```{r setup, include=FALSE}
 
+library(fitdistrplus)
 library(rlang)
 library(bench)
 library(ggbeeswarm)
@@ -35,7 +36,6 @@ library(socviz)
 library(ggrepel)
 library(extrafont)
 library(wesanderson)
-library(fitdistrplus)
 library(ggridges)
 library(countrycode)
 library(tabulizer)
@@ -3650,9 +3650,19 @@ ggplot(pib_gini_homi_wide) +
 ## Três variáveis contínuas
 
 
-```{r}
+```{r, cache=TRUE, warning=FALSE, message=FALSE }
 
-hdi <- read_csv("dados/hdi/atlas.csv")
+hdi <- read_csv("dados/hdi/atlas.csv") %>% 
+  rename(municipio = `município` ) %>% 
+  select(
+    ano,
+    rdpc,
+    gini,
+    municipio,
+    uf
+  ) %>% 
+  filter(ano == 2010)
+  
 
 violencia <- extract_text("dados/atlasviolencia/8099-tabelamunicipiostodossite.pdf", encoding = "UTF-8") %>% 
   str_split(pattern = fixed("\n")) %>% 
@@ -3666,15 +3676,45 @@ violencia <- extract_text("dados/atlasviolencia/8099-tabelamunicipiostodossite.p
   unnest_legacy() %>% 
   filter(str_length(numeros)>1) %>% 
   mutate(
-    numeros = str_trim(numeros)
+    numeros = str_trim(numeros),
+    municipio = str_trim(municipio) %>% str_to_upper()
   ) %>% 
   separate(
     col = numeros,
     into = c("populacao", "homicidios", "ocultos", "taxa_homicidios"),
     sep = " "
+  ) %>% 
+  mutate(taxa_homicidios = parse_number(taxa_homicidios, locale = locale(decimal_mark = ",")) )
+  
+
+ufs <- municipios_ajeitado %>% 
+  select(
+    UF,
+    cod_municipio
+  ) %>% 
+  mutate(
+    cod_uf = cod_municipio %/% 100000
+  ) %>% 
+  select(-cod_municipio) %>% 
+  distinct() %>% 
+  filter(!is.na(cod_uf)) 
+  
+hdi %<>% inner_join(ufs, by = c("uf" = "cod_uf"), suffix = c("_old", "")) 
+
+
+hdi_violencia <- hdi %>% 
+  inner_join(violencia, by = c("municipio", "UF") ) %>% 
+  mutate(
+    regiao = case_when(
+      uf %/% 10 == 1 ~ "Norte",
+      uf %/% 10 == 2 ~ "Nordeste",
+      uf %/% 10 == 3 ~ "Sudeste",
+      uf %/% 10 == 4 ~ "Sul",
+      uf %/% 10 == 5 ~ "Centro-Oeste",
+      TRUE ~ NA_character_
+      
+    ) 
   )
-  
-  
   
 
 
@@ -3685,6 +3725,90 @@ violencia <- extract_text("dados/atlasviolencia/8099-tabelamunicipiostodossite.p
 
 
 
+
+```{r}
+
+
+ggplot(hdi_violencia) +
+  geom_jitter(aes(color = taxa_homicidios, x = gini , y = rdpc ), alpha = 0.2   ) +
+  scale_color_gradient(low = "blue", high = "red", trans = "log10" ) +
+  facet_wrap(~regiao) + 
+  theme_minimal()
+
+
+
+```
+
+
+## Duas discretas e uma contínua
+
+
+
+```{r}
+
+ufc_data <- read_csv("dados/ufc/data.csv") %>% 
+  select(weight_class, no_of_rounds )
+
+ufc_raw_data <- read_csv2("dados/ufc/raw_total_fight_data.csv") %>% 
+  select(last_round)
+
+
+ufc_tudo <- bind_cols(ufc_data, ufc_raw_data) %>% 
+  filter(no_of_rounds == 3) %>% 
+  group_by(weight_class) %>% 
+  mutate(n_classe = n()) %>%
+  group_by(weight_class, last_round) %>% 
+  summarise(n_round = n(), n_classe = mean(n_classe)) %>% 
+  mutate(frac_lutas = n_round/n_classe ) %>% 
+  ungroup() %>% 
+  filter( weight_class %in%
+      c(
+      "Flyweight",
+      "Bantamweight",
+      "Featherweight",
+      "Lightweight",
+      "Welterweight",
+      "Middleweight",
+      "Light Heavyweight",
+      "Heavyweight"
+            
+          )) %>% 
+  mutate(
+    weight_class = fct_relevel(weight_class,
+      c(
+      "Flyweight",
+      "Bantamweight",
+      "Featherweight",
+      "Lightweight",
+      "Welterweight",
+      "Middleweight",
+      "Light Heavyweight",
+      "Heavyweight"
+      )
+    )
+  )
+
+
+
+
+
+```
+
+
+
+
+```{r}
+
+ggplot(ufc_tudo, aes(x = last_round, y = weight_class)) +
+  geom_tile(aes(fill = frac_lutas )) +
+  geom_text(aes(label = percent(frac_lutas))   ) +
+  scale_fill_gradient(low = "white", high = "darkgreen", labels = percent ) +
+  theme_minimal() 
+  
+
+
+
+```
 
 
 # PROGRAMAÇÃO FUNCIONAL 
