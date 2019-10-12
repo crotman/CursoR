@@ -39,6 +39,7 @@ library(wesanderson)
 library(ggridges)
 library(countrycode)
 library(tabulizer)
+library(GGally)
 
 library(electionsBR)
 library(worldmet)
@@ -3744,7 +3745,7 @@ ggplot(hdi_violencia) +
 
 
 
-```{r}
+```{r, message=FALSE, warning=FALSE }
 
 ufc_data <- read_csv("dados/ufc/data.csv") %>% 
   select(weight_class, no_of_rounds )
@@ -3809,6 +3810,40 @@ ggplot(ufc_tudo, aes(x = last_round, y = weight_class)) +
 
 
 ```
+
+
+
+## Várias variáveis
+
+
+
+```{r}
+
+hdi_desc <-  read_csv("dados/hdi/desc.csv")
+
+hdi_tudo <-  read_csv("dados/hdi/atlas.csv") %>% 
+  select(
+      espvida,
+      fectot,
+      mort1,
+      e_anosestudo,
+      t_fbsuper,
+      corte1,
+      corte9,
+      gini,
+      pind,
+      pren10ricos,
+      prentrab
+
+  )
+
+
+ggpairs(hdi_tudo)
+
+
+```
+
+
 
 
 # PROGRAMAÇÃO FUNCIONAL 
