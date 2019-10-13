@@ -40,6 +40,8 @@ library(ggridges)
 library(countrycode)
 library(tabulizer)
 library(GGally)
+library(broom)
+library(caret)
 
 library(electionsBR)
 library(worldmet)
@@ -3610,7 +3612,7 @@ ggplot(analise_desigualdade, aes(y = homicidios, x = indice, color = continent))
 
 ```
 
-## Três variáveis contínuas
+## Relação entre variáveis: Três variáveis contínuas
 
 
 Podemos avaliar três variáveis contínuas usando um gráfico de bolhas
@@ -3648,7 +3650,7 @@ ggplot(pib_gini_homi_wide) +
 ```
 
 
-## Três variáveis contínuas
+## Relação entre variáveis:  Três variáveis contínuas
 
 
 ```{r, cache=TRUE, warning=FALSE, message=FALSE }
@@ -3741,7 +3743,7 @@ ggplot(hdi_violencia) +
 ```
 
 
-## Duas discretas e uma contínua
+## Relação entre variáveis: Duas discretas e uma contínua
 
 
 
@@ -3813,94 +3815,50 @@ ggplot(ufc_tudo, aes(x = last_round, y = weight_class)) +
 
 
 
-## Várias variáveis
+## Relação entre variáveis:  Várias variáveis
 
 
 
-```{r}
+```{r, message=FALSE, warning=FALSE, cache=TRUE, out.width="90%" }
 
 hdi_desc <-  read_csv("dados/hdi/desc.csv")
 
 hdi_tudo <-  read_csv("dados/hdi/atlas.csv") %>% 
+  mutate(
+    regiao = case_when(
+      uf %/% 10 == 1 ~ "N",
+      uf %/% 10 == 2 ~ "NE",
+      uf %/% 10 == 3 ~ "SE",
+      uf %/% 10 == 4 ~ "S",
+      uf %/% 10 == 5 ~ "CO",
+      TRUE ~ NA_character_
+    )
+  ) %>% 
   select(
       espvida,
-      fectot,
-      mort1,
-      e_anosestudo,
-      t_fbsuper,
-      corte1,
-      corte9,
+      anos_estudo = e_anosestudo,
       gini,
       pind,
       pren10ricos,
-      prentrab
-
+      prentrab,
+      t_banagua,
+      regiao
   )
 
 
-ggpairs(hdi_tudo)
+ggpairs(hdi_tudo)  +
+  theme_minimal()
 
 
 ```
-
 
 
 
 # PROGRAMAÇÃO FUNCIONAL 
 
-## Simulação CFA com vários parâmetros
 
 
-```{r}
-
-n_simul <- 10000
-n_questoes <- 240
-min_aprovacao <-  0.6
-n_aprovado <- 240 * min_aprovacao
-prob_questao <- 0.2
-
-
-estimar_chance <-  function(...){
-    
-    print("aqui")
-    fracao_eliminar_questoes <- as.vector(...)
-    
-    #definindo o número de questões 
-    n_questoes_cada_elimina <- t(rmultinom(n_simul, size = n_questoes, fracao_eliminar_questoes))
-    probs_quando_elimina <- 1/(5:1)
-    acertos_concatenados <- 
-        rbinom( 
-            n =  n_simul * 5 , 
-            size = as.vector(t(n_questoes_cada_elimina)), 
-            prob = probs_quando_elimina  
-        )
-    
-    matriz_acertos <- matrix(acertos_concatenados, byrow = TRUE, nrow = n_simul )
-    
-    acertos <- rowSums(matriz_acertos)
-    sum(acertos > n_aprovado)/n_simul
-}
-
-
-#definindo a chance podermos eliminar 0, 1, 2, ... 4 alternativas
-resultados <- RandVec(n = 5, m = 100) %>% 
-    .$RandVecOutput %>% 
-    t() %>% 
-    as_tibble() %>% 
-    mutate(id = row_number()) %>% 
-    group_by(id) %>% 
-    nest() %>% 
-    mutate(data_fica = data) %>%     
-    mutate(data = map(data, estimar_chance) ) %>% 
-    unnest()
-
-
-
-
-
-
-
-```
+map( .x, .f, ...  )
 
 
 ## Aplicação de funções a data frames (purrr)
@@ -3909,7 +3867,217 @@ resultados <- RandVec(n = 5, m = 100) %>%
 
 # EXECUTANDO MODELOS
 
+## Rudimentos de Aprendizado Estatístico
+
+Aqui apresentaremos RUDIMENTOS de Aprendizado Estatístico com o objetivo de desmistificar alguns conceitos e apresentar algumas considerações que nos ajudarão a iniciar um processo deste tipo.
+
+
+## Desmistificando Aprendizado Estatístico (ou Machine Learning)
+
+## Trade-off viés-variância
+
+## Tentativa de estimar variância e viés: Cross validation
+
 ## Execução de modelos com broom
+
+
+
+```{r, message=FALSE, warning=FALSE }
+
+ufc_data <- read_csv("dados/ufc/data.csv") 
+
+ufc_raw_data <- read_csv2("dados/ufc/raw_total_fight_data.csv") 
+
+ufc_raw_fighter <- read_csv2("dados/ufc/raw_fighter_details.csv") 
+
+ufc_raw_pre <- read_csv2("dados/ufc/preprocessed_data.csv") 
+
+
+ufc_cada_lutador <- bind_cols(ufc_data, ufc_raw_data) %>% 
+  pivot_longer(
+    cols = matches("[BR]_.*"),
+    names_to = c("lutador",".value") ,
+    names_sep = "_"
+  ) %>% 
+  mutate(
+    ganhou = str_sub(Winner,1,1) == lutador
+  ) %>% 
+  mutate(aprov = wins/(wins+losses) )
+  
+  
+ggplot(ufc_cada_lutador) +
+  geom_boxplot(aes(x = ganhou, y = aprov )) + 
+  facet_wrap(~weight_class)
+  
+
+
+ufc_aprend <- bind_cols(ufc_data, ufc_raw_data) %>%
+  filter(Winner != "Draw") %>%
+  mutate(
+    R_aprov = R_wins / (R_wins + R_losses),
+    B_aprov = B_wins / (B_wins + B_losses),
+  ) %>% 
+  select(
+    Winner,
+    weight_class,
+    B_Weight_lbs,
+    B_age,
+    R_Weight_lbs,
+    R_age,
+    B_age,
+    R_aprov,
+    B_aprov
+
+  ) %>%
+  mutate(
+    winner_color = Winner,
+    zebra_blue = if_else(Winner == "Blue",1,0),
+    red_mais_velho = R_age - B_age,
+    idade_red = R_age
+  )
+
+ggplot(ufc_aprend ) +
+  geom_jitter(aes( y = red_mais_velho, x = R_age, color = winner_color ), alpha = 0.15) +
+  scale_color_manual( values =c("Blue" = "blue", "Red" = "red")) +
+  facet_wrap( ~weight_class ) +
+  theme_minimal()
+
+
+
+```
+
+
+
+```{r}
+
+modelo_lm <- lm(zebra_blue ~ idade_red  + red_mais_velho , data = ufc_aprend)
+
+summary(modelo_lm)
+
+modelo_tidy <- tidy(modelo_lm)
+
+modelo_aumentado <- augment(modelo_lm)
+
+modelo_tidy
+
+
+```
+
+
+
+```{r}
+
+modelo_aumentado_factor <- modelo_aumentado %>% 
+  mutate(
+    previsao_zebra_blue = as_factor(round(.fitted)),
+    zebra_blue = as_factor(zebra_blue)
+  ) 
+
+confusionMatrix(modelo_aumentado_factor$previsao_zebra_blue, modelo_aumentado_factor$zebra_blue )
+
+
+```
+
+
+```{r}
+
+red_mais_velho <-  seq(
+    from = min(ufc_aprend$red_mais_velho, na.rm = TRUE), 
+    to =  max(ufc_aprend$red_mais_velho, na.rm = TRUE), 
+    length.out = 50
+  ) %>% 
+  enframe(name = "1", value = "red_mais_velho")
+
+idade_red <-  seq(
+    from = min(ufc_aprend$idade_red, na.rm = TRUE), 
+    to =  max(ufc_aprend$idade_red, na.rm = TRUE), 
+    length.out = 50
+  ) %>% 
+  enframe(name = "2", value = "idade_red")
+
+weight_classes <- ufc_aprend %>% 
+  select(weight_class) %>% 
+  distinct()
+
+
+grid_previsao <- red_mais_velho %>% 
+  crossing(idade_red) %>% 
+  crossing(weight_classes)  
+
+previsoes <- augment(modelo_lm, newdata = grid_previsao  ) 
+
+
+#idade_red  + red_mais_velho
+
+ggplot(ufc_aprend ) +
+  geom_jitter(aes( y = red_mais_velho, x = idade_red, color = winner_color ), alpha = 0.3) +
+  scale_color_manual( values =c("Blue" = "blue", "Red" = "red")) +
+  facet_wrap( ~weight_class ) +
+  geom_point(
+    data = previsoes %>% filter(.fitted > 0.5), 
+    aes(y = red_mais_velho, x = idade_red ), 
+    color = "lightblue",
+    alpha = 0.1
+  ) +
+  geom_point(
+    data = previsoes %>% filter(.fitted < 0.5), 
+    aes(y = red_mais_velho, x = idade_red ), 
+    color = "lightcoral",
+    alpha = 0.1
+  ) +
+  theme_minimal()
+
+
+
+
+
+```
+
+
+
+```{r}
+
+modelo_ufc_por_classe  <-  ufc_aprend %>% 
+  group_by(weight_class) %>% 
+  nest() %>% 
+  mutate( 
+    modelo = map(data, ~lm(zebra_blue ~ idade_red  + red_mais_velho, data = .x)),
+  ) %>% 
+
+
+ufc_por_classe <- modelo_ufc_por_classe %>% 
+  mutate(
+    aumentado = map(modelo, augment)
+  ) %>% 
+  unnest_legacy(aumentado)
+  
+ufc_por_classe_treinamento  <- ufc_por_classe %>%   
+  ungroup() %>% 
+  mutate(
+    previsao_zebra_blue = as_factor(round(.fitted)),
+    zebra_blue = as_factor(zebra_blue)
+  ) 
+
+  
+confusionMatrix(ufc_por_classe_treinamento$previsao_zebra_blue, ufc_por_classe_treinamento$zebra_blue )
+
+
+
+```
+
+
+
+```{r}
+
+grid_previsao_com_modelo <- grid_previsao %>% 
+  inner_joi
+
+
+
+```
+
+
+
 
 ## Execução de modelos com caret
 
