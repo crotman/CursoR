@@ -1,7 +1,7 @@
 ---
 title: "R para Análise de Dados"
 author: "Bruno Crotman"
-date: "06/10/2019"
+date: "13/10/2019"
 output: 
     slidy_presentation: 
       css: styles.css
@@ -13,7 +13,8 @@ bibliography: bibliography.bib
       
 ---
 
-```{r setup, include=FALSE}
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
 
 library(fitdistrplus)
 library(rlang)
@@ -42,13 +43,17 @@ library(tabulizer)
 library(GGally)
 library(broom)
 library(caret)
+library(gam)
 
 library(electionsBR)
 library(worldmet)
 library(gapminder)
-library(BETS)
+
+```
 
 
+```{r setup, include=FALSE}
+ 
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
@@ -1469,7 +1474,7 @@ Outras funções úteis são as que fazem operações acumuladas e as operaçõe
 
 ```{r bets, cache = TRUE}
 
-series <- BETSsearch("exchange dollar")
+series <- BETS::BETSsearch("exchange dollar")
 
 series
 
@@ -1479,7 +1484,7 @@ No código abaixo, calculamos o retorno da série, a volatilidade histórica e a
 
 ```{r bets_vol, cache = TRUE}
 
-dolar <- BETSget(1) 
+dolar <- BETS::BETSget(1) 
 
 dolar_com_vol <- dolar %>% 
     filter(date > ymd("1994-07-01")) %>% 
@@ -3854,18 +3859,7 @@ ggpairs(hdi_tudo)  +
 
 
 
-# PROGRAMAÇÃO FUNCIONAL 
-
-
-
-map( .x, .f, ...  )
-
-
-## Aplicação de funções a data frames (purrr)
-
-## map-reduce
-
-# EXECUTANDO MODELOS
+# MODELOS DE APRENDIZADO ESTATÍSTICO
 
 ## Rudimentos de Aprendizado Estatístico
 
@@ -3874,15 +3868,62 @@ Aqui apresentaremos RUDIMENTOS de Aprendizado Estatístico com o objetivo de des
 
 ## Desmistificando Aprendizado Estatístico (ou Machine Learning)
 
-## Trade-off viés-variância
+
+Pesquisando imagens no Google vemos as percepções a respeito de "Machine Learning" e "Statistical Learning"
+
+![](diagramas/machine-statistical.png)
+
+## O processo de "Data Science"
+
+![](diagramas/cadu.png)
+
+
+## O processo de Aprendizado Estatístico
+
+Temos acesso a um pedaço dos dados existentes, que usamos para nos ajudar a especificar e treinar o nosso modelo.
+
+
+Com o(s) modelo(s) treinado(s), faremos inferências a respeito de outros dados futuros ou cuja variável dependente ainda desconhecemos.
+
+
+![](diagramas/aprendizado.png)
+
+
+## Seleção de modelo e Trade-off viés-variância
+
+Nosso modelo pode ser resumido por uma equação:
+
+$$y = f(x) + \epsilon$$
+
+
+Onde, idealmente, $E(\epsilon) = 0$, $\epsilon$ é independente de $x$ e $Var(\epsilon) = \sigma^2$ é constante em relação a $x$. 
+
+
+Ou seja, temos o objetivo de chegar à $f()$ mais próxima da ideal com a ajuda de nossos modelos, e existem vários tipos deles. 
+
+
+Podemos chamar a nossa estimativa de função ideal de $\hat{f}(x)$
+
+
+## Seleção de modelo e Trade-off viés-variância
+
+
+Se usarmos o erro quadrático como ffunção de penalização, podemos escrever a expectativa de erro de uma previsão a respeito de $x_0$ assim:
+
 
 ## Tentativa de estimar variância e viés: Cross validation
 
 ## Execução de modelos com broom
 
 
+## Execução de modelos com broom - explorando os dados
 
-```{r, message=FALSE, warning=FALSE }
+Primeiro devemos fazer nossa exploração preliminar.
+
+Podemos executar um pequeno tratamento de Features usando a função `pivot_longer()` de um jeito diferente, só possível na últiam versão
+
+
+```{r, message=FALSE, warning=FALSE, cache=TRUE }
 
 ufc_data <- read_csv("dados/ufc/data.csv") 
 
@@ -3907,7 +3948,8 @@ ufc_cada_lutador <- bind_cols(ufc_data, ufc_raw_data) %>%
   
 ggplot(ufc_cada_lutador) +
   geom_boxplot(aes(x = ganhou, y = aprov )) + 
-  facet_wrap(~weight_class)
+  facet_wrap(~weight_class) +
+  theme_minimal()
   
 
 
@@ -3934,7 +3976,24 @@ ufc_aprend <- bind_cols(ufc_data, ufc_raw_data) %>%
     zebra_blue = if_else(Winner == "Blue",1,0),
     red_mais_velho = R_age - B_age,
     idade_red = R_age
+  ) %>% 
+  filter(
+    !is.na(idade_red) & !is.na(red_mais_velho) & !is.na(zebra_blue)
   )
+
+
+
+```
+
+## Estudando algumas features para nossso exemplo
+
+
+Como exemplo, podemos observar a relação entre a diferença de idade dos lutadores e o vencedor da luta.
+
+Normalmente o lutador vermelho é o favorito. mas podemos ver que quando o lutador vermelho é velho e mais velho que o azul, ele costuma perder.
+
+
+```{r, message=FALSE, warning=FALSE, cache=TRUE}
 
 ggplot(ufc_aprend ) +
   geom_jitter(aes( y = red_mais_velho, x = R_age, color = winner_color ), alpha = 0.15) +
@@ -3943,17 +4002,39 @@ ggplot(ufc_aprend ) +
   theme_minimal()
 
 
-
 ```
 
+## Estudando algumas features para nossso exemplo
 
 
-```{r}
+Podemos tentar uma regressão linear simples para avaliar isso:
+
+$$ zebra = \alpha + \beta_{idade} idade\_vermelho + \beta_{dif} dif\_vermelho\_mais\_velho + \epsilon   $$
+
+Podemos perceber que os betas são signifucativos.
+
+
+
+```{r, message=FALSE, warning=FALSE, cache=TRUE}
 
 modelo_lm <- lm(zebra_blue ~ idade_red  + red_mais_velho , data = ufc_aprend)
 
 summary(modelo_lm)
 
+
+
+
+```
+
+
+## Facilitando a análise de um modelo com `broom`
+
+
+A biblioteca `broom` ajuda a extrair informações de vários tipos de modelo com as mesmas funções.
+
+
+
+```{r, message=FALSE, warning=FALSE, cache=TRUE}
 modelo_tidy <- tidy(modelo_lm)
 
 modelo_aumentado <- augment(modelo_lm)
@@ -3964,8 +4045,20 @@ modelo_tidy
 ```
 
 
+```{r, message=FALSE, warning=FALSE, cache=TRUE}
 
-```{r}
+head(modelo_aumentado)
+
+```
+
+
+## Matriz de confusão com a `caret`
+
+A biblioteca `caret` também ajuda muito 
+
+
+
+```{r, message=FALSE, warning=FALSE, cache=TRUE}
 
 modelo_aumentado_factor <- modelo_aumentado %>% 
   mutate(
@@ -3978,8 +4071,10 @@ confusionMatrix(modelo_aumentado_factor$previsao_zebra_blue, modelo_aumentado_fa
 
 ```
 
+## Rodando o modelo e plotando um grid de predições usando a biblioteca `purr`
 
-```{r}
+
+```{r, message=FALSE, warning=FALSE, cache=TRUE}
 
 red_mais_velho <-  seq(
     from = min(ufc_aprend$red_mais_velho, na.rm = TRUE), 
@@ -4033,49 +4128,269 @@ ggplot(ufc_aprend ) +
 
 ```
 
+## Rodando várias especificações de uma vez com `purrr`
 
 
-```{r}
+```{r varias_espec_purr, message=FALSE, warning=FALSE, cache=TRUE}  
 
-modelo_ufc_por_classe  <-  ufc_aprend %>% 
+
+
+modelo_ufc_por_classe <- ufc_aprend %>% 
   group_by(weight_class) %>% 
-  nest() %>% 
-  mutate( 
+  nest_legacy() %>%
+  mutate(
     modelo = map(data, ~lm(zebra_blue ~ idade_red  + red_mais_velho, data = .x)),
   ) %>% 
+  select(-data)
 
-
-ufc_por_classe <- modelo_ufc_por_classe %>% 
+ufc_por_classe <- modelo_ufc_por_classe %>%
   mutate(
     aumentado = map(modelo, augment)
-  ) %>% 
-  unnest_legacy(aumentado)
-  
-ufc_por_classe_treinamento  <- ufc_por_classe %>%   
-  ungroup() %>% 
+  ) %>%
+  unnest(aumentado)
+
+ufc_por_classe_treinamento  <- ufc_por_classe %>%
+  ungroup() %>%
   mutate(
     previsao_zebra_blue = as_factor(round(.fitted)),
     zebra_blue = as_factor(zebra_blue)
-  ) 
+  )
 
-  
+
+
 confusionMatrix(ufc_por_classe_treinamento$previsao_zebra_blue, ufc_por_classe_treinamento$zebra_blue )
 
 
 
 ```
 
+## Plotando as várias especificações de regressões lineares
+
+```{r, message=FALSE, warning=FALSE, cache=TRUE}
 
 
-```{r}
+grid_previsao_com_modelo <- grid_previsao %>%
+  group_by(weight_class) %>% 
+  nest() %>% 
+  inner_join(modelo_ufc_por_classe, by = c("weight_class")) %>% 
+  mutate(previsoes = map2(.x = modelo, .y =  data, .f =  ~augment(x = .x, newdata = .y) )) %>% 
+  unnest_legacy(previsoes)
 
-grid_previsao_com_modelo <- grid_previsao %>% 
-  inner_joi
+
+
+ggplot(ufc_aprend ) +
+  geom_jitter(aes( y = red_mais_velho, x = idade_red, color = winner_color ), alpha = 0.3) +
+  scale_color_manual( values =c("Blue" = "blue", "Red" = "red")) +
+  facet_wrap( ~weight_class ) +
+  geom_point(
+    data = grid_previsao_com_modelo %>% filter(.fitted > 0.5), 
+    aes(y = red_mais_velho, x = idade_red ), 
+    color = "lightblue",
+    alpha = 0.1
+  ) +
+  geom_point(
+    data = grid_previsao_com_modelo %>% filter(.fitted < 0.5), 
+    aes(y = red_mais_velho, x = idade_red ), 
+    color = "lightcoral",
+    alpha = 0.1
+  ) +
+  theme_minimal()
+
+
 
 
 
 ```
 
+## Separando dados de treinamento e validação
+
+
+```{r, message=FALSE, warning=FALSE, cache=TRUE}
+
+set.seed(2512)
+
+ufc_aprend_classes_selec <- ufc_aprend %>% 
+  filter(weight_class %in%
+      c(   
+      "Flyweight",
+      "Bantamweight",
+      "Featherweight",
+      "Lightweight",
+      "Welterweight",
+      "Middleweight",
+      "Light Heavyweight",
+      "Heavyweight"
+      )
+      )
+
+
+
+index_treino <- createDataPartition(
+  ufc_aprend_classes_selec$zebra_blue,
+  p = 0.75,
+  list = FALSE,
+  times = 1
+) 
+
+
+ufc_aprend_treino <- ufc_aprend_classes_selec %>% 
+  filter(row_number() %in% index_treino) %>% 
+  select(
+    idade_red,
+    red_mais_velho,
+    zebra_blue,
+    weight_class
+  )
+
+ufc_aprend_teste <- ufc_aprend_classes_selec %>% 
+  filter(!(row_number() %in% index_treino)) %>% 
+  select(
+    idade_red,
+    red_mais_velho,
+    zebra_blue,
+    weight_class
+  )
+  
+
+
+modelo_ufc_por_classe_treino  <-  ufc_aprend_treino %>% 
+  group_by(weight_class) %>% 
+  nest_legacy() %>% 
+  mutate( 
+    modelo = map(data, ~lm(zebra_blue ~ idade_red  + red_mais_velho, data = .x)),
+  ) %>% 
+  select(-data)
+
+
+resultados_teste_lm <-  ufc_aprend_teste %>% 
+  group_by(weight_class) %>% 
+  nest_legacy() %>% 
+  inner_join(modelo_ufc_por_classe_treino, by = c("weight_class") ) %>% 
+  mutate(
+    previsao = map2(.x = modelo, .y =  data,  .f = ~predict.lm(.x, .y)  )
+  ) %>%
+  unnest(cols = c("data","previsao")) %>% 
+  ungroup() %>% 
+  mutate(
+    actual = if_else(zebra_blue == 1, "B", "R"),
+    predicted = if_else(previsao > 0.5, "B", "R"),
+  ) %>% 
+  mutate(
+    actual  = fct_relevel(actual, "R", "B"),
+    predicted = fct_relevel(predicted, "R", "B")
+  ) %>% 
+  select(
+    actual,
+    predicted
+  ) 
+
+
+confusionMatrix(resultados_teste_lm$predicted, resultados_teste_lm$actual  )
+
+
+
+
+
+
+
+```
+
+
+## Rodando um modelo mais complexo: Generalized Additive Model 
+
+
+```{r, message=FALSE, warning=FALSE, cache=TRUE}
+
+#ALGO ERRADO AO RODAR O MARKDOWN. NÃO SEI
+
+
+
+# modelo_ufc_por_classe_treino_gam  <-  ufc_aprend_treino %>%
+#   # group_by(weight_class) %>%
+#   nest(data =c(zebra_blue, idade_red, red_mais_velho ) ) %>%
+#   mutate(
+#     modelo = map(data, ~gam(formula = zebra_blue ~ s(idade_red) + s(red_mais_velho), data = .x))
+#   ) %>%
+#   select(-data)
+# 
+# 
+# resultados_teste_gam <-  ufc_aprend_teste %>%
+#   group_by(weight_class) %>%
+#   nest_legacy() %>%
+#   inner_join(modelo_ufc_por_classe_treino_gam, by = c("weight_class") ) %>%
+#   mutate(
+#     previsao = map2(.x = modelo, .y =  data,  .f = ~predict(.x, .y)  )
+#   ) %>%
+#   unnest(cols = c("data","previsao")) %>%
+#   ungroup() %>%
+#   mutate(
+#     actual = if_else(zebra_blue == 1, "B", "R"),
+#     predicted = if_else(previsao > 0.5, "B", "R"),
+#   ) %>%
+#   mutate(
+#     actual  = fct_relevel(actual, "R", "B"),
+#     predicted = fct_relevel(predicted, "R", "B")
+#   ) %>%
+#   select(
+#     actual,
+#     predicted
+#   )
+# 
+# write_rds(resultados_teste_gam, "dados/ufc/resultados_teste_gam.rds")
+
+resultados_teste_gam <- read_rds("dados/ufc/resultados_teste_gam.rds")
+
+confusionMatrix(resultados_teste_gam$predicted, resultados_teste_gam$actual  )
+
+
+
+
+
+```
+
+Plotando as regiões deste modelo mais complexo
+
+
+```{r, message=FALSE, warning=FALSE, cache=TRUE}
+
+# 
+# grid_previsao_com_modelo_gam <- grid_previsao %>%
+#   group_by(weight_class) %>% 
+#   nest() %>% 
+#   inner_join(modelo_ufc_por_classe_treino_gam, by = c("weight_class")) %>% 
+#   mutate(previsoes = map2(.x = modelo, .y =  data, .f =  ~predict( .x, .y) )) %>% 
+#   select(-modelo) %>% 
+#   unnest(cols = c("previsoes","data")) %>% 
+#   ungroup()
+# 
+# 
+# write_rds(grid_previsao_com_modelo_gam, "dados/ufc/grid_previsao_com_modelo_gam.RDS") 
+
+grid_previsao_com_modelo_gam <- read_rds("dados/ufc/grid_previsao_com_modelo_gam.RDS")
+
+
+
+ggplot( bind_rows(ufc_aprend_classes_selec) ) +
+  geom_jitter(aes( y = red_mais_velho, x = idade_red, color = winner_color ), alpha = 0.3) +
+  scale_color_manual( values =c("Blue" = "blue", "Red" = "red")) +
+  facet_wrap( ~weight_class ) +
+  geom_point(
+    data = grid_previsao_com_modelo_gam %>% filter(previsoes > 0.5),
+    aes(y = red_mais_velho, x = idade_red ),
+    color = "lightblue",
+    alpha = 0.1
+  ) +
+  geom_point(
+    data = grid_previsao_com_modelo_gam %>% filter(previsoes < 0.5),
+    aes(y = red_mais_velho, x = idade_red ),
+    color = "lightcoral",
+    alpha = 0.1
+  ) +
+  theme_minimal()
+
+
+
+```
 
 
 
