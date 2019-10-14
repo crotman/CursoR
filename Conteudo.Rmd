@@ -142,6 +142,11 @@ Fonte:[@wickham2016r]
 
 Fonte: [@tidyversebig]
 
+## O processo de "Data Science"
+
+![](diagramas/cadu.png)
+
+
 
 ## Exemplos de onde vamos chegar
 
