@@ -44,6 +44,7 @@ library(GGally)
 library(broom)
 library(caret)
 library(gam)
+library(treemapify)
 
 library(electionsBR)
 library(worldmet)
@@ -3861,6 +3862,204 @@ ggpairs(hdi_tudo)  +
 
 
 ```
+
+
+## Composição: no tempo, poucos períodos, valores relativos
+
+
+
+
+```{r, message=FALSE, warning=FALSE}
+
+
+jogos <- read_csv("dados/football_events/ginf.csv") %>% 
+  mutate(
+    resultado = case_when(
+      fthg > ftag ~ "Casa",
+      fthg < ftag ~ "Fora",
+      TRUE ~ "Empate"
+      )
+  ) %>% 
+  count(season, country, resultado) 
+
+
+
+ggplot(jogos) + 
+  geom_col(aes(y = n, fill = resultado, x = as.factor(season)), position = "fill") +
+  facet_wrap(~country) +
+  theme_minimal() +
+  scale_fill_manual(values = wes_palette("Royal2")) +
+  scale_y_continuous(labels = percent) +
+  theme(
+    axis.text.x = element_text(angle = 90),
+    legend.position = "top",
+    text = element_text(family = "Rockwell Condensed")
+  ) +
+  labs(x = "Temporada", y = "% Vitórias", fill = "Resultado")
+  
+
+
+```
+
+## Composição: no tempo, poucos períodos, valores absolutos
+
+
+
+```{r, message=FALSE, warning=FALSE}
+
+jogos <- read_csv("dados/football_events/ginf.csv") %>% 
+  filter(season != 2017) %>% 
+  select(season, country, Fora = ftag, Casa = fthg) %>% 
+  pivot_longer(cols = c(Fora, Casa), names_to = "Time", values_to = "Gols"  ) %>% 
+  group_by(season, country, Time) %>% 
+  summarise(Gols = sum(Gols)) 
+
+
+ggplot(jogos) + 
+  geom_col(aes(y = Gols, fill = Time, x = as.factor(season)), position = "stack") +
+  facet_wrap(~country) +
+  theme_minimal() +
+  scale_fill_manual(values = wes_palette("Royal2")) +
+  theme(
+    axis.text.x = element_text(angle = 90),
+    legend.position = "top",
+    text = element_text(family = "Rockwell Condensed")
+  ) +
+  labs(x = "Temporada", y = "Gols", fill = "Time")
+
+
+
+
+```
+
+
+## Composição: no tempo, muitos períodos, valores relativos
+
+
+Repare que há muitos países, ou seja, muitas categorias.
+
+Usando a biblioteca `forcats` e sua função `fct_lump` conseguimos criar uma categoria de "Outros"
+
+
+```{r, cache=TRUE, warning=FALSE, message=FALSE   }
+
+gdps <- wb(indicator = "NY.GDP.MKTP.PP.KD",  country = "countries_only") 
+
+
+gdps_tratado <- gdps %>% 
+  mutate(date = as.integer(date) ) %>% 
+  group_by(country) %>% 
+  mutate(ultimo_gdp = last(value, order_by = date)) %>% 
+  ungroup() %>%  
+  mutate(country = fct_lump(country, n = 7, w = ultimo_gdp, other_level = "Outros")) %>% 
+  group_by(country, date) %>% 
+  summarise(value = sum(value),
+            ultimo_gdp = sum(ultimo_gdp)) %>% 
+  ungroup() %>% 
+  mutate(country = fct_reorder(country, ultimo_gdp ))
+
+
+ggplot(gdps_tratado ) +
+  geom_area(aes(x = date, y = value, fill = country), position = "fill") +
+  theme_minimal() +
+  scale_fill_brewer(palette = "Accent") +
+  theme(
+    axis.text.x = element_text(angle = 90),
+    legend.position = "top",
+    text = element_text(family = "CMU Classical Serif")
+  ) +
+  labs(x = "Ano", y = "PIB PPP", fill = "País")
+
+
+
+
+
+```
+
+## Composição: no tempo, muitos períodos, valores absolutos 
+
+
+```{r}
+
+
+gdps_tratado <- gdps %>% 
+  mutate(date = as.integer(date) ) %>% 
+  group_by(country) %>% 
+  mutate(ultimo_gdp = last(value, order_by = date)) %>% 
+  ungroup() %>%  
+  mutate(country = fct_lump(country, n = 7, w = ultimo_gdp, other_level = "Outros")) %>% 
+  group_by(country, date) %>% 
+  summarise(value = sum(value),
+            ultimo_gdp = sum(ultimo_gdp)) %>% 
+  ungroup() %>% 
+  mutate(country = fct_reorder(country, ultimo_gdp ))
+
+
+ggplot(gdps_tratado ) +
+  geom_area(aes(x = date, y = value, fill = country) ) +
+  theme_minimal() +
+  scale_fill_brewer(palette = "Accent") +
+  theme(
+    axis.text.x = element_text(angle = 90),
+    legend.position = "top",
+    text = element_text(family = "CMU Classical Serif")
+  ) +
+  labs(x = "Ano", y = "PIB PPP", fill = "País")
+
+
+
+
+```
+
+## Composição: estática, valores relativos
+
+Aqui cabe uma torta se houver poucas categorias
+
+
+```{r}
+
+gdps_tratado <- gdps %>% 
+  mutate(date = as.integer(date)) %>% 
+  filter(date == max(date) ) %>% 
+  mutate(country = fct_lump(country, n = 1, w =  value, other_level = "Resto")) %>% 
+  group_by(country) %>% 
+  summarise(PIB = sum(value))
+
+  
+ggplot(gdps_tratado, aes(x = "", y = PIB, fill = country)) +
+  geom_bar( width = 1, stat = "identity", color = "white") +
+  coord_polar("y", start = 0) +
+  scale_fill_brewer(palette = "Accent") +
+  theme_void()
+
+  
+```
+
+## Composição: estática, valores relativos, muitos
+
+
+```{r}
+
+
+gdps_tratado <- gdps %>% 
+  mutate(date = as.integer(date)) %>% 
+  filter(date == max(date) ) %>% 
+  mutate(country = fct_lump(country, n = 50, w =  value, other_level = "Resto")) %>% 
+  group_by(country) %>% 
+  summarise(PIB = sum(value))
+
+  
+ggplot(gdps_tratado, aes( fill = country, area = PIB, label = country)) +
+  geom_treemap() +
+  geom_treemap_text(grow = TRUE) +
+  theme(
+    legend.position = "none"
+  )
+
+
+
+```
+
 
 
 
