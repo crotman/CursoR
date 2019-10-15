@@ -1513,6 +1513,8 @@ dolar_com_vol <- dolar %>%
         vol_ewma
     )
 
+
+
 datatable(dolar_com_vol) %>% 
     formatPercentage(c("retorno", "vol", "vol_ewma"), 2)
 
@@ -2197,6 +2199,76 @@ ggplot(ntnb_2045) +
 
 
 ```
+
+
+## Outro exemplo de leitura de página
+
+
+```{r, message=TRUE, warning=TRUE, cache=TRUE}
+
+library(httr)
+library(rvest)
+library(lubridate)
+library(tidyverse)
+library(magrittr)
+
+url <- "http://www.ceagesp.gov.br/entrepostos/servicos/cotacoes/#cotacao"
+
+
+le_pagina_ceagesp <- function(grupo, data){
+
+  dados <- NA 
+  try({
+    fd <- list(  
+      cot_grupo  = grupo,
+      cot_data = data
+    )
+    
+    resp <- POST(url, body=fd, encode="form")
+    
+    tabela <- content(resp) %>% 
+      html_nodes("table") %>% 
+      extract2(1) %>% 
+      html_table()
+    
+    nomes <- tabela %>% slice(2)
+    
+    dados <- tabela %>% slice(3:nrow(tabela)) %>% 
+      mutate(data = dmy(data))
+    
+    names(dados) <- c(nomes, "data_precos")
+  })
+
+  str(dados)    
+  
+  dados
+  
+}
+
+grupos <- c(
+  "FRUTAS",
+  "LEGUMES",
+  "VERDURAS",
+  "DIVERSOS",
+  "FLORES",
+  "PESCADOS"
+)
+
+datas <- seq(from = today()-5, by = 1, to = today()-1) %>% 
+  format("%d/%m/%Y") 
+
+dados_ceagesp <-  enframe(grupos, value = "grupo", name = "id_grupo") %>%
+  crossing(enframe(datas, value = "data", name = "id_data")) %>% 
+  mutate(leitura = map2(.x = grupo, .y = data, le_pagina_ceagesp )) %>% 
+  filter(!is.na(leitura)) %>% 
+  unnest(cols = leitura)
+  
+
+head(dados_ceagesp)
+  
+
+```
+
 
 ## E quando o desenvolvedor da página web tá manguaçado?
 
@@ -4002,7 +4074,7 @@ ggplot(gdps_tratado ) +
   theme(
     axis.text.x = element_text(angle = 90),
     legend.position = "top",
-    text = element_text(family = "CMU Classical Serif")
+    text = element_text(family = "CMU Serif Extra")
   ) +
   labs(x = "Ano", y = "PIB PPP", fill = "País")
 
