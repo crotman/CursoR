@@ -157,8 +157,6 @@ Estes dados podem ser organizados de forma "tidy" para análise
 
 Após a possível execução de modelos, podemos publicar os resultados.
 
-[Demo Planel](https://crotman.shinyapps.io/PNE-Planel)
-
 [Impacto da temperatura no consumo de energia elétrica](https://crotman.shinyapps.io/EfeitoTemperaturaCarga)
 
 [Localização de empresas e dutos](https://crotman.shinyapps.io/Empresas/)
