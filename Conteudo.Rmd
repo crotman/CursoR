@@ -4156,11 +4156,31 @@ Pesquisando imagens no Google vemos as percepções a respeito de "Machine Learn
 
 Temos acesso a um pedaço dos dados existentes, que usamos para nos ajudar a especificar e treinar o nosso modelo.
 
+Podemos adotar como premissa que existe uma função que traduz como o universo funciona. Esta função determina qual valor $y$ da variável dependente acontece quando as variáveis independentes assumem valores $x$, onde $x$ é um vetor de tamanho $p$, para as $p$ variáveis dependenest usadas. Esta função não determina perfeitamente $y$, então temos sempre um $\epsilon$, um ruído que pode ser devido a variáveis dependentes desconhecidas ou efeitos que não podem ser mensurados.
+
+$$y = f(x) + \epsilon$$
+
+Nós não temos acesso a esta $f()$ que representa a VERDADE, mas tentamos estimar uma $\hat{f}$
+
+
+![](diagramas/realidade.png)  
+
+
+## O processo de Aprendizado Estatístico
+
+Nosso modelo de Aprendizado Estatístico é uma fábrica de $\hat{f}()$ que tenta aproximar a $f()$ verdadeira.
+
+Existem fábricas para todos os gostos.
+
+Esta fábrica de $\hat{f}()$ recebe como insumo variáveis retiradas do ambiente. Essas vraiáveis podem ser tratadas de forma a deixar as coisas mais fáceis para o modelo, de modo a deixá-lo na cara do gol como Gérson fazia na copa de 70. Esta etapa de preparar as entradas se chama Feature Engiineering. Para fazer isso, usamos tudo que aprendemos sobre manipulação de dados.
+
+![](diagramas/fabrica_de_f.png)
+
+
+
+
 
 Com o(s) modelo(s) treinado(s), faremos inferências a respeito de outros dados futuros ou cuja variável dependente ainda desconhecemos.
-
-
-![](diagramas/aprendizado.png)
 
 
 ## Seleção de modelo e Trade-off viés-variância
