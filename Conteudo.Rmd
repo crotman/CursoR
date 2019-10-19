@@ -147,7 +147,7 @@ Fonte: [@tidyversebig]
 
 ![](diagramas/cadu.png)
 
-
+[@cadu]
 
 ## Exemplos de onde vamos chegar
 
@@ -4151,58 +4151,73 @@ Pesquisando imagens no Google vemos as percepções a respeito de "Machine Learn
 
 ![](diagramas/cadu.png)
 
+[@cadu]
+
 
 ## O processo de Aprendizado Estatístico
 
 Temos acesso a um pedaço dos dados existentes, que usamos para nos ajudar a especificar e treinar o nosso modelo.
 
-Podemos adotar como premissa que existe uma função que traduz como o universo funciona. Esta função determina qual valor $y$ da variável dependente acontece quando as variáveis independentes assumem valores $x$, onde $x$ é um vetor de tamanho $p$, para as $p$ variáveis dependenest usadas. Esta função não determina perfeitamente $y$, então temos sempre um $\epsilon$, um ruído que pode ser devido a variáveis dependentes desconhecidas ou efeitos que não podem ser mensurados.
+Podemos adotar como premissa que existe uma função que traduz como o universo funciona. Esta função determina qual valor $y$ da variável dependente acontece quando as variáveis independentes assumem valores $x$, onde $x$ é um vetor de tamanho $p$. $p$ é o número de variáveis dependentes usadas. Esta função não determina perfeitamente $y$, então temos sempre um $\epsilon$, um ruído que pode ser devido a variáveis dependentes desconhecidas ou efeitos que não podem ser mensurados.
 
 $$y = f(x) + \epsilon$$
 
-Nós não temos acesso a esta $f()$ que representa a VERDADE, mas tentamos estimar uma $\hat{f}$
+Onde $f(x)$ é uma função desconhecida e $E(\epsilon) = 0$, 
+
+$\epsilon$ é independente de $x$ e $Var(\epsilon) = \sigma^2$ é constante em relação a $x$. 
+
+Nós não temos acesso a esta $f()$ que representa a VERDADE, mas tentamos estimar uma $\hat{f}()$
 
 
 ![](diagramas/realidade.png)  
 
 
-## O processo de Aprendizado Estatístico
+## Modelo 
 
 Nosso modelo de Aprendizado Estatístico é uma fábrica de $\hat{f}()$ que tenta aproximar a $f()$ verdadeira.
 
-Existem fábricas para todos os gostos.
+Existem fábricas para todos os gostos. Desde fábricas que produzem funções simples e inteligíveis até funções do tipo caixa preta. 
 
-Esta fábrica de $\hat{f}()$ recebe como insumo variáveis retiradas do ambiente. Essas vraiáveis podem ser tratadas de forma a deixar as coisas mais fáceis para o modelo, de modo a deixá-lo na cara do gol como Gérson fazia na copa de 70. Esta etapa de preparar as entradas se chama Feature Engiineering. Para fazer isso, usamos tudo que aprendemos sobre manipulação de dados.
+Esta fábrica de $\hat{f}()$ recebe como insumo variáveis retiradas do ambiente. Essas variáveis podem ser tratadas de forma a deixar as coisas mais fáceis para o modelo, de modo a deixá-lo na cara do gol como Gérson fazia na copa de 70. Esta etapa de preparar as entradas se chama Feature Engiineering. Para fazer isso, usamos tudo que aprendemos sobre manipulação de dados.
 
 ![](diagramas/fabrica_de_f.png)
 
+Com o(s) modelo(s) treinado(s), faremos **predições** a respeito de outros dados futuros ou cuja variável dependente ainda desconhecemos.
+
+Podemos também fazer ***inferências** a respeito de como as variáveis independentes afetam a variáveis dependente.
 
 
+## Inferência x Predição
+
+A **predição** é o ato de descobrir $y$ a partir de $x$.
+
+A **inferência** é o entendimento de como valores diferentes de **x** afetam **y**
+
+![](diagramas/predicao_inferencia.png)
+
+## Predição
+
+Temos que:
+
+$$\hat{y} = \hat{f}(x) $$
+
+Então:
+
+$$E(y - \hat{y})^2 = [f(x) - \hat{f}(x)]^2 + Var(\epsilon)$$
+
+Onde
+
+$[f(x) - \hat{f}(x)]^2$ é redutível: podemos sempre estimar uma $\hat{f}()$ melhor
+
+e
+
+$Var(\epsilon)$ é irredutível: não importa quão bem estimemos $\hat{f}()$ o resíduo $\epsilon$ está lá
+
+[@friedman2001elements]
+
+## Trade-off viés-variância
 
 
-Com o(s) modelo(s) treinado(s), faremos inferências a respeito de outros dados futuros ou cuja variável dependente ainda desconhecemos.
-
-
-## Seleção de modelo e Trade-off viés-variância
-
-Nosso modelo pode ser resumido por uma equação:
-
-$$y = f(x) + \epsilon$$
-
-
-Onde, idealmente, $E(\epsilon) = 0$, $\epsilon$ é independente de $x$ e $Var(\epsilon) = \sigma^2$ é constante em relação a $x$. 
-
-
-Ou seja, temos o objetivo de chegar à $f()$ mais próxima da ideal com a ajuda de nossos modelos, e existem vários tipos deles. 
-
-
-Podemos chamar a nossa estimativa de função ideal de $\hat{f}(x)$
-
-
-## Seleção de modelo e Trade-off viés-variância
-
-
-Se usarmos o erro quadrático como ffunção de penalização, podemos escrever a expectativa de erro de uma previsão a respeito de $x_0$ assim:
 
 
 ## Tentativa de estimar variância e viés: Cross validation
@@ -4215,6 +4230,7 @@ Se usarmos o erro quadrático como ffunção de penalização, podemos escrever 
 Primeiro devemos fazer nossa exploração preliminar.
 
 Podemos executar um pequeno tratamento de Features usando a função `pivot_longer()` de um jeito diferente, só possível na últiam versão
+
 
 
 ```{r, message=FALSE, warning=FALSE, cache=TRUE }
