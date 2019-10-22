@@ -4162,7 +4162,9 @@ Podemos adotar como premissa que existe uma função que traduz como o universo 
 
 $$y = f(x) + \epsilon$$
 
-Onde $f(x)$ é uma função desconhecida e $E(\epsilon) = 0$, 
+Onde: 
+
+$f(x)$ é uma função desconhecida e $E(\epsilon) = 0$, 
 
 $\epsilon$ é independente de $x$ e $Var(\epsilon) = \sigma^2$ é constante em relação a $x$. 
 
@@ -4172,19 +4174,21 @@ Nós não temos acesso a esta $f()$ que representa a VERDADE, mas tentamos estim
 ![](diagramas/realidade.png)  
 
 
-## Modelo 
+## Fábrica de função que aproximaa realidade
 
 Nosso modelo de Aprendizado Estatístico é uma fábrica de $\hat{f}()$ que tenta aproximar a $f()$ verdadeira.
 
 Existem fábricas para todos os gostos. Desde fábricas que produzem funções simples e inteligíveis até funções do tipo caixa preta. 
 
-Esta fábrica de $\hat{f}()$ recebe como insumo variáveis retiradas do ambiente. Essas variáveis podem ser tratadas de forma a deixar as coisas mais fáceis para o modelo, de modo a deixá-lo na cara do gol como Gérson fazia na copa de 70. Esta etapa de preparar as entradas se chama Feature Engiineering. Para fazer isso, usamos tudo que aprendemos sobre manipulação de dados.
+Esta fábrica de $\hat{f}()$ recebe como insumo variáveis retiradas do ambiente. Essas variáveis podem ser tratadas de forma a deixar as coisas mais fáceis para o modelo, de modo a deixá-lo na cara do gol como Gérson fazia na copa de 70. Esta etapa de preparar as entradas se chama Feature Engineering. Para fazer isso, usamos tudo que aprendemos sobre manipulação de dados.
 
 ![](diagramas/fabrica_de_f.png)
 
+## Modelo treinado
+
 Com o(s) modelo(s) treinado(s), faremos **predições** a respeito de outros dados futuros ou cuja variável dependente ainda desconhecemos.
 
-Podemos também fazer ***inferências** a respeito de como as variáveis independentes afetam a variáveis dependente.
+Podemos também fazer **inferências** a respeito de como as variáveis independentes afetam a variáveis dependente.
 
 
 ## Inferência x Predição
@@ -4215,7 +4219,31 @@ $Var(\epsilon)$ é irredutível: não importa quão bem estimemos $\hat{f}()$ o 
 
 [@friedman2001elements]
 
-## Trade-off viés-variância
+## Viés e Variância
+
+Se rodarmos $\hat{f}(x_0)$ treinando o modelo com vários conjuntos de treinamento e testasse ele com uma entrada específica qualquer para a qual $y_0 = f(x_0) + \epsilon$:
+
+$$E[y_o - \hat{f}(x_0)] = Var(\hat{f}(x_0) + [Bias(\hat{f}(x_0))]^2 + Var(\epsilon)$$
+
+
+$Var(\hat{f}(x_0)$ é a variância do modelo: o quanto ele muda quando treinamos ele com outro conjunto de treinamento
+
+$[Bias(\hat{f}(x_0))]^2$ é o erro introduzido por tentarmos aproximar um problema complexo fda vida real com uso de um modelo simplificado.
+
+
+![](diagramas/vies_variancia.png)
+
+
+## Inferência
+
+
+Os modelos variam muito com relação a "transparência da caixa"
+
+Há uma relação inversamente proporcional (normalmente) entre: 
+
+- Flexibilidade do modelo, ou poder de se adaptar a uma relação complexa entre entrada e saída
+
+- Interpretabilidade, ou facilidade de inferir 
 
 
 
