@@ -45,6 +45,11 @@ library(broom)
 library(caret)
 library(gam)
 library(treemapify)
+library(pROC)
+library(plotROC)
+library(xtable)
+library(texreg)
+
 
 library(electionsBR)
 library(worldmet)
@@ -1690,7 +1695,9 @@ bind_rows(ricos, pobres) %>%
 ## Funções básicas de tratamento (dplyr) `slice()`:
 
 
-```{r}
+```{r, cache=TRUE}
+
+
 
 classificacao_brasileirao <- read_html("https://pt.wikipedia.org/wiki/Campeonato_Brasileiro_de_Futebol_de_2019_-_S%C3%A9rie_A") %>% 
   html_nodes("table") %>% 
@@ -4297,9 +4304,9 @@ Podemos dividir os dados em $k$ partes. Cada vez uma parte é escolhida para ser
 
 ## Execução de modelos com broom - explorando os dados
 
-Primeiro devemos fazer nossa exploração preliminar.
+Primeiro podemos fazer nossa exploração preliminar.
 
-Podemos executar um pequeno tratamento de Features usando a função `pivot_longer()` de um jeito diferente, só possível na últiam versão
+Como exemplo, podemos executar um pequeno tratamento das features usando a função `pivot_longer()` de um jeito diferente, só possível na últiam versão
 
 
 
@@ -4419,6 +4426,11 @@ modelo_tidy <- tidy(modelo_lm)
 
 modelo_aumentado <- augment(modelo_lm)
 
+```
+
+
+```{r}
+
 modelo_tidy
 
 
@@ -4437,7 +4449,6 @@ head(modelo_aumentado)
 A biblioteca `caret` também ajuda muito 
 
 
-
 ```{r, message=FALSE, warning=FALSE, cache=TRUE}
 
 modelo_aumentado_factor <- modelo_aumentado %>% 
@@ -4453,9 +4464,10 @@ confusionMatrix(modelo_aumentado_factor$previsao_zebra_blue, modelo_aumentado_fa
 
 ## Rodando o modelo e plotando um grid de predições usando a biblioteca `purr`
 
+Preparando um grid das variáveis independentes
 
-```{r, message=FALSE, warning=FALSE, cache=TRUE}
 
+```{r, message=FALSE, warning=FALSE, cache=TRUE,  out.width="90%"}
 red_mais_velho <-  seq(
     from = min(ufc_aprend$red_mais_velho, na.rm = TRUE), 
     to =  max(ufc_aprend$red_mais_velho, na.rm = TRUE), 
@@ -4477,8 +4489,23 @@ weight_classes <- ufc_aprend %>%
 
 grid_previsao <- red_mais_velho %>% 
   crossing(idade_red) %>% 
-  crossing(weight_classes)  
+  crossing(weight_classes)
 
+
+ggplot(grid_previsao %>% filter(weight_class == "Heavyweight")) +
+  geom_point(aes(x = idade_red, y = red_mais_velho ), size = 0.01) +
+  theme_minimal()
+
+
+
+
+```
+
+## Rodando o modelo e plotando um grid de predições usando a biblioteca `purr`
+
+Rodando o modelo com o grid
+
+```{r, message=FALSE, warning=FALSE, cache=TRUE, out.width="90%" }
 previsoes <- augment(modelo_lm, newdata = grid_previsao  ) 
 
 
@@ -4511,7 +4538,10 @@ ggplot(ufc_aprend ) +
 ## Rodando várias especificações de uma vez com `purrr`
 
 
-```{r varias_espec_purr, message=FALSE, warning=FALSE, cache=TRUE}  
+Podemos treinar o modelo para cada classe
+
+
+```{r varias_espec_purr, message=FALSE, warning=FALSE, cache=TRUE, out.width="90%"}  
 
 
 
@@ -4546,7 +4576,7 @@ confusionMatrix(ufc_por_classe_treinamento$previsao_zebra_blue, ufc_por_classe_t
 
 ## Plotando as várias especificações de regressões lineares
 
-```{r, message=FALSE, warning=FALSE, cache=TRUE}
+```{r, message=FALSE, warning=FALSE, cache=TRUE, out.width="90%"}
 
 
 grid_previsao_com_modelo <- grid_previsao %>%
@@ -4585,7 +4615,7 @@ ggplot(ufc_aprend ) +
 ## Separando dados de treinamento e validação
 
 
-```{r, message=FALSE, warning=FALSE, cache=TRUE}
+```{r, message=FALSE, warning=FALSE, cache=TRUE, out.width="90%"}
 
 set.seed(2512)
 
@@ -4773,8 +4803,165 @@ ggplot( bind_rows(ufc_aprend_classes_selec) ) +
 ```
 
 
-
 ## Execução de modelos com caret
+
+Vamos mostrar a biblioteca `caret`, que facilita o processo de aprendizado de vários modelos com várias especificações de hiperparâmetros, executando o processo de cross-validation.
+
+Primeiro vamos ler uma base com informações e diagnósticos de câncer de mama [@uci]
+
+Já vamos separar os dados de teste
+
+```{r}
+
+
+
+options(OutDec = ",")
+
+
+dados <- read_csv("dados/diagnostico/wdbc.csv") %>% 
+    select(-"ID number") %>% 
+    rename_all( .funs = ~str_replace(.,"fractal-media ","fractal_")   ) %>% 
+    rename_all( .funs = ~str_replace(.,"fractal-pior ","fractal_")   ) %>% 
+    rename_all( .funs = ~str_replace(.,"fractal-dv ","fractal_")   ) %>% 
+    rename("fractal_dimension-media" = "fractal_dimension-meia") %>% 
+    rename_all( .funs = ~str_replace(.,"-","_")   ) %>% 
+    rename_all( .funs = ~str_replace(.," ","_")   ) %>% 
+    mutate(Diagnosis = as.factor(Diagnosis)) 
+
+
+set.seed(13)
+
+
+
+rows <- sample(nrow(dados))
+
+dados <- dados[rows,]
+
+split <- round(nrow(dados) * .70 )
+
+treino <- dados[1:split, ]
+
+teste <- dados[(split + 1):nrow(dados), ]
+
+
+
+
+```
+
+## Preparando 4-fold cross validation
+
+
+A função `trainControl` estabelece os conjuntos para cross validation.
+
+Os mesmos conjuntos serão usado para todos os modelos
+
+```{r}
+
+set.seed(13)
+
+
+controle_cv <- trainControl(
+    
+    summaryFunction = twoClassSummary,
+    classProbs = TRUE,
+    verboseIter = FALSE,
+    returnResamp = "all",
+    number = 4,
+    repeats = 10,
+    returnData = TRUE,
+    savePredictions = "all",
+    method = "repeatedcv",
+    allowParallel = FALSE,
+
+)
+
+
+
+```
+
+
+## Treinando uma regressão logística 
+
+A função `train` permite o estabelecimento de uma métrica para a escolha do melhor valor para os hiperparâmetros (no caso, não existem), a execuções de funções de pré-processamento. 
+
+
+
+```{r, message=FALSE, warning=FALSE, cache = TRUE  }
+
+
+model_logistic <- train( 
+    
+    form = Diagnosis ~ . ,
+    data = treino,
+    metric = "ROC",
+    method = "glm",
+    trControl = controle_cv,
+    preProcess = c( "center", "scale"),
+    family=binomial(link='logit')
+
+)
+
+
+model_logistic
+
+```
+
+
+
+
+```{r, cache = TRUE }
+ggplot(model_logistic$pred, aes(m = M, d = obs, color = Resample )) +
+    geom_roc( labels = FALSE  ) +
+    coord_equal() + style_roc() + ggtitle("ROC", subtitle = "Métricas para diversos thresholds" )+ style_roc()
+
+
+
+
+```
+
+
+```{r, cache = TRUE }
+
+
+
+result_model_logistic <-  model_logistic$resample %>% 
+    select(Resample, ROC) %>%
+    rename(AUC = ROC) 
+
+
+result_model_logistic %>% 
+    mutate_if(is.numeric, percent) %>% 
+    kable( caption = "\\label{tab_auc_reglog}Métricas para cada Fold da regressão logistica")
+
+
+
+```
+
+
+
+
+```{r , cache = TRUE }
+
+result_model_logistic %>%     
+    summarise(media = mean(AUC), sd = sd(AUC)) %>% 
+    rename("Média AUC" = media, "Desvio-padrão AUC" = sd) %>% 
+    mutate_if(is.numeric, percent) %>% 
+    kable(caption = "\\label{tab_auc_reglog_grup}Média e desvio-padrão da Métrica AUC para regressão logistica")
+
+
+```
+
+
+
+```{r, cache = TRUE }
+
+
+texreg(model_logistic$finalModel, custom.model.names = c("Regressão logística simples"), caption = "Coeficientes estimados na regressão logística", label = "reg:log", fontsize = "footnotesize")
+
+
+```
+
+
 
 # SÉRIES TEMPORAIS
 
