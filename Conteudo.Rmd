@@ -4154,6 +4154,11 @@ Pesquisando imagens no Google vemos as percepções a respeito de "Machine Learn
 [@cadu]
 
 
+## Mecânico ou Piloto ?
+
+![](imagens/mecanico_piloto.png)
+
+
 ## O processo de Aprendizado Estatístico
 
 Temos acesso a um pedaço dos dados existentes, que usamos para nos ajudar a especificar e treinar o nosso modelo.
@@ -4236,19 +4241,56 @@ $[Bias(\hat{f}(x_0))]^2$ é o erro introduzido por tentarmos aproximar um proble
 
 ## Inferência
 
-
 Os modelos variam muito com relação a "transparência da caixa"
 
-Há uma relação inversamente proporcional (normalmente) entre: 
+Há uma relação inversamente proporcional (grosso modo) entre: 
 
 - Flexibilidade do modelo, ou poder de se adaptar a uma relação complexa entre entrada e saída
 
-- Interpretabilidade, ou facilidade de inferir 
+- Interpretabilidade, ou facilidade de o usuário do modelo (piloto) inferir as relações entre as variáveis independentes e as variáveis dependentes
+
+![](diagramas/flex_interpret.png)
+
+[@james2013introduction]
 
 
+## Trade-off viés variância
+
+Além da falta de interpretabilidade, outra questão pode contar contra os modelos mais complexos, com mais poder de aprender nuances sobre os dados: eles podem aprender características específicas dos dados de treinamento.
+
+![](diagramas/trade_off_vies_variancia.png)
+
+[@friedman2001elements]
+
+## Treino, Validação e Teste
+
+O procedimento mais usado para preparar um modelo para a vida real envolve dividir a nossa base em três pedaços:
+
+- Dados de treinamento: que serão usados para treinar o modelo e não servem para avaliar seu desempenho
+
+- Dados de validação: servem para comparar modelos de forma que nos possibilite escolher UM MODELO COM UMA ESPECIFICAÇÃO DE HIPERPARÂMETROS (número de nós da rede neural, )
+
+- Dados de teste: são separados logo no início do processo, e só são usados numa avaliação final do único modelo escolhido. 
 
 
-## Tentativa de estimar variância e viés: Cross validation
+## Model Selection e Model Assesment
+
+Model Selection: estimação da performance de vários modelos a fim de escolher o melhor
+
+Model Assessment: tendo escolhido  melhor modelo, estimação do erro de generalização em novos dados
+
+![](imagens/model_selection_assesment.png)
+
+
+## K-Fold Cross validation
+
+Uma forma de usar todos os dados (EXCETO OS DADOS DE TESTE) tanto para treinar quando para validar é revezando que partes dos dados estão sendo usados para treinamento e para validação. 
+
+Podemos dividir os dados em $k$ partes. Cada vez uma parte é escolhida para ser a validação.
+
+![](imagens/k-fold-cross.png)
+
+[@datarobot]
 
 ## Execução de modelos com broom
 
