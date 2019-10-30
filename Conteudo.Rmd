@@ -2842,7 +2842,7 @@ head(municipios_ajeitado)
 
 Os códigos são diferentes, mas 
 
-```{r, warning=FALSE, message=FALSE }
+```{r, warning=FALSE, message=FALSE, cache=TRUE }
 
 de_para_codigos <- read_csv2(
   "http://blog.mds.gov.br/redesuas/wp-content/uploads/2018/06/Lista_Munic%C3%ADpios_com_IBGE_Brasil_Versao_CSV.csv",
@@ -4880,9 +4880,13 @@ controle_cv <- trainControl(
 ```
 
 
-## Treinando uma regressão logística 
+## Treinando um modelo de classificação. Exemplo: Regressão logística 
 
-A função `train` permite o estabelecimento de uma métrica para a escolha do melhor valor para os hiperparâmetros (no caso, não existem), a execuções de funções de pré-processamento. 
+A função `train` permite o estabelecimento de uma métrica para a escolha do melhor valor para os hiperparâmetros (no caso, não existem), e execuções de funções de pré-processamento. 
+
+A função retorna um objeto com todas as informações relativas ao treinamento e a melhor especificação do modelo treinada com todos os dados passados.
+
+A saída padrão impressa em problemas de classificação mostra o resultado do melhor modelo nos seus dados de validação dele.
 
 
 
@@ -4906,18 +4910,32 @@ model_logistic
 
 ```
 
+## Avaliando a curva ROC
+
+A curva ROC (Receiver Operating Characteristics) foi inventada na época da Segunda Guerra Mundial para avaliar se os operadores de radar americanos estavam detectando confiavelmente aeronaves japonesas a partir de sinais de radar.
+
+A curva mostra, para vários thresholds, qual a fração de verdadeiros positivos (ou sensibilidade) e a fração de falsos positivos (fall-out, ou $1 - especificidade$ ).
+
+Uma métrica numérica que traduz o quão bom um modelo de classificação é consiste na área embaixo desta curva (AUC, Area Under the Curve). Note que quanto mais perto de um essa área, menor a taxa de falsos positivos e maior a sensibilidade
 
 
 
-```{r, cache = TRUE }
+
+```{r, cache = TRUE, message=FALSE, warning=FALSE }
 ggplot(model_logistic$pred, aes(m = M, d = obs, color = Resample )) +
     geom_roc( labels = FALSE  ) +
-    coord_equal() + style_roc() + ggtitle("ROC", subtitle = "Métricas para diversos thresholds" )+ style_roc()
+    coord_equal() + style_roc() + ggtitle("ROC", subtitle = "Métricas para diversos thresholds" )+       style_roc()
+  
 
 
 
 
 ```
+
+
+## Desempenho dos diversos modelos
+
+Podemos avaliar a ROC de cada treinamento feito.
 
 
 ```{r, cache = TRUE }
@@ -4937,7 +4955,7 @@ result_model_logistic %>%
 
 ```
 
-
+## Desempenho e estimativa da variância do modelo
 
 
 ```{r , cache = TRUE }
@@ -4951,15 +4969,174 @@ result_model_logistic %>%
 
 ```
 
+## Gerando um latex bonitinho do modelo
 
 
-```{r, cache = TRUE }
+```{r, message=FALSE, warning=FALSE, cache=TRUE}
 
 
 texreg(model_logistic$finalModel, custom.model.names = c("Regressão logística simples"), caption = "Coeficientes estimados na regressão logística", label = "reg:log", fontsize = "footnotesize")
 
 
 ```
+
+
+## Treinando outro modelo: lasso-ridge
+
+Uma outra forma de evitar que muitas variáveis sejam usadas no modelo é aplicar uma penalidade diminuir a variância do modelo. É isso que as regressões do tipo Ridge e Lasso fazem. 
+
+O modelo mostrado nessa seção é rodado com várias parametrizações. Este modelo conjuga a penalização do tipo Ridge com a penalização do tipo Lasso modificando a função de penalização da regressão, que originalmente é o erro quadrático:
+
+$$RSS = \sum_{i = 1}^{n} ( y_i - \beta_0 - \sum_{j=1}^{p}\beta_j x_{ij})^2  $$ 
+
+Para a regressão Ridge, os coeficientes são penalizados de forma quadrática. Isso diminui a variância do modelo mas não diminui tanto a diminuição do número de coeficientes diferentes de 0:
+
+$$Loss_{Ridge} = RSS + \lambda \sum_{j=1}^{p}\beta_j^2 $$
+
+Para a regressão Lasso, os coeficientes são penalizados pelo seu valor absoluto. Isso diminui a variância do modelo E diminui o número de coeficientes diferentes de 0, favorecendo a interpretabilidade
+
+
+$$Loss_{Lasso} = RSS + \lambda \sum_{j=1}^{p} \left| \beta_j \right| $$
+
+## Conjugando Lasso e Ridge e avaliando o modelo
+
+Cada conjunto de hiperparâmetros do modelo rodado nesta possui dois valores. Um dos valores, $\alpha$ define que peso deve ser dado a cada tipo de penalização Ridge ou Lasso, onde $\alpha = 0$ é Ridge puro e $\alpha = 1$ é Lasso puro. O outro parâmetro, $\lambda$, regula a intensidade da penalização.
+
+Os resultados para várias parametrizações é mostrado abaixo. 
+
+Veja como podemos passar um grid de hiperparâmetros e avaliar esses resultados.
+
+
+```{r, cache=TRUE}
+
+set.seed(13)
+
+model_net <- train(
+    
+    Diagnosis ~ .,
+    treino,
+    metric = "ROC",
+    method = "glmnet",
+    trControl = controle_cv,
+    preProcess = c( "center", "scale"),
+    tuneGrid = expand.grid(
+         alpha = c(0,0.5,0.75,0.1,0.125,0.15,0.25,0.5, 1),
+         lambda = 0:10/500
+     )    
+    
+
+)
+
+
+plot(model_net)
+
+
+
+
+```
+
+
+Os resultados de cada parametrização são mostrados em ordem decrescente de AUC.
+
+
+```{r}
+
+resultados_net <- model_net$resample %>% 
+    group_by(alpha, lambda) %>% 
+    summarise(media = mean(ROC), "Desvio-padrão AUC" = sd(ROC)) %>% 
+    arrange(desc(media)) %>% 
+    rename("Média AUC" = media) 
+
+
+head(resultados_net, 20)
+
+
+```
+
+
+## Pré-processando com Principal Component Analysis
+
+Uma outra forma de reduzir a dimensionalidade do probelam é usar o método PCA para transformar as variáveis em componentes principais em menor número mas com boa parte da informação original.
+
+veja como pedimos esse pré-processamento.
+
+```{r, cache=TRUE}
+
+
+set.seed(13)
+
+model_net_pca <- train(
+    
+    Diagnosis ~ .,
+    treino,
+    metric = "ROC",
+    method = "glmnet",
+    trControl = controle_cv,
+    preProcess = c( "center", "scale", "pca"),
+    tuneGrid = expand.grid(
+         alpha = c(0,0.5,0.75,0.1,0.125,0.15,0.25,0.5, 1),
+         lambda = 0:10/500
+     )    
+    
+
+)
+
+
+plot(model_net_pca)
+
+
+
+
+
+```
+
+
+```{r, cache=TRUE}
+
+resultados_net_pca <- model_net_pca$resample %>% 
+    group_by(alpha, lambda) %>% 
+    summarise(media = mean(ROC), "Desvio-padrão AUC" = sd(ROC)) %>% 
+    arrange(desc(media)) %>% 
+    rename("Média AUC" = media)
+
+resultados_net_pca
+
+```
+
+
+## Árvore de decisão
+
+A árvore de decisão
+
+
+```{r, cache = TRUE }
+
+
+
+model_tree <- train(
+    
+    Diagnosis  ~ .,
+    treino,
+    metric = "ROC",
+    method = "rpart",
+    trControl = controle_cv,
+    preProcess = c( "center", "scale")
+
+
+)
+
+
+resultados_tree <- model_tree$resample %>% 
+    group_by(cp) %>% 
+    summarise(media = mean(ROC), "Desvio-padrão AUC" = sd(ROC)) %>% 
+    arrange(desc(media)) %>% 
+    rename("Média AUC" = media)
+
+
+resultados_tree
+
+```
+
 
 
 
