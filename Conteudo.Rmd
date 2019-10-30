@@ -1,7 +1,7 @@
 ---
 title: "R para Análise de Dados"
-author: "Bruno Crotman"
-date: "13/10/2019"
+author: "Bruno Crotman (crotman@gmail.com)"
+date: "30/10/2019"
 output: 
     slidy_presentation: 
       css: styles.css
@@ -4147,6 +4147,7 @@ ggplot(gdps_tratado, aes( fill = country, area = PIB, label = country)) +
 Aqui apresentaremos RUDIMENTOS de Aprendizado Estatístico com o objetivo de desmistificar alguns conceitos e apresentar algumas considerações que nos ajudarão a iniciar um processo deste tipo.
 
 
+
 ## Desmistificando Aprendizado Estatístico (ou Machine Learning)
 
 
@@ -4186,7 +4187,7 @@ Nós não temos acesso a esta $f()$ que representa a VERDADE, mas tentamos estim
 ![](diagramas/realidade.png)  
 
 
-## Fábrica de função que aproximaa realidade
+## Fábrica de função que aproxima a realidade
 
 Nosso modelo de Aprendizado Estatístico é uma fábrica de $\hat{f}()$ que tenta aproximar a $f()$ verdadeira.
 
@@ -4235,7 +4236,7 @@ $Var(\epsilon)$ é irredutível: não importa quão bem estimemos $\hat{f}()$ o 
 
 Se rodarmos $\hat{f}(x_0)$ treinando o modelo com vários conjuntos de treinamento e testasse ele com uma entrada específica qualquer para a qual $y_0 = f(x_0) + \epsilon$:
 
-$$E[y_o - \hat{f}(x_0)] = Var(\hat{f}(x_0) + [Bias(\hat{f}(x_0))]^2 + Var(\epsilon)$$
+$$E[y_o - \hat{f}(x_0)] = Var(\hat{f}(x_0)) + [Bias(\hat{f}(x_0))]^2 + Var(\epsilon)$$
 
 
 $Var(\hat{f}(x_0)$ é a variância do modelo: o quanto ele muda quando treinamos ele com outro conjunto de treinamento
@@ -4284,7 +4285,7 @@ O procedimento mais usado para preparar um modelo para a vida real envolve divid
 
 Model Selection: estimação da performance de vários modelos a fim de escolher o melhor
 
-Model Assessment: tendo escolhido  melhor modelo, estimação do erro de generalização em novos dados
+Model Assessment: tendo escolhido o melhor modelo, estimação do erro de generalização em novos dados
 
 ![](imagens/model_selection_assesment.png)
 
@@ -5106,7 +5107,10 @@ resultados_net_pca
 
 ## Árvore de decisão
 
-A árvore de decisão
+A árvore de decisão particiona o espaço formado pelas variáveis explicativas em subespaços baseando-se na "pureza" desses subespaços com relação à variável dependente.
+
+![](imagens/decisiontree.png)
+
 
 
 ```{r, cache = TRUE }
@@ -5121,6 +5125,7 @@ model_tree <- train(
     method = "rpart",
     trControl = controle_cv,
     preProcess = c( "center", "scale")
+    
 
 
 )
@@ -5137,6 +5142,580 @@ resultados_tree
 
 ```
 
+
+## Random Forests
+
+
+A forma como a árvore de decisão é criada faz com que ela tenha muita variância. 
+
+Cada decisão de particionamento é tomada a partir de características que podem ser muito específicas aos dados de treinamento.
+
+Uma ideia usada nas Random Forests é criar conjuntos de treinamento criados a partir do conjunto original, mas retirando amostras de mesmo tamanho COM REPOSIÇÃO. Além disso, cada vez que a árvore é particionada, a partição só pdoe acontecer em $m$ das variáveis explicativas. 
+
+O resultado final é uma média do resultado dessas várias árvores
+
+Estas duas mudanças fazem com que o modelo tenha uma variância muito menor do que as árvore de decisão simples    
+
+```{r, cache=TRUE}
+
+model_ranger <- train(
+    
+    Diagnosis  ~ .,
+    treino,
+    metric = "ROC",
+    method = "ranger",
+    trControl = controle_cv,
+    preProcess = c( "center", "scale"),
+    verbose = TRUE,
+    tuneGrid = expand.grid(
+         mtry = seq(2, by = 2, to = 20),
+         splitrule = c("gini", "extratrees"),
+         min.node.size = 1
+     )    
+
+
+)
+
+plot(model_ranger)
+
+resultados_ranger <- model_ranger$resample %>% 
+    group_by(mtry, splitrule) %>% 
+    summarise(media = mean(ROC), "Desvio-padrão AUC" = sd(ROC)) %>% 
+    arrange(desc(media)) %>% 
+    rename("Média AUC" = media)
+
+
+resultados_ranger
+
+```
+
+
+## Montando um modelo ensemble
+
+Podemos montar um modelo ensemble, onde cada modelo original vota e a escolha final recai sobre a classificação que receber mais votos
+
+
+```{r, message=FALSE, warning=FALSE }
+
+pred_logistic <- model_logistic$pred %>% 
+    semi_join(model_logistic$bestTune) %>% 
+    mutate(modelo = "Logística")
+
+pred_net_pca <- model_net_pca$pred %>% 
+    semi_join(model_net_pca$bestTune) %>% 
+    mutate(modelo = "Lasso-Ridge PCA")
+    
+pred_ranger <- model_ranger$pred %>% 
+    semi_join(model_ranger$bestTune) %>% 
+    mutate(modelo = "Floresta")
+
+pred_ensemble_todos <- bind_rows(pred_logistic, pred_net_pca, pred_ranger)
+
+pred_ensemble_mediana <- pred_ensemble_todos %>% 
+    separate(Resample, c("Fold", "Repeat")) %>% 
+    group_by(Repeat, rowIndex) %>% 
+    summarise(M = median(M), B= median(B), n = n(), obs = unique(obs)) 
+
+ret_roc <- function(data)
+{
+    roc(data$obs,data$M)
+}
+
+
+ret_roc_auc <- function(data)
+{
+    unlist(as.numeric(roc(data$obs,data$M)$auc))
+}
+
+
+pred_ensemble_mediana_foldado <- model_ranger$pred %>% 
+    semi_join(model_ranger$bestTune) %>% 
+    separate(Resample, c("Fold", "Repeat")) %>% 
+    select(Fold, Repeat, rowIndex) %>% 
+    inner_join(pred_ensemble_mediana, by = c("Repeat", "rowIndex"), suffix = c("","_") )  %>% 
+    group_by(Fold, Repeat) %>% 
+    nest() %>% 
+    mutate( roc = map(data, ret_roc), auc = unlist(map(data, ret_roc_auc))  )
+
+resultado_ensemble_pra_mostrar <- tibble( "Média AUC" = mean(pred_ensemble_mediana_foldado$auc), "Desvio-padrão AUC" = sd(pred_ensemble_mediana_foldado$auc) )
+
+
+resultado_ensemble_pra_mostrar
+
+```
+
+
+
+## Uma forma de avaliar o impacto das variáveis  
+
+É possível propor uma forma de avaliação do impacto das variáveis indireta e agnóstica ao modelo, ou seja, que pode ser usada da mesma forma para qualquer modelo e .
+
+Para avaliar o impacto de cada variável nos resultados de cada um dos 5 modelos, podemos gerar casos sintéticos e avaliar a probabilidade de esses casos serem malignos segundo cada modelo.
+
+Dois grupos de casos sintéticos foram gerados. 
+
+No primeiro grupo, para cada variável explicativa, foram criados casos onde o valor das outras variáveis. 
+
+No segundo grupo, para avaliar uma região onde os casos têm mais chance de ser malignos, as variáveis que não estão sendo avaliadas a cada gráfico são mantidas no quantil 0.65.
+
+```{r, cache=TRUE, out.width="90%"}
+
+
+
+medias_treino <- treino %>% 
+    select(-Diagnosis) %>% 
+    summarise_all(mean) %>% 
+    gather(variavel, media) 
+
+dps_treino <- treino %>% 
+    select(-Diagnosis) %>% 
+    summarise_all(sd) %>% 
+    gather(variavel, dp) 
+
+mediana_treino <- treino %>% 
+    select(-Diagnosis) %>% 
+    summarise_all(median) %>% 
+    gather(variavel, mediana) 
+
+
+variaveis <- medias_treino %>% 
+    select(variavel)
+
+caso_media <- medias_treino %>% 
+    spread(variavel, media)
+
+
+quantis <- treino %>% 
+    select(-Diagnosis) %>% 
+    gather(variavel, valor) %>% 
+    crossing( tibble( q = seq(0,1, 0.05))   ) %>% 
+    group_by(variavel,q ) %>% 
+    summarise( valor = quantile(valor, mean(q))) 
+    
+
+casos <- variaveis %>% 
+    crossing(variaveis %>% rename(fixa = variavel)) %>% 
+    crossing(tibble( q = seq(0,1, 0.05)) ) %>% 
+    arrange(q, variavel, fixa) %>% 
+    mutate(caso = (row_number()-1) %/% nrow(variaveis) + 1) %>% 
+    mutate(q_cada_variavel = if_else(variavel == fixa, q, 0.5 )) %>% 
+    inner_join(quantis, by=c("q_cada_variavel" = "q", "fixa" = "variavel") ) %>%
+    select(-q_cada_variavel) %>% 
+    spread(fixa, valor)
+    
+prev_log <- predict(model_logistic, casos, type = "prob") %>% 
+    mutate(modelo = "Logistica") %>% 
+    bind_cols(casos)
+
+prev_ranger <- predict(model_ranger, casos, type = "prob") %>% 
+    mutate(modelo = "Floresta") %>% 
+    bind_cols(casos)
+
+prev_pca <- predict(model_net_pca, casos, type = "prob") %>% 
+    mutate(modelo = "Lasso-Ridge PCA") %>% 
+    bind_cols(casos)
+
+
+
+prev <- 
+    bind_rows(prev_log, prev_ranger, prev_pca)
+
+
+
+prev %>% 
+    ggplot() +
+    geom_line( aes(x = q, y = M, color = modelo) ) +
+    facet_wrap( ~variavel) +
+    theme_minimal() +
+    theme(
+        aspect.ratio = .4,
+        strip.text = element_text(size = 5),
+        strip.background.y = element_rect(size = c(0.1,0.1)),
+        strip.switch.pad.grid = unit(.01,"cm"),
+        strip.switch.pad.wrap = unit(.01,"cm"),
+        axis.text =  element_text(size = 4) 
+        
+        ) +
+  theme(legend.position = "top" )
+    
+
+
+
+```
+
+
+````{r, cache = TRUE, out.width="90%"}
+
+
+
+
+casos <- variaveis %>% 
+    crossing(variaveis %>% rename(fixa = variavel)) %>% 
+    crossing(tibble( q = seq(0,1, 0.05)) ) %>% 
+    arrange(q, variavel, fixa) %>% 
+    mutate(caso = (row_number()-1) %/% nrow(variaveis) + 1) %>% 
+    mutate(q_cada_variavel = if_else(variavel == fixa, q, 0.65 )) %>% 
+    inner_join(quantis, by=c("q_cada_variavel" = "q", "fixa" = "variavel") ) %>%
+    select(-q_cada_variavel) %>% 
+    spread(fixa, valor)
+    
+prev_log <- predict(model_logistic, casos, type = "prob") %>% 
+    mutate(modelo = "Logistica") %>% 
+    bind_cols(casos)
+
+prev_ranger <- predict(model_ranger, casos, type = "prob") %>% 
+    mutate(modelo = "Floresta") %>% 
+    bind_cols(casos)
+
+prev_pca <- predict(model_net_pca, casos, type = "prob") %>% 
+    mutate(modelo = "Lasso-Ridge PCA") %>% 
+    bind_cols(casos)
+
+
+
+prev <- 
+    bind_rows(prev_log, prev_ranger, prev_pca)
+
+
+
+prev %>% 
+    ggplot() +
+    geom_line( aes(x = q, y = M, color = modelo) ) +
+    facet_wrap( ~variavel) +
+    theme_minimal() +
+    theme(
+        aspect.ratio = .4,
+        strip.text = element_text(size = 5),
+        strip.background.y = element_rect(size = c(0.1,0.1)),
+        strip.switch.pad.grid = unit(.01,"cm"),
+        strip.switch.pad.wrap = unit(.01,"cm"),
+        axis.text =  element_text(size = 4) 
+        
+        ) +
+  theme(legend.position = "top" )
+    
+
+
+
+
+```
+
+
+
+## Modelos escolhidos e seus thresholds: Model Selection
+
+```{r, warning=FALSE, message=FALSE }
+
+
+
+roc_best_modelo <- function(modelo)
+{
+
+    dados_roc <- modelo$pred %>% 
+        semi_join(modelo$bestTune) %>% 
+        mutate(obs = if_else(obs == "B", 0, 1))
+
+    dados_curva <- roc(dados_roc$obs, dados_roc$M)
+    
+    tibble( sensitivities = dados_curva$sensitivities, 
+            specificities= dados_curva$specificities,  
+            thresholds = dados_curva$thresholds,
+            auc = dados_curva$auc
+            ) 
+    
+}   
+
+
+pred_best_modelo <- function(modelo)
+{
+    modelo$pred %>% 
+        semi_join(modelo$bestTune)
+
+}
+
+    
+plota_roc_modelo <-  function(modelo, prob, nome)
+{
+    
+    
+    
+    
+    roc_modelo <-  roc_best_modelo(modelo)
+    pred_modelo <- pred_best_modelo(modelo)
+    
+    
+    threshold_escolhido <- roc_modelo %>% 
+        filter(thresholds >= prob) %>% 
+        top_n(n = 1, wt = desc(thresholds )) 
+    
+    
+    ggplot(pred_modelo ) +
+        geom_roc( labels = FALSE, labelround = 2, labelsize = 3, n.cuts = 0, aes(m = M, d = obs )  ) +
+        geom_point(data = threshold_escolhido, aes(y = sensitivities, x = 1-specificities), size = 3) +
+        geom_text(data = threshold_escolhido, aes(y = sensitivities, x = 1-specificities, label = paste0(percent(sensitivities), " / ", percent(1-specificities)) ), nudge_x = .11, nudge_y = -.05, size = 3 ) +
+        coord_equal() + style_roc() + ggtitle(paste0("ROC - ", nome), subtitle = paste0("Corte na probabilidade ", prob )) + style_roc()
+    
+}
+
+
+plota_roc_ensemble <-  function(modelo, prob, nome)
+{
+    prob <- 0.3
+    nome <- "Ensemble"
+    dados_curva <- roc(pred_ensemble_mediana$obs, pred_ensemble_mediana$M)
+    
+    roc_modelo <- tibble( sensitivities = dados_curva$sensitivities, 
+            specificities= dados_curva$specificities,  
+            thresholds = dados_curva$thresholds,
+            auc = dados_curva$auc
+            ) 
+    
+    
+    
+    pred_modelo <- pred_ensemble_mediana
+    
+    
+    threshold_escolhido <- roc_modelo %>% 
+        filter(thresholds >= prob) %>% 
+        top_n(n = 1, wt = desc(thresholds )) 
+    
+    
+    ggplot(pred_modelo ) +
+        geom_roc( labels = FALSE, labelround = 2, labelsize = 3, n.cuts = 0, aes(m = M, d = obs )  ) +
+        geom_point(data = threshold_escolhido, aes(y = sensitivities, x = 1-specificities), size = 3) +
+        geom_text(data = threshold_escolhido, aes(y = sensitivities, x = 1-specificities, label = paste0(percent(sensitivities), " / ", percent(1-specificities)) ), nudge_x = .11, nudge_y = -.05, size = 3 ) +
+        coord_equal() + style_roc() + ggtitle(paste0("ROC - ", nome), subtitle = paste0("Corte na probabilidade ", prob )) + style_roc()
+    
+}
+
+
+plota_roc_modelo(model_logistic, 1e-8, "Logistica")
+
+plota_roc_modelo(model_net_pca, 0.18, "Lasso-Ridge PCA")
+
+plota_roc_modelo(model_ranger, 0.25, "Random Forest")
+
+
+
+plota_roc_ensemble <-  function(modelo, prob, nome)
+{
+    prob <- 0.17
+    nome <- "Ensemble"
+    dados_curva <- roc(pred_ensemble_mediana$obs, pred_ensemble_mediana$M)
+    
+    roc_modelo <- tibble( sensitivities = dados_curva$sensitivities, 
+            specificities= dados_curva$specificities,  
+            thresholds = dados_curva$thresholds,
+            auc = dados_curva$auc
+            ) 
+    
+    
+    
+    pred_modelo <- pred_ensemble_mediana
+    
+    
+    threshold_escolhido <- roc_modelo %>% 
+        filter(thresholds >= prob) %>% 
+        top_n(n = 1, wt = desc(thresholds )) 
+    
+    
+    ggplot(pred_modelo ) +
+        geom_roc( labels = FALSE, labelround = 2, labelsize = 3, n.cuts = 0, aes(m = M, d = obs )  ) +
+        geom_point(data = threshold_escolhido, aes(y = sensitivities, x = 1-specificities), size = 3) +
+        geom_text(data = threshold_escolhido, aes(y = sensitivities, x = 1-specificities, label = paste0(percent(sensitivities), " / ", percent(1-specificities)) ), nudge_x = .11, nudge_y = -.05, size = 3 ) +
+        coord_equal() + style_roc() + ggtitle(paste0("ROC - ", nome), subtitle = paste0("Corte na probabilidade ", prob )) + style_roc()
+    
+}
+
+
+plota_roc_ensemble()
+
+
+```
+
+
+## Avaliação nos dados de teste: Model Assessment
+
+```{r}
+
+
+
+confusao_teste <- function(modelo, threshold)
+{
+
+    prev_teste_svm <- predict(modelo, teste, type = "prob") 
+    
+    
+    pred_teste_svm <- prev_teste_svm %>% 
+        mutate(pred = as.factor( if_else(M > threshold, "M", "B"))) %>% 
+        select(pred)
+    
+    conf_svm <- confusionMatrix(data = pred_teste_svm$pred, reference =  teste$Diagnosis, positive = "M")
+}
+
+
+gera_dados_confusao_teste <- function(modelo, threshold)
+{
+
+    prev_teste_svm <- predict(modelo, teste, type = "prob") 
+    
+    
+    pred_teste_svm <- prev_teste_svm %>% 
+        mutate(pred = as.factor( if_else(M > threshold, "M", "B"))) %>% 
+        select(pred)
+    
+    #tibble(data = pred_teste_svm$pred, reference =  teste$Diagnosis, positive = "M")
+    
+    bind_cols(pred_teste_svm, teste) 
+    
+}
+
+
+
+```
+
+
+```{r}
+
+confusao_logistic <-  confusao_teste(model_logistic, 1e-8)
+
+confusao_logistic
+
+
+```
+
+
+
+
+```{r}
+
+confusao_net_pca <-  confusao_teste(model_net_pca, 0.18)
+
+confusao_net_pca 
+
+
+```
+
+
+
+
+```{r}
+
+
+confusao_ranger  <-  confusao_teste(model_ranger, 0.25)
+
+confusao_ranger
+
+
+```
+
+
+```{r}
+
+pred_test_1 <- predict(model_logistic, teste, type = "prob") %>% 
+    mutate(row = row_number())  
+
+pred_test_2 <- predict(model_net_pca, teste, type = "prob") %>% 
+    mutate(row = row_number())  
+
+pred_test_3 <- predict(model_ranger, teste, type = "prob") %>% 
+    mutate(row = row_number())  
+
+pred_teste_ensemble <- bind_rows(pred_test_1, pred_test_2, pred_test_3) %>% 
+    group_by(row) %>% 
+    summarise (M = median(M)) %>% 
+    mutate(pred = as.factor( if_else(M > 0.17, "M", "B"))) 
+
+
+
+confusao_ensemble <- confusionMatrix(data = pred_teste_ensemble$pred, reference =  teste$Diagnosis, positive = "M")
+    
+confusao_ensemble        
+
+
+
+
+```
+
+
+
+```{r}
+
+dados_confusao_teste1 <- gera_dados_confusao_teste(model_logistic, 1e-8) %>% 
+    mutate(modelo = "Logistic", linha = row_number())
+
+dados_confusao_teste2 <- gera_dados_confusao_teste(model_net_pca, 0.18) %>% 
+    mutate(modelo = "Lasso-Ridge", linha = row_number())
+
+dados_confusao_teste3 <- gera_dados_confusao_teste(model_ranger , 0.25) %>% 
+    mutate(modelo = "Random Forest", linha = row_number())
+
+
+dados_confusao_teste_todos <- bind_rows(
+    
+    dados_confusao_teste1,
+    dados_confusao_teste2,
+    dados_confusao_teste3
+
+)
+
+pred_errados_teste <- dados_confusao_teste_todos %>% 
+    filter(pred != Diagnosis) %>% 
+    group_by(linha, pred, Diagnosis) %>% 
+    summarise(n= n()) %>% 
+    arrange(desc(n))
+
+pred_errados_teste
+
+
+```
+
+
+## Avaliando regiões de fraqueza do modelo
+
+
+
+
+```{r, out.width="90%"}
+
+dados_confusao_teste_todos_tidy <- dados_confusao_teste_todos %>% 
+    gather(atributo, valor, - pred,-Diagnosis, - modelo, - linha)
+
+dados_confusao_teste_todos_certos <- 
+    dados_confusao_teste_todos_tidy %>% 
+    filter(pred == Diagnosis)
+
+dados_confusao_teste_todos_falso_negativo <- 
+    dados_confusao_teste_todos_tidy %>% 
+    filter(pred == "M" & Diagnosis == "B")
+
+dados_confusao_teste_todos_falso_positivo <- 
+    dados_confusao_teste_todos_tidy %>% 
+    filter(pred == "B" & Diagnosis == "M")
+
+
+ggplot() +
+    geom_jitter(data = dados_confusao_teste_todos_certos %>% filter(Diagnosis == "M"), aes(x = valor, y = 0), alpha = 0.05, size = 0.5, color = "red") +
+    geom_jitter(data = dados_confusao_teste_todos_certos %>% filter(Diagnosis == "B")  , aes(x = valor, y = 0), alpha = 0.05, size = 0.5, color = "blue") +
+    geom_jitter(data = dados_confusao_teste_todos_falso_negativo, aes(x = valor, y = 0), alpha = 0.5, color = "blue", size = 0.5) +
+    geom_jitter(data = dados_confusao_teste_todos_falso_positivo , aes(x = valor, y = 0), alpha = 0.5, color = "red", size = 0.5) +
+    facet_wrap(~atributo, scales = "free") +
+    theme_minimal() +
+    theme(
+        aspect.ratio = .4,
+        strip.text = element_text(size = 5),
+        strip.background.y = element_rect(size = c(0.1,0.1)),
+        strip.switch.pad.grid = unit(.01,"cm"),
+        strip.switch.pad.wrap = unit(.01,"cm"),
+        axis.text =  element_text(size = 4) ,
+        axis.text.y = element_blank()
+        
+        )
+    
+
+
+
+```
 
 
 
