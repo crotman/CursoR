@@ -1892,7 +1892,7 @@ salva <- function(dado){
 
 
 
-baixa_faltantes <- tibble(data_dado = seq(ymd("2017-01-01"), by = "month", ymd(today()) )) %>% 
+baixa_faltantes <- tibble(data_dado = seq(ymd("2017-01-01"), by = "month", ymd(today()-4) )) %>% 
     mutate(data_formato = stamp_date("999912")(data_dado)) %>% 
     mutate(
         endereco = paste0(
@@ -5718,24 +5718,76 @@ ggplot() +
 ```
 
 
-
-# SÉRIES TEMPORAIS
-
-## Repositórios de séries temporais
-
-## Manipulação de séries temporais
-
-## Biblioteca Forecast
-
 # COMUNICANDO OS RESULTADOS
+
+## Criando visualizações interativas com Shiny
+
+Shiny é um pacote R que permite a criação de aplicações WEB interativas que ativam código em R, com as possibilidades de formatação de tabelas, geração de gráficos, execução de modelos etc que as bibliotecas do R disponibilizam.
+
+
+## Uma aplicação Shiny mínima 
+
+
+Os códigos desta seção que fala do Shiny não são executados diretamente, apenas são mostrados.
+
+Uma aplicação Shiny mínima tem 4 itens:
+
+- Carregamento da biblioteca `shiny`
+
+- Definição da interface do usuário, ou seja, a página HTML com a qual o usuário vai interagir. Essa interface é definida com o uso da função `fluidPage()`
+
+- Definição do comportamento da aplicação com a função `server()`
+
+- Execução da função `shinyApp(ui, server)` para construir e iniciar uma aplicação.
+
+
+
+
+````{r, eval=FALSE}
+
+library(shiny)
+ui <- fluidPage(
+  "Hello, world!"
+)
+server <- function(input, output, session) {
+}
+shinyApp(ui, server)
+
+```
+
+
+## Inserindo componentes de interface
+
+
+O código abaixo insere: 
+
+- Uma combo, com `selectInput`. (Há vários tipos de inputs) 
+- Uma 
+
+```{r}
+
+
+library(shiny)
+ui <- fluidPage(
+  selectInput("dataset", label = "Dataset", choices = ls("package:datasets")),
+  verbatimTextOutput("summary"),
+  tableOutput("table")
+)
+
+server <- function(input, output, session) {
+}
+
+shinyApp(ui, server)
+
+
+```
+
 
 ## Criando relatórios com R Markdown
 
 ## Livros
 
 [Referência Bookdown](https://bookdown.org/yihui/bookdown/html.html)
-
-## Criando visualizações interativas com Shiny
 
 # REFERÊNCIAS
 
