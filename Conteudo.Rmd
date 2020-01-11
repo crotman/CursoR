@@ -49,6 +49,7 @@ library(pROC)
 library(plotROC)
 library(xtable)
 library(texreg)
+library(ranger)
 
 
 library(electionsBR)
@@ -5764,7 +5765,7 @@ O código abaixo insere:
 - Uma combo, com `selectInput`. (Há vários tipos de inputs) 
 - Uma 
 
-```{r}
+```{r, eval=FALSE}
 
 
 library(shiny)
