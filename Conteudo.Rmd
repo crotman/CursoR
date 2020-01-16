@@ -12,6 +12,63 @@ output:
 bibliography: bibliography.bib
       
 ---
+```{r}
+
+# TODO
+# Package
+# mature
+# actively
+# document
+# well used
+# 
+# Package ctv
+# 
+# old.packages
+# 
+# conflicted
+# 
+# T/F  e TRUE e FALSE
+# isTRUE() 
+# 
+#supressPackageStartupMessages
+#
+#message() longrunning
+
+#warning()
+
+#stop()
+
+#try
+
+#não usar "." num nome de função
+
+#Estilo: consistente
+
+# = ou <-
+
+#spaces: operadores e depois de espaço
+
+#lintr: análise de código
+
+#não use espacos em nomes de arquivos
+
+#traço é melhor. google usa traço como separador, e espressão regular usa traço como caracter
+
+#YYYY-MM-DD
+
+
+
+
+
+
+
+
+
+
+```
+
+
+
 
 
 ```{r, warning=FALSE, message=FALSE, echo=FALSE}
