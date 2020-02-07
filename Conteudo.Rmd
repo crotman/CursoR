@@ -12,7 +12,7 @@ output:
 bibliography: bibliography.bib
       
 ---
-```{r}
+```{r, echo=FALSE}
 
 # TODO
 # Package
@@ -486,7 +486,7 @@ seq(1, 9.99, 0.1)
 ## Parâmetros nomeados
 
 
-Note que chamamos a função passando os parâmetros sem especificação de quais são eles. Eles são recebidos pela função dem específica. 
+Note que chamamos a função passando os parâmetros sem especificação de quais são eles. Eles são recebidos pela função na ordem padrão definida pela função. 
 
 Mas no R também é possível passar parâmetros de forma nomeada. 
 
@@ -619,7 +619,7 @@ Existem estruturas mais complexas na linguagem construídas a partir de vetores 
 
 * Objetos (no paradigma de orientação a objetos)
 
-Vamos passar pelo Data Frame agora. Depois por Factor e objetos que representam Datas
+Data Frame é a estrutura que mais vamos usar para nossas análises de dados.
 
 
 ## Data Frames
@@ -658,7 +658,15 @@ tib <-
     )
 ```
 
+## Criando um `tibble` com `tribble()`
 
+
+```{r}
+
+
+
+
+```
 
 ## Controle de fluxo
 
@@ -830,7 +838,6 @@ plot(resultados_perf)
 
 
 ```
-
 
 
 ## Revisão: tipos de vetores
@@ -1117,14 +1124,117 @@ mostra_chances(acertos, n_questoes)
 
 
 
-## Exemplo inicial de visualização de dados
+<!-- ## Exemplo inicial de visualização de dados -->
 
 
-```{r ggplot, eval=TRUE, code = readLines("exemplos\\exemplo_inicial_ggplot.r")}
+<!-- ```{r ggplot, eval=TRUE, code = readLines("exemplos\\exemplo_inicial_ggplot.r")} -->
+
+
+
+<!-- ``` -->
+
+
+
+# INTRODUÇÃO À PROGRAMAÇÃO FUNCIONAL COM PURRR
+
+
+## O que é programação funcional?
+
+O fato de que funções são objetos de primeira classe no R, ou seja, objetos que têm propriedades iguais às de qualquer outro, possibilita a progrmação no estilo funcional.
+
+A programação funcional inclui as formas de interação entre vetores e funções a partir de uma função
+
+
+![](imagens/fp.png)
+
+Neste curso vamos nos concentrar nos Functionals, funções que recebem função como argumento e devolvem um vetor ou uma lista
+
+
+## Função map
+
+A função mais fundamental é `map()`. 
+
+Ela recebe uma função e um vetor de $n$ elementos
+
+A função é chamada para cada elemento do vetor, $n$ vezes.
+
+Os resultados da aplicação destas $n$ execuções são devolvidos em uma lista de $n$ elementos
+ 
+![](imagens/map.png)
+
+
+## Exemplo da função map
+
+Uma função é um objeto como outro qualquer e pode ser colocado em uma variável
+
+````{r}
+
+funcao <- function(x) x^2
+
+```
+
+`map` devolve uma lista com o resultado da execução de `map` em cada elemento
+
+````{r}
+
+map(.x = 1:10, .f = funcao)
+
+```
+
+
+## `map` pode retornar outros tipos de objeto
+
+
+
+```{r}
+
+map_dbl(.x = 1:10, .f = funcao)
+
+map_chr(.x = 1:10, .f = funcao)
+
+map_df(.x = tibble(x = 1:10), .f = funcao)
+
+```
+
+
+## Shortcuts pra funções
+
+Funções podem ser declaradas inline.
+
+```{r}
+
+map(.x = 1:5, .f = function(x){rnorm(n = 4, mean = x, sd = .2)} )
+
+```
+
+
+Ou então shortcuts podem ser usados
+
+
+```{r}
+
+map(.x = 1:5, .f = ~rnorm(n = 4, mean = .x, sd = .2) )
+
+```
+
+Os argumentos são repassados pela `map` para a função executada. Podemos então passar os argumentos para a `map`.
+
+```{r}
+
+map(.x = 1:5, .f = rnorm, n = 4, sd = .2 )
+
+
+```
+
+
+```{r}
+
 
 
 
 ```
+
+
 
 
 # TIDY DATA (obtenção e organização dos dados)
@@ -1759,7 +1869,7 @@ bind_rows(ricos, pobres) %>%
 
 classificacao_brasileirao <- read_html("https://pt.wikipedia.org/wiki/Campeonato_Brasileiro_de_Futebol_de_2019_-_S%C3%A9rie_A") %>% 
   html_nodes("table") %>% 
-  extract2(8) %>% 
+  extract2(7) %>% 
   html_table()
 
 
@@ -2009,6 +2119,7 @@ cotas_verde <- todos_os_fundos %>%
 cotas_verde
 
 ```
+
 
 
 ## Leitura de conteúdo de páginas WEB
@@ -5846,6 +5957,49 @@ shinyApp(ui, server)
 ## Livros
 
 [Referência Bookdown](https://bookdown.org/yihui/bookdown/html.html)
+
+
+# DESENVOLVIMENTO DE PACOTES
+
+
+## Filosofia
+
+Tudo que pode ser automatizado deve ser automatizado *devtools*
+
+
+
+
+## Preparando o ambiente 
+
+
+Pacotes a instalar para começar:
+
+```{r, eval = FALSE }
+
+install.packages(c("devtools", "roxygen2", "testthat", "knitr"))
+
+```
+
+Para checar se o ambiente está preparado para criar pacotes:
+
+
+```{r, eval = FALSE }
+
+devtools::has_devel()
+
+
+```
+
+
+## Criando a estrutura
+
+
+New Project -> New Directory -> R Package
+
+The main difference between library() and require() is what happens if a package isn’t found. While library() throws an error, require() prints a warning message and returns FALSE. In practice, this distinction isn’t important because when building a package you should NEVER use either inside a package. See package dependencies for what you should do instead.
+
+
+
 
 # REFERÊNCIAS
 

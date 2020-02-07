@@ -3,4 +3,6 @@
 .RData
 .Ruserdata
 dados/fundos
+dados/titulos
 Conteudo_cache/slidy
+Conteudo_files/figure_slidy
