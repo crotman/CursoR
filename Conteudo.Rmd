@@ -12,60 +12,6 @@ output:
 bibliography: bibliography.bib
       
 ---
-```{r, echo=FALSE}
-
-# TODO
-# Package
-# mature
-# actively
-# document
-# well used
-# 
-# Package ctv
-# 
-# old.packages
-# 
-# conflicted
-# 
-# T/F  e TRUE e FALSE
-# isTRUE() 
-# 
-#supressPackageStartupMessages
-#
-#message() longrunning
-
-#warning()
-
-#stop()
-
-#try
-
-#não usar "." num nome de função
-
-#Estilo: consistente
-
-# = ou <-
-
-#spaces: operadores e depois de espaço
-
-#lintr: análise de código
-
-#não use espacos em nomes de arquivos
-
-#traço é melhor. google usa traço como separador, e espressão regular usa traço como caracter
-
-#YYYY-MM-DD
-
-
-
-
-
-
-
-
-
-
-```
 
 
 
@@ -107,6 +53,8 @@ library(plotROC)
 library(xtable)
 library(texreg)
 library(ranger)
+library(furrr)
+library(httr)
 
 
 library(electionsBR)
@@ -121,15 +69,53 @@ library(gapminder)
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-# INTRODUÇÃO
 
+```{r, echo=FALSE}
+
+remissivo <<- tibble(palavra = "####")
+
+slide_atual <<- 1
+
+a_r <- function(palavra_add){
+    remissivo <<- remissivo %>% 
+        bind_rows(tibble(palavra = palavra_add, slide = slide_atual))
+
+    str_glue("**{palavra_add}**")
+    
+}
+
+
+escreve_remissivo <- function(){
+    
+    remissivo_final <- remissivo %>% 
+        slice(2:nrow(remissivo)) %>% 
+        mutate(
+            linha = row_number(),
+            link = str_glue("[{palavra}](#({slide}))\n\n")
+        ) %>% 
+        arrange(palavra)
+        
+    str_flatten(remissivo_final$link, "\n\n")
+
+}
+
+
+
+```
+
+
+
+# INTRODUÇÃO
+`r slide_atual = slide_atual + 1`
 
 ## A máquina de escrever do meu avô
+`r slide_atual = slide_atual + 1`
 
 ![](imagens/olivetti.jpg){width=50%} 
 
 
 ## Nem um Nobel escapa... 
+`r slide_atual = slide_atual + 1`
 
 
 ...da maldição do erro operacional
@@ -143,6 +129,7 @@ PS.: ele não é Nobel...
 
 
 ## Homem foi a Lua há 50 anos
+`r slide_atual = slide_atual + 1`
 
 ...e ainda...
 
@@ -153,6 +140,7 @@ Fonte: [@genetic]
 
 
 ## Objetivos do curso
+`r slide_atual = slide_atual + 1`
 
 Meta final: que vários dos processos de análise de dados da empresa passem a ser feitos dentro do fluxo de trabalho do R.
 
@@ -163,6 +151,7 @@ Fonte:[@tidyversebig]
 Ao fim do curso o objetivo é que todos os fios da meada sejam puxados para que o aluno consiga continuar por si só usando a vasta documentação disponível.
 
 ## Por que programar?
+`r slide_atual = slide_atual + 1`
 
 
 Também amo o Excel, mas amo mais as seguintes vantagens:
@@ -183,6 +172,7 @@ Também amo o Excel, mas amo mais as seguintes vantagens:
 
 
 ## Por que programar em R?
+`r slide_atual = slide_atual + 1`
 
 * Ela é feita para lidar com dados
 
@@ -196,6 +186,7 @@ Também amo o Excel, mas amo mais as seguintes vantagens:
 
 
 ## Fluxo de trabalho
+`r slide_atual = slide_atual + 1`
 
 ![](imagens/tidyverse_simplificado.png){width=50%} 
 
@@ -207,12 +198,14 @@ Fonte:[@wickham2016r]
 Fonte: [@tidyversebig]
 
 ## O processo de "Data Science"
+`r slide_atual = slide_atual + 1`
 
 ![](diagramas/cadu.png)
 
 [@cadu]
 
 ## Exemplos de onde vamos chegar
+`r slide_atual = slide_atual + 1`
 
 É muito comum possuirmos dados gerados em planilhas ou em algum suporte de formato estruturado ou semi-estruturado. 
 
@@ -231,10 +224,11 @@ Após a possível execução de modelos, podemos publicar os resultados.
 
 
 ## Ambiente R/RStudio
+`r slide_atual = slide_atual + 1`
 
 R é uma linguagem que é interpretada por um [engine](https://cran.r-project.org/) gratuito.
 
-[RStudio](https://www.rstudio.com/) é o melhor ambiente de programação da linguagem R. A versão mais simples, que é totalmente funcional, é gratuita.
+`r a_r("RStudio")` é o melhor ambiente de programação da linguagem R. A versão mais simples, que é totalmente funcional, é gratuita.
 
 ![](imagens/RStudio.png){width=50%}
 
@@ -242,6 +236,7 @@ Na visualização padrão, ele oferece um console para execução de comandos e 
 
 
 ## RStudio como console
+`r slide_atual = slide_atual + 1`
 
 No console é possível executar comandos, como o que atribui valor a uma variável
 
@@ -266,6 +261,7 @@ x + 2
 Veja o `[1]` no console. O R considera que tudo é um vetor. É uma linguagem muito baseada em operações vetoriais. Isso facilita muito as coisas quando se lida com dados.
 
 ## RStudio como IDE para um script
+`r slide_atual = slide_atual + 1`
 
 O console serve só para testes, aprendizado de novos comandos, debug, experiências etc.
 
@@ -276,6 +272,7 @@ Eles são salvos em um arquivo de extensão ".r"
 
 
 ## Funcionalidades interessantes do RStudio
+`r slide_atual = slide_atual + 1`
 
 * Atalhos de teclado: **ctrl**+**enter** (rodar linhas selecionadas), **ctrl**+**shift**+**enter** (rodar script),  **ctrl**+**1** (foco no script), **ctrl**+**2** ** (foco no console), **ctrl**+**shift**+**F10** ** (reiniciar R), **ctrl**+**shift**+**C** (comentar/descomentar bloco)  ...
 
@@ -295,6 +292,7 @@ Eles são salvos em um arquivo de extensão ".r"
 
 
 ## Baixando o material do github
+`r slide_atual = slide_atual + 1`
 
 Todo o material do curso está hospedado no Github, inclusive esta apresentação, escrita em RMarkdown.
 
@@ -309,9 +307,11 @@ Todo material é disponibilizado sob a licença [Creative Commons Attribution-No
 
 
 # FUNDAMENTOS DA LINGUAGEM
+`r slide_atual = slide_atual + 1`
     
 
 ## Tipos de valores "armazenados" por variáveis
+`r slide_atual = slide_atual + 1`
 
 Para o R, simplificando para o escopo deste curso, as variáveis "armazenam" os seguintes tipos:
 
@@ -335,6 +335,7 @@ tibble(col1 = 1:10, col2 = 11:20 )
 ```
 
 ## Tipos de valores "armazenados" por variáveis (cont.)
+`r slide_atual = slide_atual + 1`
 
 * Funções (sim... uma variável pode "armazenar" uma função)
 
@@ -366,6 +367,7 @@ get("b", e1)
 ```
 
 ## Tipos de valores "armazenados" por variáveis (cont.)
+`r slide_atual = slide_atual + 1`
 
 
 Existe orientação a objetos no R, mas não está no escopo deste curso
@@ -375,15 +377,16 @@ Note que não há variáveis que armazenam dado escalar, como já vimos.
 Dentre os vetores há:
 
 
-* vetores atômicos (seus elementos são do mesmo tipo primário)
+* `r a_r("vetores atômicos")` (seus elementos são do mesmo tipo primário)
 
-* listas (seus elementos, que são vetores atômicos, são de tipos primários diferentes)
+* `r a_r("listas")` (seus elementos, que são vetores atômicos, são de tipos primários diferentes)
 
 ![Tipos de vetores](imagens/summary-tree.png){width=25%}
 
 Fonte: [@wickham2014advanced]
 
 ## Tipos de valores "armazenados" por variáveis (cont.)
+`r slide_atual = slide_atual + 1`
 
 Os vetores atômicos podem ser dos seguintes tipos:
 
@@ -393,8 +396,9 @@ Os vetores atômicos podem ser dos seguintes tipos:
 Fonte: [@wickham2014advanced]
 
 ## Tipos de vetores atômicos
+`r slide_atual = slide_atual + 1`
 
-* Logical é um tipo booleano, aceita TRUE ou FALSE
+* `r a_r("Logical")` é um tipo booleano, aceita TRUE ou FALSE
 
 ```{r bool, echo=TRUE}
 
@@ -404,7 +408,7 @@ booleano
 
 ```
 
-* Integer é numérico e inteiro. Equivalente ao long do C++ (por isso o L na declaração)
+* `r a_r("Integer")` é numérico e inteiro. Equivalente ao long do C++ (por isso o `r a_r("L")` na declaração)
 
 ```{r integer, echo=TRUE}
 
@@ -418,8 +422,9 @@ typeof(inteiro + 1)
 ```
 
 ## Tipos de vetores atômicos (cont.)
+`r slide_atual = slide_atual + 1`
 
-* Double é numérico e aceita números decimais. Equivalente ao double do C++
+* `r a_r("Double")` é numérico e aceita números decimais. Equivalente ao double do C++
 
 ```{r double, echo=TRUE}
 
@@ -444,8 +449,9 @@ infinito
 
 
 ## Cobinando vetores em vetores maiores usando c()
+`r slide_atual = slide_atual + 1`
 
-Uma das funções mais usadas do R é c(), que cria um vetor novo vetor combinando vetores.
+Uma das funções mais usadas do R é `r a_r("c()")`, que cria um vetor novo vetor combinando vetores.
 
 ```{r c, echo=TRUE}
 
@@ -458,8 +464,9 @@ c(1, 2, 3, c(4, 5, 6))
 ```
 
 ## Outras formas de gerar um vetor
+`r slide_atual = slide_atual + 1`
 
-O operador `:` é usado para gerar um vetor com todos números que estão entre os operandos e são formados somando números inteiros ao primeiro operando.
+O operador `r a_r(":")` é usado para gerar um vetor com todos números que estão entre os operandos e são formados somando números inteiros ao primeiro operando.
 
 ```{r dois_pontos, echo=TRUE}
 
@@ -471,7 +478,7 @@ O operador `:` é usado para gerar um vetor com todos números que estão entre 
 
 ```
 
-A função `seq()` é usada para criar um vetor de várias formas. 
+A função `r a_r("seq()")` é usada para criar um vetor de várias formas. 
 
 Numa das formas especifica-se o valor inicial, o valor final e o incremento entre elementos do vetor. 
 
@@ -484,11 +491,12 @@ seq(1, 9.99, 0.1)
 ```
 
 ## Parâmetros nomeados
+`r slide_atual = slide_atual + 1`
 
 
 Note que chamamos a função passando os parâmetros sem especificação de quais são eles. Eles são recebidos pela função na ordem padrão definida pela função. 
 
-Mas no R também é possível passar parâmetros de forma nomeada. 
+Mas no R também é possível passar `r a_r("parâmetros nomeados")`. 
 
 Clique em `F1` enquanto tem o cursor em cima da função e veja a ordem dos parâmetros. Veja que outros parâmetros que não utilizamos. Podemos usar `length.out` ao invés de `by`:
 
@@ -510,8 +518,9 @@ seq(20, 100, along.with = 1:10)
 ```
 
 ## Valores faltantes NA
+`r slide_atual = slide_atual + 1`
 
-Valores faltantes ou desconecidos são representados por `NA`
+Valores faltantes ou desconecidos são representados por `r a_r("NA")`
 
 ```{r na, echo=TRUE}
 
@@ -559,6 +568,7 @@ is.na(v)
 
 
 ## Programação com vetores
+`r slide_atual = slide_atual + 1`
 
 As operações do R são vetoriais. Numa operação entre um vetor e um escalar, a operação com o escalar é aplicada a cada elemento do vetor
 
@@ -587,8 +597,9 @@ Numa operação com vetores do mesmo tamanho, os elementos são pareados
 ```
 
 ## Programação com vetores - recycling
+`r slide_atual = slide_atual + 1`
 
-Outro conceito importante é o de *recycling*. 
+Outro conceito importante é o de `r a_r("recycling")`. 
 
 Numa operação entre dois vetores de tamanhos diferentes, o vetor menor é repetido ciclicamente de forma a ficar com o mesmo tamanho do vetor maior. 
 
@@ -604,6 +615,7 @@ Então... o escalar mostrado no primeiro código do slide anterior é um vetor d
 ```
 
 ## Estruturas construídas a partir de vetores e listas
+`r slide_atual = slide_atual + 1`
 
 Existem estruturas mais complexas na linguagem construídas a partir de vetores e listas.
 
@@ -623,10 +635,11 @@ Data Frame é a estrutura que mais vamos usar para nossas análises de dados.
 
 
 ## Data Frames
+`r slide_atual = slide_atual + 1`
 
-Data Frames, e seu primo Tibble, são estruturas muito usadas em análises de dados feitas em R.
+`r a_r("Data Frame")`, e seu primo `r a_r("Tibble")`, são estruturas muito usadas em análises de dados feitas em R.
 
-O data frame consiste em um conjunto de vetores nomeados, com o mesmo número de elementos, que formam uma estrutura retangular, onde cada coluna é um vetor e cada linha n contém o n-ésimo elemento dos vetores.
+O Data Frame consiste em um conjunto de vetores nomeados, com o mesmo número de elementos, que formam uma estrutura retangular, onde cada coluna é um vetor e cada linha n contém o n-ésimo elemento dos vetores.
 
 É similar, em muitas características, a uma tabela de banco de dados.
 
@@ -659,29 +672,42 @@ tib <-
 ```
 
 ## Criando um `tibble` com `tribble()`
+`r slide_atual = slide_atual + 1`
+
+É possível criar um Tibble a partir de um código que parece uma tabela, ou seja, criar por linhas e não por colunas.
+
+Isso é feito com a função `r a_r("tribble()")`
 
 
 ```{r}
 
-
+tribble(
+  ~nome,       ~idade,      ~altura,
+  "Bruno",     41,         1.75,
+  "João",      23,         1.80,
+  "Maria",     29,         1.70,
+  "Zezinho",   31,         1.78
+)
 
 
 ```
 
 ## Controle de fluxo
+`r slide_atual = slide_atual + 1`
 
-A linguagem oferece comandos de controle de fluxo similares aos de outras linguagens.
+A linguagem oferece comandos de `r a_r("controle de fluxo")` similares aos de outras linguagens.
 
 Podemos dividir os comandos de controle de fluxo em dois tipos:
 
-* choices: execução alternativa de comandos
+* `r a_r("choices")`: execução alternativa de comandos
 
-* loops: execução repetida de comandos
+* `r a_r("loops")`: execução repetida de comandos
 
 
 ## Choices: `if`, `ifelse`
+`r slide_atual = slide_atual + 1`
 
-O comando `if` funciona para um valor lógico escalar
+O comando `r a_r("if")` funciona para um valor lógico escalar
 
 
 ```{r if}
@@ -694,11 +720,9 @@ if (2 + 2 == 4) {
 
 
 
-
-
 Note o operador de comparação `==` e não `=`
 
-A função `if_else` (da biblioteca dplyr) funciona de vetorial. `if_else` é mais rápida que a função `ifelse` da biblioteca `base`, mas só aceita argumentos de mesmo tipo no segundo e terceiro parâmetros
+A função `r a_r("if_else")` (da biblioteca dplyr) funciona de vetorial. `if_else` é mais rápida que a função `ifelse` da biblioteca `base`, mas só aceita argumentos de mesmo tipo no segundo e terceiro parâmetros
 
 ```{r jogo_pim}
 jogo_do_pim_silvio_santos <- if_else(
@@ -713,8 +737,9 @@ Note o operador `%%` e a função de coerção de tipo `as.character`
 
 
 ## Choices: `switch` e `case_when`
+`r slide_atual = slide_atual + 1`
 
-A cláusula `switch` e a função `dplyr::case_when` evitam que o programador tenha que criar muitos `if else` aninhados
+A cláusula `r a_r("switch")` e a função `r a_r("dplyr::case_when")` evitam que o programador tenha que criar muitos `if else` aninhados
 
 ```{r switch}
 letra <- "b"
@@ -728,7 +753,7 @@ switch(
 
 ```
 
-Note que a condição vai sendo testada na ordem e `stop` gera um erro
+Note que a condição vai sendo testada na ordem e `r a_r("stop")` gera um erro
 
 case_when serve ao caso vetorial
 
@@ -742,8 +767,9 @@ case_when(
 
 
 ## Loops
+`r slide_atual = slide_atual + 1`
 
-A cláusula de loop mais usada e mais versátil é `for`
+A cláusula de `r a_r("loop")` mais usada e mais versátil é `r a_r("for")`
 
 ```{r for}
 for(i in 1:5){ 
@@ -751,7 +777,7 @@ for(i in 1:5){
 }
 ```
 
-As cláusulas `next` e `break` modificam o comportamento, respectivamente caminhando direto para a próxima iteração e saindo do for
+As cláusulas `r a_r("next")` e `r a_r("break")` modificam o comportamento, respectivamente caminhando direto para a próxima iteração e saindo do for
 
 ```{r next}
 #next vai pra próxima iteração
@@ -776,6 +802,7 @@ for(i in 1:5){
 
 
 ## Loops: coisa do passado
+`r slide_atual = slide_atual + 1`
 
 Vamos ver que quase sempre é desnecessário usar loop para as tarefas que vamos executar.
 
@@ -817,9 +844,10 @@ sem_loop(5)
 ```
 
 ## Loops: coisa do passado (cont.)
+`r slide_atual = slide_atual + 1`
 
 
-A biblioteca `bench` oferece funções ótimas para avaliar a performance de pedaços pequenos de código.
+A biblioteca `r a_r("bench")` oferece funções ótimas para avaliar a performance de pedaços pequenos de código.
 
 
 ```{r bench_loop, warning=FALSE, cache=TRUE}
@@ -841,11 +869,13 @@ plot(resultados_perf)
 
 
 ## Revisão: tipos de vetores
+`r slide_atual = slide_atual + 1`
 
 ![](diagramas/vetores.png)
 
 
 ## Revisão: operações vetoriais
+`r slide_atual = slide_atual + 1`
 
 Qual o valor de v1 ?
 
@@ -862,6 +892,7 @@ v1 <- c(1, 2, 3, 4, 5, 6) * 2
 
 
 ## Revisão: operações vetoriais
+`r slide_atual = slide_atual + 1`
 
 Qual o valor de v2
 
@@ -877,6 +908,7 @@ v2 <-  c(1, 2, 3, 4) + c(0, 1)
 
 
 ## Revisão: data frames
+`r slide_atual = slide_atual + 1`
 
 
 ![](diagramas/dataframes.png)
@@ -884,10 +916,12 @@ v2 <-  c(1, 2, 3, 4) + c(0, 1)
 
 
 ## Revisão: controle de fluxo
+`r slide_atual = slide_atual + 1`
 
 ![](diagramas/controlefluxo.png){width=90%}
 
 ## Revisão: if
+`r slide_atual = slide_atual + 1`
 
 
 Complete a lacuna:
@@ -910,6 +944,7 @@ else{
 
 
 ## Revisão: if_else
+`r slide_atual = slide_atual + 1`
 
 Complete a lacuna:
 
@@ -929,6 +964,7 @@ if_else(
 
 
 ## Revisão: if_else
+`r slide_atual = slide_atual + 1`
 
 Qual o valor de x ?
 
@@ -948,6 +984,7 @@ x <- case_when(
 
 
 ## Revisão: for
+`r slide_atual = slide_atual + 1`
 
 Complete a lacuna para imprimir os quadrados dos números de 1 a 10
 
@@ -964,8 +1001,9 @@ for ____{
 
 
 ## Exemplo de simulação: Monty Hall
+`r slide_atual = slide_atual + 1`
 
-Monty Hall era uma espécie de Sílvio Santos juvenil (sub 80) americano.
+`r a_r("Monty Hall")` era uma espécie de Sílvio Santos juvenil (sub 80) americano.
 
 ![](imagens/montyhall.png){width=20%}
 
@@ -979,6 +1017,7 @@ O que vocês acham? Melhor trocar, manter a escolha original ou tanto faz?
 
 
 ## Simulando o Monty Hall
+`r slide_atual = slide_atual + 1`
 
 Note o que há de interessante no código (comentado)
 
@@ -1019,6 +1058,7 @@ sum(fica)/n
 ```
 
 ## Outra simulação: dá pra passar no CFA sem saber nada?
+`r slide_atual = slide_atual + 1`
 
 
 ![](imagens/macacocomputador.jpg){width=20%}
@@ -1026,7 +1066,7 @@ sum(fica)/n
 
 Vamos ver... mas dá pra simular sem saber quase nada.
 
-Vamos usar uma das funções da família `r<familia de distribuição de prob>()`. Neste caso, a `rbinom`, que simula a distribução binomial (aquela que equivale ao evento de jogar n moedas (ou alguma coisa com dois lados) para cima e ver quantas deram cara).
+Vamos usar uma das funções da família `r<familia de distribuição de prob>()`. Neste caso, a `r a_r("rbinom")`, que simula a distribução binomial (aquela que equivale ao evento de jogar n moedas (ou alguma coisa com dois lados) para cima e ver quantas deram cara).
 
 
 ```{r cfa}
@@ -1072,6 +1112,7 @@ mostra_chances(acertos, n_questoes)
 
 
 ## Outra simulação: dá pra passar no CFA sabendo a um grau x ?
+`r slide_atual = slide_atual + 1`
 
 O exemplo anterior era muito simplista: ninguém chuta tudo.
 
@@ -1136,9 +1177,11 @@ mostra_chances(acertos, n_questoes)
 
 
 # INTRODUÇÃO À PROGRAMAÇÃO FUNCIONAL COM PURRR
+`r slide_atual = slide_atual + 1`
 
 
-## O que é programação funcional?
+## O que é `r a_r("programação funcional")`?
+`r slide_atual = slide_atual + 1`
 
 O fato de que funções são objetos de primeira classe no R, ou seja, objetos que têm propriedades iguais às de qualquer outro, possibilita a progrmação no estilo funcional.
 
@@ -1151,8 +1194,9 @@ Neste curso vamos nos concentrar nos Functionals, funções que recebem função
 
 
 ## Função map
+`r slide_atual = slide_atual + 1`
 
-A função mais fundamental é `map()`. 
+A função mais fundamental é `r a_r("map()")`. 
 
 Ela recebe uma função e um vetor de $n$ elementos
 
@@ -1164,6 +1208,7 @@ Os resultados da aplicação destas $n$ execuções são devolvidos em uma lista
 
 
 ## Exemplo da função map
+`r slide_atual = slide_atual + 1`
 
 Uma função é um objeto como outro qualquer e pode ser colocado em uma variável
 
@@ -1183,6 +1228,7 @@ map(.x = 1:10, .f = funcao)
 
 
 ## `map` pode retornar outros tipos de objeto
+`r slide_atual = slide_atual + 1`
 
 
 
@@ -1198,6 +1244,7 @@ map_df(.x = tibble(x = 1:10), .f = funcao)
 
 
 ## Shortcuts pra funções
+`r slide_atual = slide_atual + 1`
 
 Funções podem ser declaradas inline.
 
@@ -1208,7 +1255,7 @@ map(.x = 1:5, .f = function(x){rnorm(n = 4, mean = x, sd = .2)} )
 ```
 
 
-Ou então shortcuts podem ser usados
+Ou então `r a_r("shortcuts para funções")` podem ser usados
 
 
 ```{r}
@@ -1227,19 +1274,89 @@ map(.x = 1:5, .f = rnorm, n = 4, sd = .2 )
 ```
 
 
+## Versões da `map()` para dois argumentos
+`r slide_atual = slide_atual + 1`
+
+A função `map()`possui versões para mais de um argumento.
+
+`r a_r("map2")` e suas modificações para retornos em outros tipos, como `map2_dbl()`, são preparadas para funções de dois argumentos.
+
+
 ```{r}
 
+tib_2_arg <- tribble(
+  
+  ~mean,  ~sd,
+  0,       2,
+  0,       4,
+  1,       2,
+  1,       4,
+  
+)
+  
 
+map2(
+  .x = tib_2_arg$mean, 
+  .y = tib_2_arg$sd, 
+  .f = ~rnorm(n = 4, mean = .x, sd = .y) 
+)
+
+```
+
+
+## Versões da `map()` para mais de dois argumentos
+`r slide_atual = slide_atual + 1`
+
+
+`r a_r("pmap")` e suas modificações para retornos em outros tipos, como `pmap_dbl()`, são preparadas um número ilimitado de argumentos.
+
+Uma lista de vetores nomeados deve ser passada para a `pmap()`. Esses são os argumentos passados para a função.
+
+Lembre que um Data Frame/Tibble é exatamente issouma lista de vetores nomeados.
+
+O detalhe é que os nomes dos vetores deve bater com o nome dos parâmetros da função 
+
+
+```{r}
+
+tib_n_arg <- tribble(
+  
+  ~mean,  ~sd,  ~n,
+  0,       2,   5,
+  0,       4,   5,
+  1,       2,   5,
+  1,       4,   5,
+  0,       2,   10,
+  0,       4,   10,
+  1,       2,   10,
+  1,       4,   10
+  
+)
+
+pmap(.l = tib_n_arg, .f = rnorm)
 
 
 ```
 
 
+## Vantagens da programação funcional
+`r slide_atual = slide_atual + 1`
+
+
+A programação funcional deixa o código mais expressivo e maioria das vezes mais performático
+
+Existem algumas características avançadas da programação funcional que facilitam bastante o trabalho.
+
+A principal delas é a facilidade com que podemos converter um código que roda em série para um código que roda em paralelocom a biblioteca `furrr`, que veremos adiante.
+
+
 
 
 # TIDY DATA (obtenção e organização dos dados)
+`r slide_atual = slide_atual + 1`
 
-## A habilidade mais subestimada
+## Um habilidade subestimada
+`r slide_atual = slide_atual + 1`
 
 Dentro de todo o hype envolvendo Data Science, surgem as buzz words mais mirabolantes: machine learning, AI, Deep Learning... 
 
@@ -1249,14 +1366,18 @@ A agilidade de se tentar abordagens alterativas com os dados cresce muito quando
 
 
 ## Organizando os dados de forma tidy
+`r slide_atual = slide_atual + 1`
 
-Arrumar os dados de forma que as linhas sejam eventos e as colunas sejam atributos do evento ajuda muito a rodar modelos e construir visualizações eficientemente.
+Arrumar os dados de forma que as linhas sejam eventos e as colunas sejam atributos do evento ajuda muito a rodar modelos e construir visualizações eficientemente. Esta forma de organização foi chamada de `r a_r("Tidy data")` por Hadley Wickham, o criador do conjunto de bibliotecas `Tidyverse`
 
 O que é o evento e o que é o atributo pode variar até para diferentes usos do mesmo dado. Mas a prática ajuda a determinar isso.
 
 ![](imagens/tidydata.png)
 
 ## Tratamento de dados em passos: operador Pipe (`%>%`)
+`r slide_atual = slide_atual + 1`
+
+O operador `r a_r("pipe")`, representado por `r a_r("%>% ")` é extremamente útil para análise de dados no R com uso das bibliotecas `Tidyverse`
 
 Normalmente os tratamentos de dados são feitos em múltiplos passos encadeados:
 
@@ -1271,7 +1392,7 @@ Vamos imaginar que queremos a média de PIB per capita por continente em 2007.
 
 Note quanto código desnecessário há nestas linhas: variáveis que não precisavam ser nomeadas nem passadas explicitamente como parâmetro.
 
-Este código desnecessário causa fadiga no programador e confunde o próprio programador e o leitor posterior do código.
+Este código desnecessário causa fadiga no programador, confunde o próprio autor do código e confunde ainda mais o leitor posterior do código.
 
 
 ```{r sem_pipe }
@@ -1288,6 +1409,7 @@ resultado
 ```
 
 ## Tratamento de dados em passos: operador Pipe (`%>%`) (cont.)
+`r slide_atual = slide_atual + 1`
 
 O operador pipe `%>%` faz o seguinte:
 
@@ -1321,7 +1443,9 @@ Não é por coincidência que as funções de tratamento das bibliotecas tidyver
 
 
 ## Um mapa conceitual da bibioteca de transformação de dados `dplyr`
+`r slide_atual = slide_atual + 1`
 
+`r a_r("dplyr")` é a biblioteca mais básica do conjunto `tidyverse`
 
 ![](imagens/conceptual_dplyr.jpg)
 
@@ -1329,14 +1453,15 @@ Fonte: [@dplyrrberlin]
 
 
 ## CRAN: uma Disneylândia dos dados?
+`r slide_atual = slide_atual + 1`
 
-CRAN é o repositório de bibliotecas mantido pelo R com contribuição de populares.
+`r a_r("CRAN")` é o repositório de bibliotecas mantido pelo R com contribuição de populares.
 
 Além de funcionalidades estatísticas e funcionalidades para lidar com dados, há dados e funcionalidades para buscar dados online.
 
 Usaremos várias das bases como exemplo.
 
-A primeira é a do Banco Mundial, muito rica para quem gosta de dados socioeconômicos
+A primeira é a do `r a_r("Banco Mundial")`, muito rica para quem gosta de dados socioeconômicos: `r a_r("wbstats")`
 
 Para acessar um indicador precisamos achá-lo na base de indicadores com a função `wbsearch()`
 
@@ -1366,12 +1491,14 @@ head(gini)
 
 
 ## dplyr: Modificar -> Colunas -> Nomes e posições
+`r slide_atual = slide_atual + 1`
 
 ![](diagramas/dplyr_select.png)
 
 
 
-## Funções básicas de tratamento (dplyr): select()
+## Funções básicas de tratamento (dplyr): `r a_r("select()")`
+`r slide_atual = slide_atual + 1`
 
 
 A função `select()` é usada para selecionar colunas do data frame/tibble
@@ -1406,9 +1533,10 @@ head(gini_select2)
 
 
 ## Funções básicas de tratamento (dplyr): select() (cont.)
+`r slide_atual = slide_atual + 1`
 
 
-Algumas funções *helpers* nos ajudam a usar a função `select` e são muito úteis para tratamentos mais elaborados.
+Algumas `r a_r("funções helpers da dplyr")` nos ajudam a usar a função `select` e são muito úteis para tratamentos mais elaborados.
 
 Pra mostrar mais funcionalidades da função `select`, vamos usar uma base com dados eleitorais brasileiros, que retorna mais colunas
 
@@ -1422,6 +1550,7 @@ glimpse(candidatos)
 ```
 
 ## Funções básicas de tratamento (dplyr): select() - helpers
+`r slide_atual = slide_atual + 1`
 
 
 ```{r candidatos_select}
@@ -1469,11 +1598,12 @@ datatable(head(candidatos_select))
 
 
 ## Funções básicas de tratamento (dplyr): select() - helpers (cont.)
+`r slide_atual = slide_atual + 1`
 
 
-A função *helper* num_range ajuda a encontrar colunas do tipo `prefixo_n`. Isso é muito comum em bases de dados
+A função *helper* `r a_r("num_range")` ajuda a encontrar colunas do tipo `prefixo_n`. Isso é muito comum em bases de dados
 
-A biblioteca `worldmet` retorna dados de estações meteorológicas espalhadas pelo planeta 
+A biblioteca `r a_r("worldmet")` retorna dados de `r a_r("estações meteorológicas")` espalhadas pelo planeta 
 
 Primeiro é necessário encontrar o código da base desejada
 
@@ -1488,6 +1618,7 @@ estacao
 
 
 ## Funções básicas de tratamento (dplyr): select() - helpers (cont.)
+`r slide_atual = slide_atual + 1`
 
 A função abaixo retorna os dados de uma estação. Veja que alguns campos têm um sufixo _n 
 
@@ -1520,7 +1651,7 @@ head(dados_heathrow_select)
 
 ```
 
-Outra função útil é a `everything`, que ajuda, por exemplo, a passar algumas colunas para o início do *tibble*.
+Outra função útil é a `r a_r("everything()")`, que ajuda, por exemplo, a passar algumas colunas para o início do `tibble`.
 
 
 ```{r everything}
@@ -1541,12 +1672,14 @@ glimpse(dados_heathrow_select)
 ```
 
 ## Funções básicas de tratamento (dplyr): `rename()`
+`r slide_atual = slide_atual + 1`
 
-`rename()` é usada para modificar os nomes das colunas. Ela renomeia as colunas indicadas e mantném as outras.
+`r a_r("rename()")` é usada para modificar os nomes das colunas. Ela renomeia as colunas indicadas e mantném as outras.
 
 ![](diagramas/dplyr_rename.png)
 
 ## Funções básicas de tratamento (dplyr): `rename()`
+`r slide_atual = slide_atual + 1`
 
 ```{r}
 
@@ -1561,6 +1694,7 @@ dados_heathrow %>%
 ```
 
 ## Funções básicas de tratamento (dplyr): `rename()` x `select()`
+`r slide_atual = slide_atual + 1`
 
 
 `select()` também pode ser usado para renomear colunas, mas mantém apenas as colunas citadas
@@ -1580,13 +1714,15 @@ dados_heathrow %>%
 
 
 ## dplyr: Modificar -> Colunas -> Valores
+`r slide_atual = slide_atual + 1`
 
 
-A função mutate é usada para criar novas colunas no tibble, mantendo as outras.
+A função `r a_r("mutate()")` é usada para criar novas colunas no tibble, mantendo as outras.
 ![](diagramas/dplyr_mutate.png)
 
 
 ## Funções básicas de tratamento (dplyr): `mutate()`
+`r slide_atual = slide_atual + 1`
 
 
 Notando que a coluna DATA_ELEICAO é um caracter, vamos criar uma coluna de tipo data.
@@ -1599,7 +1735,7 @@ typeof(candidatos$DATA_ELEICAO)
 ```
 
 
-O jeito mais fácil de fazer isso é usando uma das funções da biblioteca `lubridate` que veremos em detalhes em seguida
+O jeito mais fácil de fazer isso é usando uma das funções da biblioteca `r a_r("lubridate")`
 
 
 ```{r lubridate}
@@ -1628,6 +1764,7 @@ head(candidatos_com_data)
 
 
 ## Funções básicas de tratamento (dplyr): `mutate()`
+`r slide_atual = slide_atual + 1`
 
 
 funções derivadas da `mutate` possibilitam a alteração de várias colunas ao mesmo tempo, usando os mesmos helpers que já vimos para a `select` e uma função à escolha
@@ -1646,8 +1783,11 @@ head(candidatos_com_data)
 ```
 
 ## Funções básicas de tratamento (dplyr) `mutate()` (cont.):
+`r slide_atual = slide_atual + 1`
 
-Outras funções úteis são as que fazem operações acumuladas e as operações de `lag()` e `lead()`
+Outras funções úteis são as que fazem operações acumuladas e as operações de `r a_r("lag()")` e `r a_r("lead()")`.
+
+`r a_r("BETS")` é uma biblioteca criada pela FGV que dá acesso a `r a_r("séries temporais econômicas")`
 
 ```{r bets, cache = TRUE}
 
@@ -1657,7 +1797,7 @@ series
 
 ```
 
-No código abaixo, calculamos o retorno da série, a volatilidade histórica e a volatilidade EWMA
+No código abaixo, calculamos o retorno da série, a `r a_r("volatilidade histórica")` e a volatilidade `r a_r("EWMA")`
 
 ```{r bets_vol, cache = TRUE}
 
@@ -1711,8 +1851,9 @@ dolar_ajeitado %>%
 
 
 ## Funções básicas de tratamento (dplyr) `transmute()`:
+`r slide_atual = slide_atual + 1`
 
-`transmute()` cria colunas e mantém apenas as colunas citadas
+`r a_r("transmute()")` cria colunas e mantém apenas as colunas citadas
 
 
 ![](diagramas/dplyr_transmute.png)
@@ -1733,14 +1874,16 @@ gapminder %>%
 ```
 
 ## dplyr: Modificar -> Linhas -> Posição
+`r slide_atual = slide_atual + 1`
 
 
-A função `arrange` serve para ordenar as linhas do tibble.
+A função `r a_r("arrange")` serve para ordenar as linhas do tibble.
 
 ![](diagramas/dplyr_arrange.png)
 
 
 ## Funções básicas de tratamento (dplyr) `arrange()`:
+`r slide_atual = slide_atual + 1`
 
 
 
@@ -1753,7 +1896,7 @@ head(dados_ordenados)
 
 ```
 
-A função `desc()` permite a ordenação decrescente
+A função `r a_r("desc()")` permite a ordenação decrescente
 
 
 ```{r desc}
@@ -1769,15 +1912,17 @@ head(dados_ordenados)
 
 
 ## Funções básicas de tratamento (dplyr) `filter()`:
+`r slide_atual = slide_atual + 1`
 
-`filter()` seleciona colunas de acordo com os seus valores
+`r a_r("filter()")` seleciona colunas de acordo com os seus valores
 
 ![](diagramas/dplyr_filter.png)
 
 ## Funções básicas de tratamento (dplyr) `filter()` (cont.):
+`r slide_atual = slide_atual + 1`
 
 
-Filtrando países (note o operador `%in%`)
+Filtrando países (note o operador `r a_r("%in% ")`)
 
 
 ```{r}
@@ -1794,12 +1939,15 @@ gapminder %>%
 
 
 ## Funções básicas de tratamento (dplyr) `top_n()`:
+`r slide_atual = slide_atual + 1`
 
-`top_n` seleciona as `n` linhas maiores de acordo com uma das colunas.
+`r a_r("top_n()")` seleciona as `n` linhas maiores de acordo com uma das colunas.
 
 ![](diagramas/dplyr_top_n.png)
 
 ## Funções básicas de tratamento (dplyr) `top_n()` (cont.):
+`r slide_atual = slide_atual + 1`
+
 
 Selecionando os países mais ricos em 2007.
 
@@ -1818,12 +1966,14 @@ gapminder %>%
 ```
 
 ## Funções básicas de tratamento (dplyr) `top_frac()`:
+`r slide_atual = slide_atual + 1`
 
 
 ![](diagramas/dplyr_top_frac.png)
 
 
 ## Funções básicas de tratamento (dplyr) `top_frac()`:
+`r slide_atual = slide_atual + 1`
 
 
 
@@ -1855,12 +2005,15 @@ bind_rows(ricos, pobres) %>%
 
 
 ## Funções básicas de tratamento (dplyr) `slice()`:
+`r slide_atual = slide_atual + 1`
 
+`r a_r("slice()")` seleciona "linhas" de um data frame/tibble
 
 ![](diagramas/dplyr_slice.png)
 
 
 ## Funções básicas de tratamento (dplyr) `slice()`:
+`r slide_atual = slide_atual + 1`
 
 
 ```{r, cache=TRUE}
@@ -1884,15 +2037,17 @@ limbo
 
 
 ## Funções básicas de tratamento (dplyr) `group_by()`:
+`r slide_atual = slide_atual + 1`
 
 
 ![](diagramas/dplyr_group_by.png)
 
 
 ## Funções básicas de tratamento (dplyr) `group_by()`:
+`r slide_atual = slide_atual + 1`
 
 
-A função `group_by` será bastante usada.
+A função `r a_r("group_by()")` será bastante usada.
 
 Quem conhece SQL pode estranhar um pouco o comportamento desta função, pois ela não agrupa os dados diminuindo o número de linhas imediatamente.
 
@@ -1914,6 +2069,7 @@ gini_agrupado
 
 
 ## Funções básicas de tratamento (dplyr) `group_by()` (cont.):
+`r slide_atual = slide_atual + 1`
 
 Para várias operações, o agrupamento faz com que o comportamento seja diferente.
 
@@ -1935,9 +2091,10 @@ datatable(gini_agrupado)
 
 
 ## Funções básicas de tratamento (dplyr) `group_by()` (cont.):
+`r slide_atual = slide_atual + 1`
 
 
-As funções `lag()` e `lead()` funcionam dentro de cada grupo (o primeiro value de um grupo não acessa o valor do outro grupo com `lag()` .
+As funções `r a_r("lag() no contexto da group_by")` e `r a_r("lead() no contexto da group_by")` funcionam dentro de cada grupo (o primeiro value de um grupo não acessa o valor do outro grupo com `lag()` .
 
 ```{r lag}
 
@@ -1952,17 +2109,19 @@ datatable(gini_agrupado)
 
 
 ## Funções básicas de tratamento (dplyr) `summarise()` (cont.):
+`r slide_atual = slide_atual + 1`
 
 
 ![](diagramas/dplyr_summarise.png)
 
 
 ## Funções básicas de tratamento (dplyr) `group_by()` (cont.):
+`r slide_atual = slide_atual + 1`
 
 
-A função `group_by` só leva a uma sumarização, ou seja, só transforma o tibble em um tibble com o número de linhas igual ao número de grupos, quando executamos a função `summarise()`
+A função `group_by` só leva a uma sumarização, ou seja, só transforma o tibble em um tibble com o número de linhas igual ao número de grupos, quando executamos a função `r a_r("summarise()")`
 
-Se executarmos `summarise` sem particionar o tibble, a operação resulta em uma linha.
+Se executarmos `summarise()` sem particionar o tibble, a operação resulta em uma linha.
 
 
 ```{r summarise}
@@ -1984,7 +2143,7 @@ datatable(maiores_temp_dia) %>%
 
 
 
-A função `top_n` retorna os n maiores valores. Se o tibble estiver agrupado, pra cada grupo.
+A função `r a_r("top_n() no contexto da group_by()")` retorna os n maiores valores. Se o tibble estiver agrupado, pra cada grupo.
 
 
 
@@ -2018,12 +2177,14 @@ ggplot(maiores_temp_dia) +
 
 
 ## Leitura de dados de arquivos 
+`r slide_atual = slide_atual + 1`
 
 Até agora acessamos dados que estavam disponíveis em bibliotecas, mas muitas vezes encontramos dados em arquivos.
 
-De modo geral, as funções da biblioteca `readr` são mas rápidas do que as da biblioteca base, e também mostram barra de progresso no console. É possível reconhecê-las pelo `_` ao invés de `.` 
+De modo geral, as funções da biblioteca `r a_r("readr")` são mais rápidas do que as da biblioteca base, e também mostram barra de progresso no console. É possível reconhecê-las pelo `_` ao invés de `.` 
 
 ## Leitura de dados de arquivos 
+`r slide_atual = slide_atual + 1`
 
 O caso mais comum é ler dados em formato de tabela para um tibble
 
@@ -2034,23 +2195,26 @@ Fonte: [@cheatsheetimport]
 
 
 ## Leitura de dados de arquivos - Exemplo: CVM
+`r slide_atual = slide_atual + 1`
 
 
 O portal da CVM é uma das minas de ouro de dados
 
 
-O código abaixo baixa os dados que ainda não estão na nossa base
+O código abaixo baixa os dados que ainda não estão na nossa base.
+
+Note que vamos usar um `r a_r("exemplo de programação funcional")`. Semm uso de loop vamos executar uma função para cada linha do data frame/tibble.
+
+
 
 ```{r fundos, message=FALSE, warning=FALSE}
 
 existem <- tibble(arquivo = list.files("dados/fundos"))
 
 
-salva <- function(dado){
+salva <- function(endereco, arquivo){
     
-    endereco <- pull(dado, endereco)
-    arquivo <- pull(dado, arquivo)
-    
+
     print(endereco)
     conteudo <- read_csv2(endereco)
     
@@ -2071,17 +2235,14 @@ baixa_faltantes <- tibble(data_dado = seq(ymd("2017-01-01"), by = "month", ymd(t
     mutate(arquivo = paste("inf_diario_fi_",data_formato,".csv")) %>% 
     anti_join(existem, by = c("arquivo" = "arquivo")) %>% 
     select(-data_formato) %>% 
-    group_by(data_dado) %>% 
-    nest() %>% 
-    mutate(data = map(data, salva ))
+    mutate(data = pmap(.l = list(endereco, arquivo), salva))
 
 
-le_arquivo <- function(lista_arquivo){
-    
-    arquivo <- pull(lista_arquivo, arquivo)
-    
-    conteudo <- read_csv(arquivo)
-    
+le_arquivo <- function(arquivo){
+  
+    print(arquivo)
+      
+    conteudo <- read_csv(arquivo, progress = FALSE)
 
     conteudo
     
@@ -2089,10 +2250,8 @@ le_arquivo <- function(lista_arquivo){
 
 
 todos_os_fundos <- tibble(arquivo = list.files("dados/fundos")) %>%
-    mutate(arquivo = paste0("dados/fundos/",arquivo )) %>% 
-    group_by(row_number()) %>% 
-    nest() %>% 
-    mutate(data = map(data, le_arquivo)) %>% 
+    mutate(arquivo = paste0("dados/fundos/",arquivo )) %>%
+    mutate(data = map(arquivo, le_arquivo)) %>% 
     unnest()
 
 
@@ -2122,9 +2281,12 @@ cotas_verde
 
 
 
-## Leitura de conteúdo de páginas WEB
+## Leitura de conteúdo de páginas web
+`r slide_atual = slide_atual + 1`
 
-Uma página WEB pode ser representada por uma árvore de objetos, também chamada de DOM (Document Object Model).
+Para efetuar a `r a_r("leitura de páginas WEB")`, é necessário conhecer como é a estrutura de uma página web.
+
+Uma página web pode ser representada por uma árvore de objetos, também chamada de `r a_r("DOM (Document Object Model)")`.
 
 Esta árvore de objetos é definida pelo conteúdo de linguagem html que existe na página (e pode ser modificado por scripts em javascript e definições de estilo do CSS).
 
@@ -2134,6 +2296,7 @@ Podem existir objetos de vários tipos em uma página: links, inputs de dados, t
 
 
 ## Leitura de conteúdo de páginas WEB (cont.)
+`r slide_atual = slide_atual + 1`
 
 
 Para retirar da página web o conteúdo de que precisamos, temos que analisar como é esta árvore de objetos e que nós desta árvore nos interessam.
@@ -2146,10 +2309,11 @@ A tecla F12 do Chrome nos permite ver a árvore DOM da página em que estamos na
 
 
 ## Leitura de conteúdo de páginas WEB (cont.)
+`r slide_atual = slide_atual + 1`
 
-É possível clicar com o botão direito e inspecionar um elementos específico de forma a saber onde ele está na árvore e que tipo de elemento ele é (mesmo que você saiba pouco de html).
+É possível clicar com o botão direito e inspecionar um elemento específico de forma a saber onde ele está na árvore e que tipo de elemento ele é (mesmo que você saiba pouco de `r a_r("html")`).
 
-O mais importante é saber que uma tag html que define um elemento tem a sintaxe:
+O mais importante é saber que uma `r a_r("tag html")` que define um elemento tem a sintaxe:
 
 `<tipo_elemento nome_atributo=valor_attributo>texto do elemento</tipo_elemento>`
 
@@ -2161,11 +2325,12 @@ Mesmo sem saber hmtl, fica claro que queremos esse tal de atributo `href` dos ta
 
 
 ## Leitura de conteúdo de páginas WEB (cont.)
+`r slide_atual = slide_atual + 1`
 
 
-A biblioteca `rvest` possibilita a extração destes elementos.
+A biblioteca `r a_r("rvest")` possibilita a extração destes elementos.
 
-É possível caminhar pela árvore DOM até os nós desejados e atributos que queremos usando `html_nodes` e `html_attr`. 
+É possível caminhar pela árvore DOM até os nós desejados e atributos que queremos usando `r a_r("html_nodes()")` e `r a_r("html_attr()")`. 
 
 Munidos de uma função que faz download e salva um arquivo, podemos caminhar pelas planilhas e salvá-las
 
@@ -2175,11 +2340,13 @@ Munidos de uma função que faz download e salva um arquivo, podemos caminhar pe
 existem <- tibble(arquivo = list.files("dados/titulos"))
 
 
-salva_planilha <- function(dado){
+salva_planilha <- function(name, endereco){
     
-    arquivo <- pull(dado, endereco)
-    destino <- pull(dado, name_in)
-    
+    arquivo <- endereco
+    destino <- name
+
+    print(arquivo)
+        
     download.file(
         arquivo, 
         paste0("dados/titulos/",destino,".xls" ),
@@ -2199,31 +2366,33 @@ links <- read_html("https://sisweb.tesouro.gov.br/apex/f?p=2031:2:0::::") %>%
     anti_join(existem, by = c("destino" = "arquivo")) %>%
     select(-destino) %>% 
     mutate(endereco = paste0("https://sisweb.tesouro.gov.br/apex/",endereco) ) %>% 
-    mutate(name_in = name) %>% 
-    group_by(name) %>% 
-    nest() %>% 
-    mutate(data = map(data, salva_planilha ))
+    mutate(data = map2(name, endereco, salva_planilha ))
 
 ```
 
 
 ## Leitura de conteúdo de planilhas Excel
+`r slide_atual = slide_atual + 1`
 
+vamos aproveitar as planilhas que baixamos para ver como podemos efetuar a `r a_r("leitura de planilhas Excel")`.
 
-Agora Vamos organizar as planilhas que lemos do site do tesouro.
+Agora vamos organizar as planilhas que lemos do site do tesouro.
 
-Vamos usar a biblioteca `read_xl`.
+Vamos usar a biblioteca `r a_r("read_xl")`.
 
 Precisamos ler todas as sheets de todos os arquivos em um diretório (onde baixamos os arquivos excel do site do tesouro).
 
 A função abaixo lê as sheets de um arquivo.
 
+Aqui fazemos o primeiro uso de uma funçãoda biblioteca `r a_r("stringr")`, que trata strings, ou seja, cadeias de caracteres. 
+
+A função `r a_r("str_glue()")` possibilita a criação de novas strings a partir de variáveis já existentes de uma forma expressiva.
+
 
 ```{r le_sheets, warning=FALSE  }
-le_sheets <- function(dados){
+le_sheets <- function(arquivo){
     
-    arquivo <- pull(dados, arquivo)
-    excel_sheets(paste0("dados/titulos/",arquivo)) 
+  excel_sheets(str_glue("dados/titulos/{arquivo}")) 
     
 }
 ```
@@ -2233,12 +2402,10 @@ A função abaixo lê o conteúdo de cada sheet
 
 
 ```{r le_conteudo_sheets, warning=FALSE }
-le_conteudo_sheet <- function(dados){
+le_conteudo_sheet <- function(arquivo, sheet){
     
-    arquivo <- pull(dados, arquivo)
-    sheet <- pull(dados, sheet)
     read_excel(
-        paste0("dados/titulos/",arquivo),
+        str_glue("dados/titulos/{arquivo}"),
         sheet = sheet,
         skip = 2,
         col_names = FALSE,
@@ -2249,6 +2416,7 @@ le_conteudo_sheet <- function(dados){
 ```
 
 ## Leitura de conteúdo de planilhas Excel (cont.)
+`r slide_atual = slide_atual + 1`
 
 
 Munidos destas duas funções, podemos guardar tudo em um só data frame.
@@ -2258,39 +2426,43 @@ Primeiro, definindo as sheets a ler
 ```{r arruma_titulos, warning=FALSE, cache=TRUE}
 sheets_pra_ler <- list.files("dados/titulos") %>% 
     enframe(value = "arquivo") %>%
-    mutate(arquivo_out = arquivo) %>% 
-    group_by(name, arquivo_out) %>% 
-    nest() %>% 
-    mutate(data = map(data, le_sheets)) %>% 
-    unnest() %>% 
-    rename(
-        arquivo = arquivo_out,
-        sheet = data
-    )
+    mutate(sheet = map(arquivo, le_sheets)) %>% 
+    unnest(cols = sheet) 
 ```
 
 Depois lendo as sheets para um data frame
 
+Neste momento, vamos executar a função em `r a_r("processamento paralelo")`, usando todos os processadores da nossa máquina.
+
+Para isso, vamos lançar mão da biblioteca `r a_r("furrr")`%.
+
+Ela contém adaptações de todas as funções map. São as funções baseadas na `r a_r("future_map")`.
+
+Antes de rodar a future_map, determinamos a forma de paralelização. No nosso caso, plan(multiprocess).
+
+É legal notar a forma como usamos `r a_r("expressão regular")` aqui
+
 
 ```{r arruma_titulos_1, warning=FALSE, cache=TRUE, message=FALSE }
+
+plan(multiprocess)
+
 sheets_lidas <- sheets_pra_ler %>% 
-    mutate(titulo = str_extract(sheet,"[^[0-9]]*" )) %>% 
-    mutate(vencimento = str_extract(sheet,"[0-9]{6}" )) %>% 
-    mutate(vencimento = dmy(vencimento)) %>%
-    mutate(
-        arquivo_out = arquivo,
-        sheet_out = sheet
-    ) %>% 
-    group_by(name, titulo, vencimento, arquivo_out, sheet_out) %>% 
-    nest() %>% 
-    mutate(data = map(data, le_conteudo_sheet)) %>% 
-    unnest() %>% 
-    ungroup()
+  mutate(titulo = str_extract(sheet,"[^[0-9]]*" )) %>% 
+  mutate(vencimento = str_extract(sheet,"[0-9]{6}" )) %>% 
+  mutate(vencimento = dmy(vencimento)) %>%
+  mutate(
+      arquivo_out = arquivo,
+      sheet_out = sheet
+  ) %>% 
+  mutate(data = future_map2(.x = arquivo, .y = sheet , le_conteudo_sheet, .progress = TRUE)) %>% 
+  unnest(data) 
 
 
 ```
 
 ## Leitura de conteúdo de planilhas Excel (cont.)
+`r slide_atual = slide_atual + 1`
 
 
 Uma última arrumada
@@ -2299,12 +2471,12 @@ Uma última arrumada
 ```{r arruma_titulos_2, warning=FALSE, cache=TRUE}
 taxas_titulos <- sheets_lidas %>% 
     rename(
-        data = 6,
-        taxa_compra_manha = 7,
-        taxa_venda_manha = 8,
-        pu_compra_manha = 9,
-        pu_venda_manha = 10,
-        pu_base_manha = 11
+        data = 8,
+        taxa_compra_manha = 9,
+        taxa_venda_manha = 10,
+        pu_compra_manha = 11,
+        pu_venda_manha = 12,
+        pu_base_manha = 13
     ) %>% 
     mutate(
         data = if_else(
@@ -2343,6 +2515,7 @@ taxas_titulos <- sheets_lidas %>%
 ```
 
 ## Leitura de conteúdo de planilhas Excel (cont.)
+`r slide_atual = slide_atual + 1`
 
 
 Aí fica fácil fazer a análise que desejarmos
@@ -2376,48 +2549,50 @@ ggplot(ntnb_2045) +
 
 
 ## Outro exemplo de leitura de página
+`r slide_atual = slide_atual + 1`
+
+Neste caso, precisamos entender quando requisição é feita pela página e emular essas requisições passando os parâmetros que devem ser passados via método `r a_r("POST")`.
+
+Primeiro usamos a função `r a_r("crossing")` para criar 
 
 
 ```{r, message=TRUE, warning=TRUE, cache=TRUE}
 
-library(httr)
-library(rvest)
-library(lubridate)
-library(tidyverse)
-library(magrittr)
 
 url <- "http://www.ceagesp.gov.br/entrepostos/servicos/cotacoes/#cotacao"
 
 
 le_pagina_ceagesp <- function(grupo, data){
 
-  dados <- NA 
-  try({
-    fd <- list(  
-      cot_grupo  = grupo,
-      cot_data = data
-    )
-    
-    resp <- POST(url, body=fd, encode="form")
-    
-    tabela <- content(resp) %>% 
-      html_nodes("table") %>% 
-      extract2(1) %>% 
-      html_table()
-    
-    nomes <- tabela %>% slice(2)
-    
-    dados <- tabela %>% slice(3:nrow(tabela)) %>% 
-      mutate(data = dmy(data))
-    
-    names(dados) <- c(nomes, "data_precos")
-  })
+  print(str_glue("Grupo:{grupo}, data:{data}"))
 
-  str(dados)    
+  dados <- NA 
+  fd <- list(  
+    cot_grupo  = grupo,
+    cot_data = data
+  )
   
+  resp <- POST(url, body=fd, encode="form")
+  
+  tabela <- content(resp) %>% 
+    html_nodes("table") %>% 
+    extract2(1) %>% 
+    html_table()
+  
+  nomes <- tabela %>% slice(2)
+  
+  dados <- tabela %>% slice(3:nrow(tabela)) %>% 
+    mutate(data = dmy(data))
+  
+  names(dados) <- c(nomes, "data_precos")
+
   dados
   
 }
+
+
+le_pagina_ceagesp_ignora_erro <- possibly(le_pagina_ceagesp, otherwise = NA) 
+
 
 grupos <- c(
   "FRUTAS",
@@ -2428,23 +2603,24 @@ grupos <- c(
   "PESCADOS"
 )
 
-datas <- seq(from = today()-5, by = 1, to = today()-1) %>% 
+datas <- seq(from = today()-3, by = 1, to = today()-1) %>% 
   format("%d/%m/%Y") 
 
 dados_ceagesp <-  enframe(grupos, value = "grupo", name = "id_grupo") %>%
   crossing(enframe(datas, value = "data", name = "id_data")) %>% 
-  mutate(leitura = map2(.x = grupo, .y = data, le_pagina_ceagesp )) %>% 
-  filter(!is.na(leitura)) %>% 
+  mutate(leitura = map2(.x = grupo, .y = data, le_pagina_ceagesp_ignora_erro )) %>% 
+  filter(!is.na(leitura)) %>%
   unnest(cols = leitura)
-  
 
 head(dados_ceagesp)
-  
+
+
 
 ```
 
 
 ## E quando o desenvolvedor da página web tá manguaçado?
+`r slide_atual = slide_atual + 1`
 
 Nem todas as páginas são fáceis de ler.
 
@@ -2455,6 +2631,8 @@ O nosso objeto de interesse aparece na ferramenta chamada por F12, mas não é e
 ![](imagens/pagina_bmf.png)
 
 ## Lendo páginas difíceis
+`r slide_atual = slide_atual + 1`
+
 
 Existem duas técnicas para o Web Scraping:
 
@@ -2469,6 +2647,7 @@ Na página que visualizamos da BMF, o conteúdo recebido inclui um script javasc
 
 
 ## Lendo páginas difíceis (cont.)
+`r slide_atual = slide_atual + 1`
 
 
 Conseguimos, no entanto, extrair do script as informações de que precisamos
@@ -2478,6 +2657,7 @@ Conseguimos, no entanto, extrair do script as informações de que precisamos
 
 
 ## Lendo páginas difíceis (cont.)
+`r slide_atual = slide_atual + 1`
 
 O código abaixo extrai da página as informações de que precisamos.
 
@@ -2624,7 +2804,7 @@ datatable(linhas)
 
 
 ## Lendo páginas difíceis (cont.)
-
+`r slide_atual = slide_atual + 1`
 
 Agora vamos executar para todos os dias desde janeiro de 2017.
 
@@ -5060,7 +5240,7 @@ A saída padrão impressa em problemas de classificação mostra o resultado do 
 
 
 
-```{r, message=FALSE, warning=FALSE, cache = TRUE  }
+```{r, message=FALSE, warning=FALSE, cache=TRUE  }
 
 
 model_logistic <- train( 
@@ -5997,15 +6177,72 @@ devtools::has_devel()
 New Project -> New Directory -> R Package
 
 The main difference between library() and require() is what happens if a package isn’t found. While library() throws an error, require() prints a warning message and returns FALSE. In practice, this distinction isn’t important because when building a package you should NEVER use either inside a package. See package dependencies for what you should do instead.
+ 
 
+# Apêndices
 
+## Índice remissivo
 
-
-# REFERÊNCIAS
+`r escreve_remissivo()`
 
 ## Bibliografia
 
 
+
+```{r, echo=FALSE }
+
+# TODO
+# Package
+# mature
+# actively
+# document
+# well used
+# 
+# Package ctv
+# 
+# old.packages
+# 
+# conflicted
+# 
+# T/F  e TRUE e FALSE
+# isTRUE() 
+# 
+#supressPackageStartupMessages
+#
+#message() longrunning
+
+#warning()
+
+#stop()
+
+#try
+
+#não usar "." num nome de função
+
+#Estilo: consistente
+
+# = ou <-
+
+#spaces: operadores e depois de espaço
+
+#lintr: análise de código
+
+#não use espacos em nomes de arquivos
+
+#traço é melhor. google usa traço como separador, e espressão regular usa traço como caracter
+
+#YYYY-MM-DD
+
+
+
+
+
+
+
+
+
+
+```
 
 
 
