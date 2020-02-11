@@ -2937,11 +2937,11 @@ dados_todas_as_datas <- seq.Date(
 ```
 
 ## Lendo páginas difíceis (cont.)
-
+`r slide_atual = slide_atual + 1`
 
 O data frame com todos os dados ficou assim.
 
-Veja como as funções da biblioteca `kable` e `kableExtra` dão mais controle na criação das tabelas.
+Veja como as funções da biblioteca `r a_r("kable")` e `r a_r("kableExtra")` dão mais controle na criação das tabelas.
 
 Note como ele ainda não está "Tidy". Por quê?
 
@@ -2986,7 +2986,7 @@ dados_todas_as_datas %>%
 
 
 ## Pivoteando
-
+`r slide_atual = slide_atual + 1`
 
 Reparamos que o data frame no slide anterior não está "Tidy", ou seja não está de forma que **cada linha represente um evento** e **cada coluna represente um atributo do evento**.
 
@@ -2998,22 +2998,24 @@ Isso porque é extremamente comum fazermos contas com mais de uma informação d
 
 
 ## Tidyr
+`r slide_atual = slide_atual + 1`
 
-O pacote Tidyr ajuda a arrumar os data frames dessas formas. O hex sticker dele é bem explicativo.
+O pacote `r a_r("Tidyr")` ajuda a arrumar os data frames dessas formas. O hex sticker dele é bem explicativo.
 
 
 ![](imagens/tidyr.png){width=40%}
 
 ## Tidyr - `pivot_longer()` e `pivot_wider()`
+`r slide_atual = slide_atual + 1`
 
-
-Os nomes das principais funções mudaram em setembro de 2019 (quando saiu a versão 1.0.0). Antes se chamavam `gather()` e `spread()` e agora se chamam `pivot_wider()` e `pivot_longer()`, o que é mais intuitivo.
+Os nomes das principais funções mudaram em setembro de 2019 (quando saiu a versão 1.0.0). Antes se chamavam `r a_r("gather()")` e `r a_r("spread()")` e agora se chamam `r a_r("pivot_wider()")` e `r a_r("pivot_longer()")`, o que é mais intuitivo.
 
 ![](diagramas/tidyr.png)
 
 
 
 ## Pivoteando nosso data frame com muitas linhas
+`r slide_atual = slide_atual + 1`
 
 O nosso data frame tem cada tipo de cotação em cada linha e gostaríamos que essas linhas fossem transformadas em colunas.
 
@@ -3042,7 +3044,7 @@ dados_todas_as_datas %>%
 
 
 ## Pivoteando nosso data frame com muitas colunas
-
+`r slide_atual = slide_atual + 1`
 
 É muito comum recebermos os dados com colunas que deviam ser valores de um atributo, e não um atributo em si.
 
@@ -3064,11 +3066,11 @@ read_csv2(
 
 
 ## Pivoteando nosso data frame com muitas colunas (cont.)
-
+`r slide_atual = slide_atual + 1`
 
 Acontece que "2009" não é um atributo, mas sim o valor de um atributo que deveria ser data
 
-A função `pivot_longe()` faz a operação de que precisamos.
+A função `pivot_longer()` faz a operação de que precisamos.
 
 * `data`, que é o data frame a ser tratado
 
@@ -3076,7 +3078,7 @@ A função `pivot_longe()` faz a operação de que precisamos.
 
 * `values_from`, o atributo de onde vêm os valores dos novos atributos
 
-Note também a função `separate()`, que divide colunas de acordo com caracteres separadores. 
+Note também a função `r a_r("separate()")`, que divide colunas de acordo com caracteres separadores. 
 
 
 ```{r pivot_longer, warning=FALSE, message=FALSE }
@@ -3114,8 +3116,9 @@ head(siab_familias)
 
 
 ## Pivoteando nosso data frame com muitas colunas (cont.)
+`r slide_atual = slide_atual + 1`
 
-Para pegar mais informações dos municipios, vamos ler um arquivo baixado do iBGE 
+Para pegar mais informações dos municipios, vamos ler um arquivo baixado do IBGE 
 
 
 ```{r le_municipios, message=FALSE, warning=FALSE, cache=TRUE}
@@ -3128,9 +3131,11 @@ head(municipios, n = 30)
 
 ```
 
-Ops... células mescladas
+Ops... `r a_r("células mescladas")`
 
 Não deixe o ódio tomar você...
+
+A função `r a_r("fill()")` pode te ajudar
 
 
 ```{r, message=FALSE, warning=FALSE  }
@@ -3157,12 +3162,17 @@ head(municipios_ajeitado)
 
 
 ## Combinando tibbles (dplyr)
+`r slide_atual = slide_atual + 1`
 
 Para juntar as informações de dois tibbles em um só, podemos fazer isso de três formas
 
 ![](diagramas/combinando.png)
 
 ## Combinando tibbles (tidyr): funções de join
+`r slide_atual = slide_atual + 1`
+
+
+Eis as funções de `r a_r("join de data frames")`
 
 ![](imagens/join.png)
 
@@ -3170,6 +3180,7 @@ Fonte: [@cheatsheettransform]
 
 
 ## Combinando tibbles (tidyr): exemplo funções de join:
+`r slide_atual = slide_atual + 1`
 
 Anteriormente, pegamos informações do cadastro de famílias...
 
@@ -3243,16 +3254,15 @@ numero_medio_familias <- read_excel("dados/ibge/pessoas_por_familia.xlsx", skip 
 
 
 
-
-## Tratamento de strings (caracteres) com stringr
-
-## Tratamento de datas (lubridate)
-
-## Tratamento de dados categóricos (forcats) 
-
 # VISUALIZAÇÃO DE DADOS 
+`r slide_atual = slide_atual + 1`
+
 
 ## NÃO!!! Distorções
+`r slide_atual = slide_atual + 1`
+
+Nos próximos slides vemos `r a_r("antipadrões de visualização e dados")`.
+
 
 ![](imagens/doria.png)
 
@@ -3261,6 +3271,7 @@ Fonte: [@doria]
 
 
 ## NÃO!!! Distorções II
+`r slide_atual = slide_atual + 1`
 
 Às vezes mesmo sem querer (será?)
 
@@ -3273,7 +3284,7 @@ PS. gráfico de 2014
 Fonte: [@gnews]
 
 ## NÃO!!! Estilos que atrapalham
-
+`r slide_atual = slide_atual + 1`
 
 Gráfico com sombra, 3D, estilos que dificultam a interpretação
 
@@ -3286,7 +3297,7 @@ Fonte: [@healy2018data]
 
 
 ## NÃO!!! 3D indiscriminado
-
+`r slide_atual = slide_atual + 1`
 
 O pessoal que usa Excel muitas vezes ama 3D, mas...
 
@@ -3304,7 +3315,7 @@ O pessoal que usa Excel muitas vezes ama 3D, mas...
 
 
 ## NÃO!!! Pizza maior que 100%
-
+`r slide_atual = slide_atual + 1`
 
 ![](imagens/tortamaisque100.jpg )
 
@@ -3312,6 +3323,7 @@ O pessoal que usa Excel muitas vezes ama 3D, mas...
 Fonte: [@mais100]
 
 ## MELHOR AINDA: Pizza só meio a meio
+`r slide_atual = slide_atual + 1`
 
 Assim como os restaurantes devemos servir pizzas de dois sabores no máximo
 
@@ -3324,7 +3336,7 @@ Fonte: [@pie]
 
 
 ## NÃO!!! Pizza só meio a meio (cont.)
-
+`r slide_atual = slide_atual + 1`
 
 ![](imagens/barranaopizza.png)
 
@@ -3332,6 +3344,7 @@ Fonte: [@pie]
 Fonte: [@pie]
 
 ## Com muita parcimônia: gráficos de linhas com dois eixos
+`r slide_atual = slide_atual + 1`
 
 Gráficos de dois eixos podem mostrar relações espúrias muito facilmente. E elas dependem da escolha da escala e dos limites dos eixos.
 
@@ -3346,7 +3359,9 @@ O mesmo dado pode levar aos seguintes gráficos (e suas soluções)
 
 
 ## Dicas para uma boa visualização
+`r slide_atual = slide_atual + 1`
 
+Algumas `r a_r("dicas para boa visualização de dados")`:
 
 * Enfatize o dado relevante
 
@@ -3410,8 +3425,8 @@ p + geom_point( color = "coral4") +
 
 
 ## Dicas para uma boa visualização
-
-Use small multiples: divida o gráfico em gráficos iguais menores cada um com parte dos dados, seguindo uma regra categórica
+`r slide_atual = slide_atual + 1`
+Use `r a_r("small multiples")`: divida o gráfico em gráficos iguais menores cada um com parte dos dados, seguindo uma regra categórica
 
 
 ```{r, out.width="90%"}
@@ -3442,9 +3457,10 @@ p + geom_line(color="chocolate", aes(group = country)) +
 
 
 ## GGPLOT2
+`r slide_atual = slide_atual + 1`
 
 
-GGPLOT2 é a biblioteca de visualização de dados moderna mais usada no R.
+`r a_r("ggplot2")` é a biblioteca de visualização de dados moderna mais usada no R.
 
 Muitos dos problemas listados anteriormente são tratados por ela. É até difícil causar alguns dos problemas anteriores, por exemplo as distorções. É preciso muito malabarismo para produzir um gráfico com 2 eixos.
 
