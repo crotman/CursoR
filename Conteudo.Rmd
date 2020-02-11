@@ -1,7 +1,7 @@
 ---
 title: "R para Análise de Dados"
 author: "Bruno Crotman (crotman@gmail.com)"
-date: "30/10/2019"
+date: "11/02/2020"
 output: 
     slidy_presentation: 
       css: styles.css
@@ -55,7 +55,9 @@ library(texreg)
 library(ranger)
 library(furrr)
 library(httr)
-
+library(shiny)
+library(rhandsontable)
+library(reactable)
 
 library(electionsBR)
 library(worldmet)
@@ -3468,6 +3470,7 @@ Por outro lado, a biblioteca facilita muito a criação de small multiples, a cr
 
 
 ## Filosofia
+`r slide_atual = slide_atual + 1`
 
 
 GGPLOT é baseada na filosofia de Tufte [@tufte1973visual] e Wilkinson [@wilkinsongrammar], em que os gráficos são construídos a partir de dois princípios:
@@ -3481,6 +3484,8 @@ GGPLOT é baseada na filosofia de Tufte [@tufte1973visual] e Wilkinson [@wilkins
 A GGPLOT2 parece mais complicada de usar do que funções como a `plot()` da biblioteca base do R.
 
 Talvez porque as pessoas não são sempre apresentadas às camadas da gramática "Grammar of Graphics" que fundamenta a biblioteca.
+
+As camadas da ggplot
 
 ![](imagens/camadas_ggplot.png)
 
@@ -6121,31 +6126,127 @@ shinyApp(ui, server)
 ```
 
 
-## Inserindo componentes de interface
+## Uma aplicação simples funcional
 
 
-O código abaixo insere: 
+Abaixo uma aplicação Shiny simples
 
-- Uma combo, com `selectInput`. (Há vários tipos de inputs) 
-- Uma 
+Na função ***ui() do aplicativo shiny%%%, definimos a interface.
+
+No exemplo abaixo, além dos títulos, há um select e espaços para um gráfico e duas tabelas
+
+Na função ***server() do aplicativo shiny%%%, definimos o comportamento
+
+No exemplo abaixo, definimos como o gráfico e as tabelas são gerados a partir do conteúdo do select contido na interface.
+
+Repare que há duas tabelas, cada uma gerada com uma biblioteca diferente.
+
+A biblioteca ***reactable%%% permite que tenhamos mais controle sobre a estética
+
+A biblioteca ***rhandontable%%% parece mais com uma tabela de Excel, permitindo inclusive copiar e colar os números.
+
 
 ```{r, eval=FALSE}
 
 
-library(shiny)
+selectPaises <-     
+    selectInput(
+        "pais", 
+        label = "País", 
+        choices = gapminder$country,
+        multiple = TRUE 
+    )
+
+
 ui <- fluidPage(
-  selectInput("dataset", label = "Dataset", choices = ls("package:datasets")),
-  verbatimTextOutput("summary"),
-  tableOutput("table")
+    h1("Dashboard Gapminder"),
+    hr(),
+    h3("Filtros:"),
+    selectPaises,
+    h3("Gráfico:"),
+    plotOutput("grafico"),
+    h3("Tabela bonita:"),
+    reactableOutput("tabela_reactable"),
+    h3("Tabela pros viciados:"),
+    rHandsontableOutput("tabela_rhanson")
 )
 
 server <- function(input, output, session) {
+
+    output$grafico <- renderPlot({
+        gapminder %>% 
+            filter(country %in% input$pais) %>% 
+            ggplot() +
+            geom_line(aes(x = year, y = gdpPercap, color = country )) +
+            geom_point(aes(x = year, y = gdpPercap, color = country )) +
+            theme_light()
+        
+    }) 
+
+    
+    output$tabela_reactable <- renderReactable({
+        
+        gapminder %>% 
+            filter(country %in% input$pais) %>%
+            select(
+                country,
+                year,
+                gdpPercap
+            ) %>% 
+            pivot_wider(
+                names_from = year,
+                values_from = gdpPercap
+            ) %>% 
+            reactable(
+                defaultColDef = colDef(
+                    format = colFormat(digits = 0, separators = TRUE) 
+                )
+            )
+            
+    })
+        
+    
+    output$tabela_rhanson <- renderRHandsontable({
+        gapminder %>% 
+            filter(country %in% input$pais) %>%
+            select(
+                country,
+                year,
+                gdpPercap
+            ) %>% 
+            pivot_wider(
+                names_from = year,
+                values_from = gdpPercap
+            ) %>% 
+            mutate_at(
+                vars(matches("[0-9]{4}")),
+                ~round(x = .x, digits = 0)
+            ) %>% 
+            rhandsontable(
+                readOnly = TRUE
+            ) %>% 
+            hot_cols(
+                format = "0,000",
+                language = "pt-BR"
+            )
+        
+    })
+    
+    
 }
+
 
 shinyApp(ui, server)
 
 
 ```
+
+
+
+## O objeto reactive
+
+
+
 
 
 ## Criando relatórios com R Markdown
