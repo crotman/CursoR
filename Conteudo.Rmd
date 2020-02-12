@@ -2923,7 +2923,7 @@ E executamos para todos os dias.
 ```{r le_di,  warning=FALSE, message=FALSE, cache=TRUE}
 
 dados_todas_as_datas <- seq.Date(
-        ymd("2017-01-01"), 
+        ymd("2020-01-01"), 
         to = today(), 
         by = "day") %>% 
     enframe() %>% 
@@ -6243,7 +6243,7 @@ shinyApp(ui, server)
 
 
 
-## O objeto reactive
+## Programação reativa  
 
 
 
