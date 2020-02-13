@@ -6245,6 +6245,97 @@ shinyApp(ui, server)
 
 ## Programação reativa  
 
+Diferentemente da programação feita em scripts, a execução no Shiny não segue a ordem dos comandos. É o conceito da ***programação reativa%%%
+
+A execução das funções do tipo render (que já vimos), reactive, observe e observeEvent é preguiçosa. Só acontece quando os inputs são alterados.
+
+No caso do nosso aplicativo simples, apenas quando o input "pais" é alterado, as funções render relativas aos outputs (gráfico e tabela) são executadas.
+
+![](diagramas/reactive_1.png)
+
+## Produtores e consumidores
+
+Temos 2 papéis para os objetos: produtores e consumidores
+
+Os inputs são produtores e os outputs são consumidores.
+
+Vamos começar a ver agora objetos que funcionam tanto como produtores como consumidores.
+
+As ***reactive expressions do shiny%%% são objetos que assumem os dois papéis.
+
+Elas possibilitam que cálculos e tratamentos que são comuns a várias saídas sejam executados apenas uma vez. 
+
+
+
+## Leaflet
+
+
+<!-- library(RSelenium) -->
+<!-- library(rvest) -->
+<!-- library(httr) -->
+<!-- library(magrittr) -->
+
+<!-- # initiate selenium     -- start it this way every time -->
+<!-- # make sure the location of firefox on your machine is correct -->
+<!-- rs <- rsDriver( -->
+<!--   browser = "firefox",  -->
+<!--   extraCapabilities = list( -->
+<!--     `mox:firefoxOptions` = list( -->
+<!--       binary = "C:/Program Files (x86)/Mozilla Firefox/firefox.exe" -->
+<!--     ) -->
+<!--   ) -->
+<!-- ) -->
+
+
+<!-- preparou <-  function(){ -->
+<!--   outputzipfile <- "nada" -->
+<!--   try(outputzipfile <- rsc$findElement(using = "xpath", "/html/body/div[2]/div[1]/div/div[13]/div[2]/div/div/div[3]/div[2]/div[2]/div[2]/div/div[1]"))   -->
+<!--   if(typeof(outputzipfile) == "S4"){ -->
+<!--     resposta <- outputzipfile$getElementText() == "Output Zip File" -->
+<!--   } -->
+<!--   else{ -->
+<!--     resposta <-  FALSE -->
+<!--   } -->
+
+<!--   resposta -->
+
+<!-- } -->
+
+
+<!-- rsc <- rs$client -->
+
+<!-- rsc$navigate("https://sigel.aneel.gov.br/Down/") -->
+
+<!-- imagem <- rsc$findElement(using = "css selector",  "#uniqName_9_1 > div:nth-child(1)" ) -->
+
+<!-- imagem$clickElement() -->
+
+<!-- Sys.sleep(3) -->
+
+<!-- UHE <- rsc$findElement(using = "xpath", "/html/body/div[2]/div[1]/div/div[13]/div[2]/div/div/div[3]/div[2]/div[1]/div[1]/div[1]/div[2]/div/div[3]/div[1]") -->
+
+<!-- UHE$clickElement() -->
+
+<!-- GD <- rsc$findElement(using = "xpath", "/html/body/div[2]/div[1]/div/div[13]/div[2]/div/div/div[3]/div[2]/div[1]/div[1]/div[1]/div[2]/div/div[1]/div[1]") -->
+
+<!-- GD$clickElement() -->
+
+<!-- baixar <- rsc$findElement(using = "xpath", "/html/body/div[2]/div[1]/div/div[13]/div[2]/div/div/div[3]/div[2]/div[1]/div[2]/div[2]/div") -->
+
+<!-- baixar$clickElement() -->
+
+<!-- while(!preparou()){ -->
+
+<!--   print("esperando") -->
+<!--   Sys.sleep(1) -->
+
+<!-- } -->
+
+<!-- arquivo_download <- rsc$findElement(using = "xpath", "/html/body/div[2]/div[1]/div/div[13]/div[2]/div/div/div[3]/div[2]/div[2]/div[2]/div/div[2]/div/a") -->
+
+<!-- endereco <- arquivo_download$getElementText() -->
+
+<!-- download.file(url = unlist(endereco), destfile = "c:\\temp\\gd.zip") -->
 
 
 
