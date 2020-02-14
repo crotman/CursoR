@@ -58,6 +58,10 @@ library(httr)
 library(shiny)
 library(rhandsontable)
 library(reactable)
+library(RSelenium)
+library(sf)
+library(leaflet)
+library(ggmap)
 
 library(electionsBR)
 library(worldmet)
@@ -2621,6 +2625,118 @@ head(dados_ceagesp)
 ```
 
 
+## Leitura de página como um robô
+`r slide_atual = slide_atual + 1`
+
+
+Em dois casos precisamos emular um browser para obter o conteúdo html que desejamos, para então usar a `rvest`
+
+- Quando a página precisa executar um script javascript para que fique pronta
+
+- Quando a página exige muitos passos de navegação antes de chegarmos aos dados desejados;
+
+
+## Usando Selenium
+`r slide_atual = slide_atual + 1`
+
+
+***Selenium%%% é um famoso automatizador de browser. Através dele, é possível enviar cliques, preencher caixas de texto etc. até se chegar aos dados desejados. Além disso, ele executa os scripts javascripts que a página exige.
+
+A biblioteca ***RSelenium%%% possibilita o uso na linguagem R
+
+Abaixo um exemplo de ativação do firefox a partir do R com RSelenium
+
+```{r, eval=FALSE }
+
+rs <- rsDriver(
+    browser = "firefox",
+    extraCapabilities = list(
+        `mox:firefoxOptions` = list(
+            binary = "C:/Program Files (x86)/Mozilla Firefox/firefox.exe"
+        )
+    )
+)
+
+
+```
+
+
+## Baixando dados da ANEEL
+`r slide_atual = slide_atual + 1`
+
+```{r}
+
+library(RSelenium)
+library(rvest)
+library(httr)
+library(magrittr)
+
+# initiate selenium     -- start it this way every time
+# make sure the location of firefox on your machine is correct
+rs <- rsDriver(
+  browser = "firefox", 
+  extraCapabilities = list(
+    `mox:firefoxOptions` = list(
+      binary = "C:/Program Files (x86)/Mozilla Firefox/firefox.exe"
+    )
+  )
+)
+
+
+preparou <-  function(){
+  outputzipfile <- "nada"
+  try(outputzipfile <- rsc$findElement(using = "xpath", "/html/body/div[2]/div[1]/div/div[13]/div[2]/div/div/div[3]/div[2]/div[2]/div[2]/div/div[1]"))  
+  if(typeof(outputzipfile) == "S4"){
+    resposta <- outputzipfile$getElementText() == "Output Zip File"
+  }
+  else{
+    resposta <-  FALSE
+  }
+  
+  resposta
+  
+}
+
+
+rsc <- rs$client
+
+rsc$navigate("https://sigel.aneel.gov.br/Down/")
+
+imagem <- rsc$findElement(using = "css selector",  "#uniqName_9_1 > div:nth-child(1)" )
+
+imagem$clickElement()
+
+Sys.sleep(3)
+
+UHE <- rsc$findElement(using = "xpath", "/html/body/div[2]/div[1]/div/div[13]/div[2]/div/div/div[3]/div[2]/div[1]/div[1]/div[1]/div[2]/div/div[3]/div[1]")
+
+UHE$clickElement()
+
+GD <- rsc$findElement(using = "xpath", "/html/body/div[2]/div[1]/div/div[13]/div[2]/div/div/div[3]/div[2]/div[1]/div[1]/div[1]/div[2]/div/div[1]/div[1]")
+
+GD$clickElement()
+
+baixar <- rsc$findElement(using = "xpath", "/html/body/div[2]/div[1]/div/div[13]/div[2]/div/div/div[3]/div[2]/div[1]/div[2]/div[2]/div")
+
+baixar$clickElement()
+
+while(!preparou()){
+  
+  print("esperando")
+  Sys.sleep(1)
+  
+}
+  
+arquivo_download <- rsc$findElement(using = "xpath", "/html/body/div[2]/div[1]/div/div[13]/div[2]/div/div/div[3]/div[2]/div[2]/div[2]/div/div[2]/div/a")
+
+endereco <- arquivo_download$getElementText()
+
+download.file(url = unlist(endereco), destfile = "c:\\temp\\gd.zip")
+
+
+```
+
+
 ## E quando o desenvolvedor da página web tá manguaçado?
 `r slide_atual = slide_atual + 1`
 
@@ -3633,6 +3749,7 @@ ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width)) +
 ![](diagramas/graficos.png)
 
 
+
 ## Escolhendo o melhor gráfico: distribuição (variável discreta)
 
 
@@ -4312,7 +4429,6 @@ ggpairs(hdi_tudo)  +
 
 
 ## Composição: no tempo, poucos períodos, valores relativos
-
 
 
 
@@ -6266,78 +6382,178 @@ As ***reactive expressions do shiny%%% são objetos que assumem os dois papéis.
 Elas possibilitam que cálculos e tratamentos que são comuns a várias saídas sejam executados apenas uma vez. 
 
 
-
-## Leaflet
-
-
-<!-- library(RSelenium) -->
-<!-- library(rvest) -->
-<!-- library(httr) -->
-<!-- library(magrittr) -->
-
-<!-- # initiate selenium     -- start it this way every time -->
-<!-- # make sure the location of firefox on your machine is correct -->
-<!-- rs <- rsDriver( -->
-<!--   browser = "firefox",  -->
-<!--   extraCapabilities = list( -->
-<!--     `mox:firefoxOptions` = list( -->
-<!--       binary = "C:/Program Files (x86)/Mozilla Firefox/firefox.exe" -->
-<!--     ) -->
-<!--   ) -->
-<!-- ) -->
+## Usando reactive para evitar duplicação
 
 
-<!-- preparou <-  function(){ -->
-<!--   outputzipfile <- "nada" -->
-<!--   try(outputzipfile <- rsc$findElement(using = "xpath", "/html/body/div[2]/div[1]/div/div[13]/div[2]/div/div/div[3]/div[2]/div[2]/div[2]/div/div[1]"))   -->
-<!--   if(typeof(outputzipfile) == "S4"){ -->
-<!--     resposta <- outputzipfile$getElementText() == "Output Zip File" -->
-<!--   } -->
-<!--   else{ -->
-<!--     resposta <-  FALSE -->
-<!--   } -->
+Na aplicação que desenhamos anteriormente, o select de país filtra da mesma forma os dados que são mostrados no gráfico e nas tabelas.
 
-<!--   resposta -->
+Podemos inserir um reactive que vai realizar esse tratamento que é comum a todas as saídas de uma só vez.
 
-<!-- } -->
+Assim evitamos mais facilmente, também, duplicar código.
 
 
-<!-- rsc <- rs$client -->
-
-<!-- rsc$navigate("https://sigel.aneel.gov.br/Down/") -->
-
-<!-- imagem <- rsc$findElement(using = "css selector",  "#uniqName_9_1 > div:nth-child(1)" ) -->
-
-<!-- imagem$clickElement() -->
-
-<!-- Sys.sleep(3) -->
-
-<!-- UHE <- rsc$findElement(using = "xpath", "/html/body/div[2]/div[1]/div/div[13]/div[2]/div/div/div[3]/div[2]/div[1]/div[1]/div[1]/div[2]/div/div[3]/div[1]") -->
-
-<!-- UHE$clickElement() -->
-
-<!-- GD <- rsc$findElement(using = "xpath", "/html/body/div[2]/div[1]/div/div[13]/div[2]/div/div/div[3]/div[2]/div[1]/div[1]/div[1]/div[2]/div/div[1]/div[1]") -->
-
-<!-- GD$clickElement() -->
-
-<!-- baixar <- rsc$findElement(using = "xpath", "/html/body/div[2]/div[1]/div/div[13]/div[2]/div/div/div[3]/div[2]/div[1]/div[2]/div[2]/div") -->
-
-<!-- baixar$clickElement() -->
-
-<!-- while(!preparou()){ -->
-
-<!--   print("esperando") -->
-<!--   Sys.sleep(1) -->
-
-<!-- } -->
-
-<!-- arquivo_download <- rsc$findElement(using = "xpath", "/html/body/div[2]/div[1]/div/div[13]/div[2]/div/div/div[3]/div[2]/div[2]/div[2]/div/div[2]/div/a") -->
-
-<!-- endereco <- arquivo_download$getElementText() -->
-
-<!-- download.file(url = unlist(endereco), destfile = "c:\\temp\\gd.zip") -->
+![](diagramas/reactive_2.png)
 
 
+## Reactive expressions
+
+
+Esta é a sintaxe das ***reactive expressions%%%.
+
+```{r, eval=FALSE }
+
+selectPaises <-     
+    selectInput(
+        "pais", 
+        label = "País", 
+        choices = gapminder$country,
+        multiple = TRUE 
+    )
+
+
+ui <- fluidPage(
+    h1("Dashboard Gapminder"),
+    hr(),
+    h3("Filtros:"),
+    selectPaises,
+    h3("Gráfico:"),
+    plotOutput("grafico"),
+    h3("Tabela bonita:"),
+    reactableOutput("tabela_reactable"),
+    h3("Tabela pros viciados:"),
+    rHandsontableOutput("tabela_rhanson")
+)
+
+server <- function(input, output, session) {
+    
+    
+    
+    dados_filtrados <- reactive({
+        
+        gapminder %>% 
+            filter(country %in% input$pais)
+        
+    })
+    
+    
+    output$grafico <- renderPlot({
+            dados_filtrados() %>% 
+            ggplot() +
+            geom_line(aes(x = year, y = gdpPercap, color = country )) +
+            geom_point(aes(x = year, y = gdpPercap, color = country )) +
+            theme_light()
+        
+    }) 
+    
+    
+    output$tabela_reactable <- renderReactable({
+        
+        dados_filtrados() %>% 
+            select(
+                country,
+                year,
+                gdpPercap
+            ) %>% 
+            pivot_wider(
+                names_from = year,
+                values_from = gdpPercap
+            ) %>% 
+            reactable(
+                defaultColDef = colDef(
+                    format = colFormat(digits = 0, separators = TRUE) 
+                )
+            )
+        
+    })
+    
+    
+    output$tabela_rhanson <- renderRHandsontable({
+
+        dados_filtrados() %>% 
+            select(
+                country,
+                year,
+                gdpPercap
+            ) %>% 
+            pivot_wider(
+                names_from = year,
+                values_from = gdpPercap
+            ) %>% 
+            mutate_at(
+                vars(matches("[0-9]{4}")),
+                ~round(x = .x, digits = 0)
+            ) %>% 
+            rhandsontable(
+                readOnly = TRUE
+            ) %>% 
+            hot_cols(
+                format = "0,000",
+                language = "pt-BR"
+            )
+        
+    })
+    
+    
+}
+
+
+shinyApp(ui, server)
+
+
+
+
+```
+
+
+
+## Visualização Geoespacial
+
+A biblioteca ***sf%%% tem várias funções para lidar com dados geoespaciais.
+
+A função ***st_read%%% lê vários formatos de dados geoespaciais para um objeto da classe `sf`, ou `simple features`.
+
+
+
+```{r }
+
+gd <- st_read("dados/gd/Geração_Distribuída.shp")
+
+
+```
+
+
+## Classe sf
+
+`sf` é uma classe que extende a classe data.frame contendo uma coluna de dados geoespaciais.
+
+Cada linha do data.frame é relacionada a um dado geoespacial, que pode ser um ponto, um polígono etc.
+
+```{r}
+
+str(gd)
+
+
+```
+
+
+```{r }
+
+gd_sample <- gd %>% 
+  sample_n(1000)
+
+
+brazil <- c(left = -75, bottom = -36, right = -30, top =5)
+
+get_stamenmap(brazil, zoom = 5, maptype = "toner-lite") %>% 
+  ggmap() +
+  geom_sf(data = gd_sample, inherit.aes = FALSE)
+
+ggplot() +
+  geom_sf(data = gd_sample)
+
+
+
+```
 
 
 ## Criando relatórios com R Markdown
