@@ -6537,6 +6537,61 @@ str(gd)
 ```
 
 
+
+## Operações espaciais com sf
+
+
+```{r}
+
+enderecos <- tribble(
+  
+  ~nome,    ~endereco,
+  "RB1",    "Avenida Rio Branco 1, Centro, Rio de Janeiro",
+  "Marques dos Reis",    "Praça Pio X 54, Centro, Rio de Janeiro"
+  
+) 
+
+
+enderecos_com_geo <- enderecos %>% 
+  mutate_geocode(location = endereco)
+
+enderecos_id <- enderecos_com_geo %>% 
+  mutate(id = row_number()) 
+
+comb_1 <- enderecos_id %>% 
+  rename_all(function(x){str_glue("{x}_1")})
+
+comb_2 <- enderecos_id %>% 
+  rename_all(function(x){str_glue("{x}_2")})
+
+
+
+ponto_4326 <- function (lat, lon){
+  st_point(c(lat, lon)) %>% 
+    st_sfc(crs = 4326)
+}
+
+enderecos_combinados <- comb_1 %>% 
+  crossing(comb_2) %>% 
+  filter(id_1 < id_2) %>% 
+  mutate(
+    ponto_1 = map2(.x = lon_1, .y = lat_1, .f = ponto_4326 ) ,
+    ponto_2 = map2(.x = lon_2, .y = lat_2, .f = ponto_4326 ) ,
+    dist = map2(.x = ponto_1, .y = ponto_2, st_distance ) 
+  )
+
+
+
+
+
+
+```
+
+
+
+
+
+
 ## Biblioteca ggmap
 
 A biblioteca ***ggmap%%% deixa que usemos um background em um plot de mapa.
@@ -6623,6 +6678,13 @@ ggmap(ggmap = map) +
 
 
 ## Dashboard exemplo
+
+
+Este dashboard de exemplo tem algumas funcionalidades interessantes que vamos explorar nos próximos slides
+
+
+[Dashboard GD]((https://https://crotman.shinyapps.io/DashboardGD/))
+
 
 
 ```{r, eval=FALSE}
@@ -7018,58 +7080,46 @@ shinyApp(ui, server)
 ```
 
 
+## Mapa interativo
 
-## Operações espaciais com sf
+O usuário pode selecionar áreas do mapa.
 
+A seleção dessa área leva a uma seleção de pontos
 
-```{r}
+Essa opção é habilitada com `brushOpts` e os pontos selecionados são acessados com `brushedPoints`
 
-enderecos <- tribble(
-  
-  ~nome,    ~endereco,
-  "RB1",    "Avenida Rio Branco 1, Centro, Rio de Janeiro",
-  "Marques dos Reis",    "Praça Pio X 54, Centro, Rio de Janeiro"
-  
-) 
+Este tipo de interação pode ser usado com qualquer tipo de gráfico
 
+## Spinner de espera
 
-enderecos_com_geo <- enderecos %>% 
-  mutate_geocode(location = endereco)
+Esta aplicação lida com mais de 100.000 dados a respeito de instalações de geração distribuída.
 
-enderecos_id <- enderecos_com_geo %>% 
-  mutate(id = row_number()) 
+Portanto, o gráfico demora um pouco para ser plotado.
 
-comb_1 <- enderecos_id %>% 
-  rename_all(function(x){str_glue("{x}_1")})
-
-comb_2 <- enderecos_id %>% 
-  rename_all(function(x){str_glue("{x}_2")})
+Para que o usuário saiba que a aplicação está calculando alguma coisa e não travada, usamos um `waiter`
 
 
+## Uso de váriáveis globais de estado
 
-ponto_4326 <- function (lat, lon){
-  st_point(c(lat, lon)) %>% 
-    st_sfc(crs = 4326)
-}
+Algumas variáveis de estado são criadas para ajudar a controlar a aplicação.
 
-enderecos_combinados <- comb_1 %>% 
-  crossing(comb_2) %>% 
-  filter(id_1 < id_2) %>% 
-  mutate(
-    ponto_1 = map2(.x = lon_1, .y = lat_1, .f = ponto_4326 ) ,
-    ponto_2 = map2(.x = lon_2, .y = lat_2, .f = ponto_4326 ) ,
-    dist = map2(.x = ponto_1, .y = ponto_2, st_distance ) 
-  )
+Elas são atribuídas com o operador `<<-`
 
+## Programando com Tidy evaluation
 
+O Tidy evaluation deixa que usemos os nomes dos campos sem aspas.
 
+Em aplicações Shiny exploratórias, é comum que os campos que participam dos agrupamentos ou dos cálculos sejam escolhidos pelo usuário. Portanto, estes campos estarão no comteúdo de variáveis.
 
+Para que as funções do tidyverse usem o conteúdo da variável como o campo a ser considerado (e não o próprio nome da variável), temos que lançar mão das funções `group_by_at`, `summarise_at`, `.data[[variável]]` e o operador `!!`.
 
+## Diagramação da página
 
-```
+A diagramação da página é toda feita com as funções de diagramação do Shiny. 
 
+Entretanto, cada objeto é definido anteriormente, o que é diferente do template que é gerado pelo RStudio quando um template Shiny é gerado.
 
-
+Isso parece besteira, mas separar a criação dos objetos da diagramação destes objetos facilita muito uma reorganizaçào da diagramação e causa menos problemas relacionados a erros de sintaxe como falta de vírgulas e parênteses
 
 ## Criando relatórios com R Markdown
 
