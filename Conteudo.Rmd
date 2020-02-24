@@ -2641,9 +2641,9 @@ Em dois casos precisamos emular um browser para obter o conteúdo html que desej
 `r slide_atual = slide_atual + 1`
 
 
-***Selenium%%% é um famoso automatizador de browser. Através dele, é possível enviar cliques, preencher caixas de texto etc. até se chegar aos dados desejados. Além disso, ele executa os scripts javascripts que a página exige.
+`r a_r("Selenium")` é um famoso automatizador de browser. Através dele, é possível enviar cliques, preencher caixas de texto etc. até se chegar aos dados desejados. Além disso, ele executa os scripts javascripts que a página exige.
 
-A biblioteca ***RSelenium%%% possibilita o uso na linguagem R
+A biblioteca `r a_r("RSelenium")` possibilita o uso na linguagem R
 
 Abaixo um exemplo de ativação do firefox a partir do R com RSelenium
 
@@ -3597,6 +3597,8 @@ GGPLOT é baseada na filosofia de Tufte [@tufte1973visual] e Wilkinson [@wilkins
 * Os dados ganham sentido a partir de mapeamentos a escalas, que são mapeadas a geometrias
 
 ## Camadas da GGPLOT2
+`r slide_atual = slide_atual + 1`
+
 
 A GGPLOT2 parece mais complicada de usar do que funções como a `plot()` da biblioteca base do R.
 
@@ -3610,14 +3612,18 @@ As camadas da ggplot
 Fonte: [@datacampggplot2]
 
 ## Descrição das camadas
+`r slide_atual = slide_atual + 1`
+
+
+As `r a_r("camadas da ggplot")` são as seguintes:
 
 - **Dados (data)**
 
-- **Aesthetics (aes())**: mapeamento das colunas dos dados a escalas
+- `r a_r("Aesthetics (aes())")`: mapeamento das colunas dos dados a escalas
 
-- **Geometries geoms_()**: elementos visuais que mostram os dados nas escalas
+- `r a_r("Geometries geoms_()")`: elementos visuais que mostram os dados nas escalas
 
-- **Facets**: small multiples
+- `r a_r("Facets")`: small multiples
 
 - **Statistics**: representações do dados transformadas por operações matemáticas
 
@@ -3626,6 +3632,8 @@ Fonte: [@datacampggplot2]
 - **Themes**: "non-data ink", ou seja, os elementos que não são diretamente plotados pela existência de dados 
 
 ## Elementos das camadas
+`r slide_atual = slide_atual + 1`
+
 
 ![](imagens/elementos_ggplot.png)
 
@@ -3633,6 +3641,7 @@ Fonte: [@datacampggplot2]
 
 
 ## Montando o gráfico
+`r slide_atual = slide_atual + 1`
 
 Usando as camadas, vamos montando o gráfico
 
@@ -3645,6 +3654,7 @@ glimpse(iris)
 ```
 
 ## Montando o gráfico: data, aes, geom
+`r slide_atual = slide_atual + 1`
 
 ![](imagens/geom_aes_data.png)
 
@@ -3657,7 +3667,7 @@ ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width)) +
 
 ```
 
-Veja que, pela variável ser representada de forma discreta (uma casa decimal), há sobreposição de pontos. para dar a real impressão de quantos pontos existem, o ideal é inserir um ruído.
+Veja que, pela variável ser representada de forma discreta (uma casa decimal), há sobreposição de pontos. para dar a real impressão de quantos pontos existem, o ideal é inserir um ruído com `r a_r("geom_jitter()")`.
 
 ```{r}
 
@@ -3668,6 +3678,7 @@ ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width)) +
 ```
 
 ## Montando o gráfico: data, aes, geom, facet
+`r slide_atual = slide_atual + 1`
 
 
 ![](imagens/geom_aes_data_facet.png)
@@ -3683,6 +3694,7 @@ ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width)) +
 ```
 
 ## Montando o gráfico: data, aes, geom, facet, statistics
+`r slide_atual = slide_atual + 1`
 
 
 ![](imagens/geom_aes_data_facet_stat.png)
@@ -3700,6 +3712,7 @@ ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width)) +
 
 
 ## Montando o gráfico: data, aes, geom, facet, statistics, coord
+`r slide_atual = slide_atual + 1`
 
 ![](imagens/geom_aes_data_facet_stat_coord.png)
 
@@ -3718,6 +3731,8 @@ ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width)) +
 
 
 ## Montando o gráfico: data, aes, geom, facet, statistics, coord, theme
+`r slide_atual = slide_atual + 1`
+
 
 ![](imagens/geom_aes_data_facet_stat_coord_theme.png)
 
@@ -3745,6 +3760,9 @@ ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width)) +
 ```
 
 ## Escolhendo o melhor gráfico
+`r slide_atual = slide_atual + 1`
+
+
 
 
 ![](diagramas/graficos.png)
@@ -3752,6 +3770,7 @@ ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width)) +
 
 
 ## Escolhendo o melhor gráfico: distribuição (variável discreta)
+`r slide_atual = slide_atual + 1`
 
 
 ![](diagramas/graficos.png)
@@ -3815,9 +3834,10 @@ ggplot() +
 
 
 ## Escolhendo o melhor gráfico: acumulada empírica
+`r slide_atual = slide_atual + 1`
 
 
-O gráfico mostrando a função de probablidade acumulada empírica mostra propriedades que o histograma não mostra
+O gráfico mostrando gráfco com a `r a_r("função de probablidade acumulada empírica")` mostra propriedades que o histograma não mostra
 
 
 ```{r}
@@ -3832,9 +3852,10 @@ ggplot(gols, aes(x = gols)) +
 ```
 
 ## Escolhendo o melhor gráfico: distribuição de variável contínua
+`r slide_atual = slide_atual + 1`
 
 
-Para variáveis contínuas, faz sentido usar o gráfico de densidade
+Para variáveis contínuas, faz sentido usar o gráfico de `r a_r("densidade de probabilidade")`
 
 
 ```{r, message=FALSE, warning=FALSE}
@@ -3865,6 +3886,7 @@ ggplot(ufc_pesos) +
 ```
 
 ## Escolhendo o melhor gráfico: distribuição de variável contínua. ECF
+`r slide_atual = slide_atual + 1`
 
 
 Mais uma vez a distribuição empírica nos deixa ver mais coisa: os quantis
@@ -3881,6 +3903,7 @@ ggplot(ufc_pesos) +
 
 
 ## Escolhendo o melhor gráfico: comparando distribuições
+`r slide_atual = slide_atual + 1`
 
 
 
@@ -3907,7 +3930,10 @@ ggplot(ufc_pesos) +
 
 
 ## Escolhendo o melhor gráfico: comparando muitas distribuições
+`r slide_atual = slide_atual + 1`
 
+
+O tipo de gráfico gerado por `r a_r("geom_desity_ridges()")` ajuda a comparar várias distribuições.
 
 
 ```{r, message=FALSE, warning=FALSE }
@@ -3941,9 +3967,10 @@ Legal a ideia, mas não queremos comparar mulheres também
 
 
 ## Introduzindo stringr
+`r slide_atual = slide_atual + 1`
 
 
-A biblioteca `stringr`facilita muio lidar com strings. Por exemplo detectar um pedaço de string em outra
+A biblioteca `r a_r("stringr")` facilita muito lidar com strings. Por exemplo detectar um pedaço de string em outra.
 
 
 ```{r, message=FALSE, warning= FALSE }
@@ -3977,16 +4004,17 @@ Melhorou, mas ainda á estranho. Melhor seria se as classes de peso estivessem e
 
 
 ## Introduzindo forcats
+`r slide_atual = slide_atual + 1`
 
-No R, as variáveis categóricas são chamadas de `fatores`. Cada valor possível de um fator é representadas internamente com um identificador numérico, e não com a própria string.
+No R, as variáveis categóricas são chamadas de `r a_r("fator")`. Cada valor possível de um fator é representadas internamente com um identificador numérico, e não com a própria string.
 
-Cada valor possível da variável categórica também é chamada de `level`
+Cada valor possível da variável categórica também é chamada de `r a_r("level")`
 
-Podemos manipular essas representações facilmente com a `forcats`.
+Podemos manipular essas representações facilmente com a `r a_r("forcats")`.
 
 No caso, queremos ordenar nosso fator com a ordem as classes de peso no UFC
 
-A função `fct_relevel` possibilita a ordenação manual de uma variável `factor`
+A função `r a_r("fct_relevel")` possibilita a ordenação manual de uma variável `r a_r("factor")`
 
 
 ```{r, message=FALSE, warning= FALSE}
@@ -4020,9 +4048,10 @@ ggplot(ufc_pesos_ordem) +
 ```
 
 ## Relação entre variáveis: scatter plot
+`r slide_atual = slide_atual + 1`
 
 
-Os gráficos do tipo scatter plot
+Os gráficos do tipo `r a_r("scatter plot")` possibilitam a visualização de relações entre as variáveis
 
 
 Vamos brincar um pouco com os dados do Banco Mundial
@@ -4081,9 +4110,10 @@ ggplot(pib_gini_homi, aes(y = homicidios, x = indice)) +
 ```
 
 ## Relação entre variáveis: scatter plot (cont.)
+`r slide_atual = slide_atual + 1`
 
 
-É possível visualizar os eixos em log na base 10
+É possível visualizar os `r a_r("eixos em log")` na base 10
 
 
 ```{r, message=FALSE, warning=FALSE, out.width="80%"}
@@ -4105,7 +4135,7 @@ ggplot(pib_gini_homi, aes(y = homicidios, x = indice)) +
 
 
 ## Relação entre variáveis: scatter plot (cont.)
-
+`r slide_atual = slide_atual + 1`
 
 É possível também usar as cores para olhar uma terceira característica
 
@@ -4189,9 +4219,10 @@ ggplot(analise_desigualdade, aes(y = homicidios, x = indice, color = continent))
 ```
 
 ## Relação entre variáveis: Três variáveis contínuas
+`r slide_atual = slide_atual + 1`
 
 
-Podemos avaliar três variáveis contínuas usando um gráfico de bolhas
+Podemos avaliar três variáveis contínuas usando um gráfico
 
 Primeiro vamos colocar em wide as duas variáveis que tínhamos deixado long.
 
@@ -4207,7 +4238,7 @@ head(pib_gini_homi_wide)
 ```
 
 
-A escala de cor usada abaixo, Viridis, oferece a mesma sensação para olorido e preto e branco e é feita para ajudar daltônicos.
+A escala de cor usada abaixo, `r a_r("Viridis")`, oferece a mesma sensação para colorido e preto e branco e é feita para ajudar `r a_r("daltônicos")`.
 
 
 O log foi usado aqui para evitar que os valores extremos dificultem a visualização da escala de cores.
@@ -4227,6 +4258,7 @@ ggplot(pib_gini_homi_wide) +
 
 
 ## Relação entre variáveis:  Três variáveis contínuas
+`r slide_atual = slide_atual + 1`
 
 
 ```{r, cache=TRUE, warning=FALSE, message=FALSE }
@@ -4320,6 +4352,7 @@ ggplot(hdi_violencia) +
 
 
 ## Relação entre variáveis: Duas discretas e uma contínua
+`r slide_atual = slide_atual + 1`
 
 
 
@@ -4374,6 +4407,7 @@ ufc_tudo <- bind_cols(ufc_data, ufc_raw_data) %>%
 ```
 
 
+O gráfico gerado por `r a_r("geom_tile()")` ajuda a visualizar duas variáveis discretas ordinais e uma contínua.
 
 
 ```{r}
@@ -4392,6 +4426,7 @@ ggplot(ufc_tudo, aes(x = last_round, y = weight_class)) +
 
 
 ## Relação entre variáveis:  Várias variáveis
+`r slide_atual = slide_atual + 1`
 
 
 
@@ -4430,7 +4465,18 @@ ggpairs(hdi_tudo)  +
 
 
 ## Composição: no tempo, poucos períodos, valores relativos
+`r slide_atual = slide_atual + 1`
 
+
+A função `r a_r("geom_col()")` é melhor para poucos períodos
+
+Pelo mapeamentos no eixo x e y, haveria valores no mesmo lugar do eixo cartesiano.
+
+Para sanar esse conflito, usamos o `r a_r("position - parâmetro da geom_col()")`.
+
+Pata o caso em que queremos comparar valores relativamente a cada período, devemos empilhar as categorias de forma que a coluna tenha o mesmo tamanho a cada período.
+
+Para isso, usamos o valor *fill* para o parâmetro *position*    
 
 
 ```{r, message=FALSE, warning=FALSE}
@@ -4466,6 +4512,9 @@ ggplot(jogos) +
 ```
 
 ## Composição: no tempo, poucos períodos, valores absolutos
+`r slide_atual = slide_atual + 1`
+
+Para compararmos de forma que o total de cada período apareça, em valores absolutos, devemos usar o valor *stack*
 
 
 
@@ -4498,11 +4547,14 @@ ggplot(jogos) +
 
 
 ## Composição: no tempo, muitos períodos, valores relativos
+`r slide_atual = slide_atual + 1`
 
+
+Para muito períodos o ideal é usar áreas empilhadas, com a função `r a_r("geom_area()")`
 
 Repare que há muitos países, ou seja, muitas categorias.
 
-Usando a biblioteca `forcats` e sua função `fct_lump` conseguimos criar uma categoria de "Outros"
+Usando a biblioteca `r a_r("forcats")` e sua função `r a_r("fct_lump()")` conseguimos criar uma categoria de "Outros"
 
 
 ```{r, cache=TRUE, warning=FALSE, message=FALSE   }
@@ -4541,6 +4593,9 @@ ggplot(gdps_tratado ) +
 ```
 
 ## Composição: no tempo, muitos períodos, valores absolutos 
+`r slide_atual = slide_atual + 1`
+
+
 
 
 ```{r}
@@ -4576,8 +4631,11 @@ ggplot(gdps_tratado ) +
 ```
 
 ## Composição: estática, valores relativos
+`r slide_atual = slide_atual + 1`
 
 Aqui cabe uma torta se houver poucas categorias
+
+Para gerar um `r a_r("gráfico de torta")` é preciso gerar um gráfico de barras e tornar a coordenada polar com uso de `r a_r("coord_polar")` 
 
 
 ```{r}
@@ -4600,6 +4658,7 @@ ggplot(gdps_tratado, aes(x = "", y = PIB, fill = country)) +
 ```
 
 ## Composição: estática, valores relativos, muitos
+`r slide_atual = slide_atual + 1`
 
 
 ```{r}
@@ -4628,14 +4687,17 @@ ggplot(gdps_tratado, aes( fill = country, area = PIB, label = country)) +
 
 
 # MODELOS DE APRENDIZADO ESTATÍSTICO
+`r slide_atual = slide_atual + 1`
 
 ## Rudimentos de Aprendizado Estatístico
+`r slide_atual = slide_atual + 1`
 
 Aqui apresentaremos RUDIMENTOS de Aprendizado Estatístico com o objetivo de desmistificar alguns conceitos e apresentar algumas considerações que nos ajudarão a iniciar um processo deste tipo.
 
 
 
 ## Desmistificando Aprendizado Estatístico (ou Machine Learning)
+`r slide_atual = slide_atual + 1`
 
 
 Pesquisando imagens no Google vemos as percepções a respeito de "Machine Learning" e "Statistical Learning"
@@ -4643,6 +4705,7 @@ Pesquisando imagens no Google vemos as percepções a respeito de "Machine Learn
 ![](diagramas/machine-statistical.png)
 
 ## O processo de "Data Science"
+`r slide_atual = slide_atual + 1`
 
 ![](diagramas/cadu.png)
 
@@ -4650,11 +4713,13 @@ Pesquisando imagens no Google vemos as percepções a respeito de "Machine Learn
 
 
 ## Mecânico ou Piloto ?
+`r slide_atual = slide_atual + 1`
 
 ![](imagens/mecanico_piloto.png)
 
 
 ## O processo de Aprendizado Estatístico
+`r slide_atual = slide_atual + 1`
 
 Temos acesso a um pedaço dos dados existentes, que usamos para nos ajudar a especificar e treinar o nosso modelo.
 
@@ -4675,6 +4740,7 @@ Nós não temos acesso a esta $f()$ que representa a VERDADE, mas tentamos estim
 
 
 ## Fábrica de função que aproxima a realidade
+`r slide_atual = slide_atual + 1`
 
 Nosso modelo de Aprendizado Estatístico é uma fábrica de $\hat{f}()$ que tenta aproximar a $f()$ verdadeira.
 
@@ -4685,13 +4751,17 @@ Esta fábrica de $\hat{f}()$ recebe como insumo variáveis retiradas do ambiente
 ![](diagramas/fabrica_de_f.png)
 
 ## Modelo treinado
+`r slide_atual = slide_atual + 1`
 
-Com o(s) modelo(s) treinado(s), faremos **predições** a respeito de outros dados futuros ou cuja variável dependente ainda desconhecemos.
 
-Podemos também fazer **inferências** a respeito de como as variáveis independentes afetam a variáveis dependente.
+Com o(s) modelo(s) treinado(s), faremos `r a_r("predições")` a respeito de outros dados futuros ou cuja variável dependente ainda desconhecemos.
+
+Podemos também fazer `r a_r("inferências")` a respeito de como as variáveis independentes afetam a variáveis dependente.
 
 
 ## Inferência x Predição
+`r slide_atual = slide_atual + 1`
+
 
 A **predição** é o ato de descobrir $y$ a partir de $x$.
 
@@ -4700,6 +4770,9 @@ A **inferência** é o entendimento de como valores diferentes de **x** afetam *
 ![](diagramas/predicao_inferencia.png)
 
 ## Predição
+`r slide_atual = slide_atual + 1`
+
+Podemos dividir o erro de previsão em redutível e irredutível.
 
 Temos que:
 
@@ -4711,90 +4784,106 @@ $$E(y - \hat{y})^2 = [f(x) - \hat{f}(x)]^2 + Var(\epsilon)$$
 
 Onde
 
-$[f(x) - \hat{f}(x)]^2$ é redutível: podemos sempre estimar uma $\hat{f}()$ melhor
+$[f(x) - \hat{f}(x)]^2$ é um `r a_r("erro redutível")`: podemos sempre estimar uma $\hat{f}()$ melhor
 
 e
 
-$Var(\epsilon)$ é irredutível: não importa quão bem estimemos $\hat{f}()$ o resíduo $\epsilon$ está lá
+$Var(\epsilon)$ é um `r a_r("erro irredutível")`: não importa quão bem estimemos $\hat{f}()$ o resíduo $\epsilon$ está lá
 
 [@friedman2001elements]
 
 ## Viés e Variância
+`r slide_atual = slide_atual + 1`
 
-Se rodarmos $\hat{f}(x_0)$ treinando o modelo com vários conjuntos de treinamento e testasse ele com uma entrada específica qualquer para a qual $y_0 = f(x_0) + \epsilon$:
+Podemos dividir o erro redutível em viés e variância.
+
+Se rodarmos $\hat{f}(x_0)$ treinando o modelo com vários conjuntos de treinamento e testássemos ele com uma entrada específica qualquer para a qual $y_0 = f(x_0) + \epsilon$:
 
 $$E[y_o - \hat{f}(x_0)] = Var(\hat{f}(x_0)) + [Bias(\hat{f}(x_0))]^2 + Var(\epsilon)$$
 
 
-$Var(\hat{f}(x_0)$ é a variância do modelo: o quanto ele muda quando treinamos ele com outro conjunto de treinamento
+$Var(\hat{f}(x_0)$ é a `r a_r("variância do modelo")`: o quanto ele muda quando treinamos ele com outro conjunto de treinamento
 
-$[Bias(\hat{f}(x_0))]^2$ é o erro introduzido por tentarmos aproximar um problema complexo fda vida real com uso de um modelo simplificado.
+$[Bias(\hat{f}(x_0))]^2$ é o erro introduzido por tentarmos aproximar um problema complexo da vida real com uso de um modelo simplificado, também chamado de `r a_r("viés do modelo")`.
 
 
 ![](diagramas/vies_variancia.png)
 
 
-## Inferência
+## Trade-off viés x variância
+`r slide_atual = slide_atual + 1`
 
-Os modelos variam muito com relação a "transparência da caixa"
+Os modelos variam muito com relação a "transparência da caixa" e essa relação tem correlação com viés e variância.
+
+Existe um `r a_r("trade-off entre viés e variância")`, que são medidas que a gente não observa diretamente.
 
 Há uma relação inversamente proporcional (grosso modo) entre: 
 
-- Flexibilidade do modelo, ou poder de se adaptar a uma relação complexa entre entrada e saída
+- Flexibilidade do modelo, ou poder de se adaptar a uma relação complexa entre entrada e saída. Modelos com maior flexibilidade tendem a ter viés menor e variância maior.
 
-- Interpretabilidade, ou facilidade de o usuário do modelo (piloto) inferir as relações entre as variáveis independentes e as variáveis dependentes
+- Interpretabilidade, ou facilidade de o usuário do modelo (piloto) inferir as relações entre as variáveis independentes e as variáveis dependentes. Modelos mais fáceis de interpretar tendem a ser menos poderosos portanto tem viés maior. Mas também variam menos.
 
 ![](diagramas/flex_interpret.png)
 
 [@james2013introduction]
 
 
-## Trade-off viés variância
+## Ponto ótimo no aprendizado e overfitting
+`r slide_atual = slide_atual + 1`
 
-Além da falta de interpretabilidade, outra questão pode contar contra os modelos mais complexos, com mais poder de aprender nuances sobre os dados: eles podem aprender características específicas dos dados de treinamento.
+Além da falta de interpretabilidade, outra questão pode contar contra os modelos mais complexos, com mais poder de aprender nuances sobre os dados: eles podem aprender características específicas da amostra de treinamento que não podem ser generalizados para o resto dos dados.
+
+Existe um ponto ótimo no poder de aprendizado para que o modelo atinja a melhor performance possível na população como um todo.
+
+Além desse ponto ótimo, onde o erro no conjunto de teste é mínimo, o erro no conjunto de treinamento continua a diminuir, mas o aumento do erro no conjunto de teste mostra que ele perde o poder de generalização. Neste região diz-se que está acontecendo o fenômeno do `r a_r("overfitting")`.
 
 ![](diagramas/trade_off_vies_variancia.png)
 
 [@friedman2001elements]
 
 ## Treino, Validação e Teste
+`r slide_atual = slide_atual + 1`
 
 O procedimento mais usado para preparar um modelo para a vida real envolve dividir a nossa base em três pedaços:
 
-- Dados de treinamento: que serão usados para treinar o modelo e não servem para avaliar seu desempenho
+- `r a_r("Dados de treinamento")`: que serão usados para treinar o modelo e não servem para avaliar seu desempenho
 
-- Dados de validação: servem para comparar modelos de forma que nos possibilite escolher UM MODELO COM UMA ESPECIFICAÇÃO DE HIPERPARÂMETROS (número de nós da rede neural, )
+- `r a_r("Dados de validação")`: servem para comparar modelos de forma que nos possibilite escolher UM MODELO COM UMA ESPECIFICAÇÃO DE HIPERPARÂMETROS (número de nós da rede neural, )
 
-- Dados de teste: são separados logo no início do processo, e só são usados numa avaliação final do único modelo escolhido. 
+- `r a_r("Dados de teste")`: são separados logo no início do processo, e só são usados numa avaliação final do único modelo escolhido. 
 
 
 ## Model Selection e Model Assesment
+`r slide_atual = slide_atual + 1`
 
-Model Selection: estimação da performance de vários modelos a fim de escolher o melhor
+`r a_r("Model Selection")`: estimação da performance de vários modelos a fim de escolher o melhor
 
-Model Assessment: tendo escolhido o melhor modelo, estimação do erro de generalização em novos dados
+`r a_r("Model Assessment")`: tendo escolhido o melhor modelo, estimação do erro de generalização em novos dados
 
 ![](imagens/model_selection_assesment.png)
 
 
 ## K-Fold Cross validation
+`r slide_atual = slide_atual + 1`
 
 Uma forma de usar todos os dados (EXCETO OS DADOS DE TESTE) tanto para treinar quando para validar é revezando que partes dos dados estão sendo usados para treinamento e para validação. 
+
+Este esquema é chamado de `r a_r("k-fold cross validation")`
 
 Podemos dividir os dados em $k$ partes. Cada vez uma parte é escolhida para ser a validação.
 
 ![](imagens/k-fold-cross.png)
 
-[@datarobot]
 
-## Execução de modelos com broom
+[@datarobot]
 
 
 ## Execução de modelos com broom - explorando os dados
+`r slide_atual = slide_atual + 1`
 
 Primeiro podemos fazer nossa exploração preliminar.
 
-Como exemplo, podemos executar um pequeno tratamento das features usando a função `pivot_longer()` de um jeito diferente, só possível na últiam versão
+Como exemplo, podemos executar um pequeno tratamento das features usando a função `pivot_longer()` de um jeito diferente, só possível na última versão da biblioteca `tidyr`.
 
 
 
@@ -4860,7 +4949,8 @@ ufc_aprend <- bind_cols(ufc_data, ufc_raw_data) %>%
 
 ```
 
-## Estudando algumas features para nossso exemplo
+## Estudando algumas features para nosso exemplo
+`r slide_atual = slide_atual + 1`
 
 
 Como exemplo, podemos observar a relação entre a diferença de idade dos lutadores e o vencedor da luta.
@@ -4880,13 +4970,14 @@ ggplot(ufc_aprend ) +
 ```
 
 ## Estudando algumas features para nossso exemplo
+`r slide_atual = slide_atual + 1`
 
 
-Podemos tentar uma regressão linear simples para avaliar isso:
+Podemos tentar uma `r a_r("regressão linear")` para avaliar isso:
 
 $$ zebra = \alpha + \beta_{idade} idade\_vermelho + \beta_{dif} dif\_vermelho\_mais\_velho + \epsilon   $$
 
-Podemos perceber que os betas são signifucativos.
+Podemos perceber que os betas são significativos.
 
 
 
@@ -4903,9 +4994,10 @@ summary(modelo_lm)
 
 
 ## Facilitando a análise de um modelo com `broom`
+`r slide_atual = slide_atual + 1`
 
 
-A biblioteca `broom` ajuda a extrair informações de vários tipos de modelo com as mesmas funções.
+A biblioteca `r a_r("broom")` ajuda a extrair informações de vários tipos de modelo com as mesmas funções.
 
 
 
@@ -4933,8 +5025,11 @@ head(modelo_aumentado)
 
 
 ## Matriz de confusão com a `caret`
+`r slide_atual = slide_atual + 1`
 
-A biblioteca `caret` também ajuda muito 
+A biblioteca `caret` também ajuda muito.
+
+A função `r a_r("confusionMatrix")` monta uma matriz de confusão, que mostra estão acontecendo os falsos positivos, falsos negativos, verdadeiros positivos e verdadeiros negativos.
 
 
 ```{r, message=FALSE, warning=FALSE, cache=TRUE}
@@ -4951,6 +5046,7 @@ confusionMatrix(modelo_aumentado_factor$previsao_zebra_blue, modelo_aumentado_fa
 ```
 
 ## Rodando o modelo e plotando um grid de predições usando a biblioteca `purr`
+`r slide_atual = slide_atual + 1`
 
 Preparando um grid das variáveis independentes
 
@@ -4990,6 +5086,7 @@ ggplot(grid_previsao %>% filter(weight_class == "Heavyweight")) +
 ```
 
 ## Rodando o modelo e plotando um grid de predições usando a biblioteca `purr`
+`r slide_atual = slide_atual + 1`
 
 Rodando o modelo com o grid
 
@@ -5024,9 +5121,12 @@ ggplot(ufc_aprend ) +
 ```
 
 ## Rodando várias especificações de uma vez com `purrr`
+`r slide_atual = slide_atual + 1`
 
 
-Podemos treinar o modelo para cada classe
+Podemos treinar o modelo para cada classe usando `r a_r("group_by + nest() + map()")`.
+
+Estes comandos criam um tibble com uma coluna de tibbles aninhados já separados por classe de peso. A função `map()` pode, então rodar o modelo para cada classe.
 
 
 ```{r varias_espec_purr, message=FALSE, warning=FALSE, cache=TRUE, out.width="90%"}  
@@ -5063,6 +5163,9 @@ confusionMatrix(ufc_por_classe_treinamento$previsao_zebra_blue, ufc_por_classe_t
 ```
 
 ## Plotando as várias especificações de regressões lineares
+`r slide_atual = slide_atual + 1`
+
+
 
 ```{r, message=FALSE, warning=FALSE, cache=TRUE, out.width="90%"}
 
@@ -5101,6 +5204,7 @@ ggplot(ufc_aprend ) +
 ```
 
 ## Separando dados de treinamento e validação
+`r slide_atual = slide_atual + 1`
 
 
 ```{r, message=FALSE, warning=FALSE, cache=TRUE, out.width="90%"}
@@ -5195,6 +5299,7 @@ confusionMatrix(resultados_teste_lm$predicted, resultados_teste_lm$actual  )
 
 
 ## Rodando um modelo mais complexo: Generalized Additive Model 
+`r slide_atual = slide_atual + 1`
 
 
 ```{r, message=FALSE, warning=FALSE, cache=TRUE}
@@ -5247,6 +5352,18 @@ confusionMatrix(resultados_teste_gam$predicted, resultados_teste_gam$actual  )
 ```
 
 Plotando as regiões deste modelo mais complexo
+`r slide_atual = slide_atual + 1`
+
+
+É possível observar que este modelo se adapta com muito mais potência às especificidades dos dados. Ou seja, consegue um viés baixo no conjunto de treinamento. 
+
+Ele se adapta tão bem ao conjunto que se apresentarmos um conjunto um pouco diferente, a $\hat{f}()$ será diferente certamente.
+
+O modelo parece se adaptar demais aos dados, gerando `overfitting`. Será que ele é melhor do que um modelo simples?
+
+Precisamos de um mecanismo para avaliar o poder de generalização do modelo.
+
+
 
 
 ```{r, message=FALSE, warning=FALSE, cache=TRUE}
@@ -5292,8 +5409,11 @@ ggplot( bind_rows(ufc_aprend_classes_selec) ) +
 
 
 ## Execução de modelos com caret
+`r slide_atual = slide_atual + 1`
 
-Vamos mostrar a biblioteca `caret`, que facilita o processo de aprendizado de vários modelos com várias especificações de hiperparâmetros, executando o processo de cross-validation.
+
+
+Vamos mostrar a biblioteca `r a_r("caret")`, que facilita o processo de aprendizado de vários modelos com várias especificações de hiperparâmetros, executando o processo de cross-validation.
 
 Primeiro vamos ler uma base com informações e diagnósticos de câncer de mama [@uci]
 
@@ -5337,11 +5457,12 @@ teste <- dados[(split + 1):nrow(dados), ]
 ```
 
 ## Preparando 4-fold cross validation
+`r slide_atual = slide_atual + 1`
 
 
-A função `trainControl` estabelece os conjuntos para cross validation.
+A função `r a_r("trainControl()")` estabelece os conjuntos para cross validation.
 
-Os mesmos conjuntos serão usado para todos os modelos
+Os mesmos conjuntos serão usados para todos os modelos
 
 ```{r}
 
@@ -5369,8 +5490,9 @@ controle_cv <- trainControl(
 
 
 ## Treinando um modelo de classificação. Exemplo: Regressão logística 
+`r slide_atual = slide_atual + 1`
 
-A função `train` permite o estabelecimento de uma métrica para a escolha do melhor valor para os hiperparâmetros (no caso, não existem), e execuções de funções de pré-processamento. 
+A função `r a_r("train()")` permite o estabelecimento de uma métrica para a escolha do melhor valor para os hiperparâmetros (no caso, não existem), e execuções de funções de pré-processamento. 
 
 A função retorna um objeto com todas as informações relativas ao treinamento e a melhor especificação do modelo treinada com todos os dados passados.
 
@@ -5399,12 +5521,13 @@ model_logistic
 ```
 
 ## Avaliando a curva ROC
+`r slide_atual = slide_atual + 1`
 
-A curva ROC (Receiver Operating Characteristics) foi inventada na época da Segunda Guerra Mundial para avaliar se os operadores de radar americanos estavam detectando confiavelmente aeronaves japonesas a partir de sinais de radar.
+A curva `r a_r("ROC")` (Receiver Operating Characteristics) foi inventada na época da Segunda Guerra Mundial para avaliar se os operadores de radar americanos estavam detectando confiavelmente aeronaves japonesas a partir de sinais de radar.
 
 A curva mostra, para vários thresholds, qual a fração de verdadeiros positivos (ou sensibilidade) e a fração de falsos positivos (fall-out, ou $1 - especificidade$ ).
 
-Uma métrica numérica que traduz o quão bom um modelo de classificação é consiste na área embaixo desta curva (AUC, Area Under the Curve). Note que quanto mais perto de um essa área, menor a taxa de falsos positivos e maior a sensibilidade
+Uma métrica numérica que traduz o quão bom um modelo de classificação é consiste na área embaixo desta curva (`r a_r("AUC, Area Under the Curve)")`. Note que quanto mais perto de um essa área, menor a taxa de falsos positivos e maior a sensibilidade
 
 
 
@@ -5422,6 +5545,7 @@ ggplot(model_logistic$pred, aes(m = M, d = obs, color = Resample )) +
 
 
 ## Desempenho dos diversos modelos
+`r slide_atual = slide_atual + 1`
 
 Podemos avaliar a ROC de cada treinamento feito.
 
@@ -5444,6 +5568,7 @@ result_model_logistic %>%
 ```
 
 ## Desempenho e estimativa da variância do modelo
+`r slide_atual = slide_atual + 1`
 
 
 ```{r , cache = TRUE }
@@ -5458,6 +5583,7 @@ result_model_logistic %>%
 ```
 
 ## Gerando um latex bonitinho do modelo
+`r slide_atual = slide_atual + 1`
 
 
 ```{r, message=FALSE, warning=FALSE, cache=TRUE}
@@ -5470,10 +5596,11 @@ texreg(model_logistic$finalModel, custom.model.names = c("Regressão logística 
 
 
 ## Treinando outro modelo: lasso-ridge
+`r slide_atual = slide_atual + 1`
 
-Uma outra forma de evitar que muitas variáveis sejam usadas no modelo é aplicar uma penalidade diminuir a variância do modelo. É isso que as regressões do tipo Ridge e Lasso fazem. 
+Uma outra forma de evitar que muitas variáveis sejam usadas no modelo é aplicar uma penalidade diminuir a variância do modelo. É isso que as regressões do tipo `r a_r("Ridge")` e `r a_r("Lasso")` fazem. 
 
-O modelo mostrado nessa seção é rodado com várias parametrizações. Este modelo conjuga a penalização do tipo Ridge com a penalização do tipo Lasso modificando a função de penalização da regressão, que originalmente é o erro quadrático:
+O modelo mostrado nessa seção é rodado com várias parametrizações. Este modelo, chamado `r a_r("Elastic Net")`, conjuga a penalização do tipo Ridge com a penalização do tipo Lasso modificando a função de penalização da regressão, que originalmente é o erro quadrático:
 
 $$RSS = \sum_{i = 1}^{n} ( y_i - \beta_0 - \sum_{j=1}^{p}\beta_j x_{ij})^2  $$ 
 
@@ -5487,8 +5614,10 @@ Para a regressão Lasso, os coeficientes são penalizados pelo seu valor absolut
 $$Loss_{Lasso} = RSS + \lambda \sum_{j=1}^{p} \left| \beta_j \right| $$
 
 ## Conjugando Lasso e Ridge e avaliando o modelo
+`r slide_atual = slide_atual + 1`
 
-Cada conjunto de hiperparâmetros do modelo rodado nesta possui dois valores. Um dos valores, $\alpha$ define que peso deve ser dado a cada tipo de penalização Ridge ou Lasso, onde $\alpha = 0$ é Ridge puro e $\alpha = 1$ é Lasso puro. O outro parâmetro, $\lambda$, regula a intensidade da penalização.
+
+Cada conjunto de `r a_r("hiperparâmetros")` do modelo Elastic Net rodado nesta possui dois valores. Um dos valores, $\alpha$ define que peso deve ser dado a cada tipo de penalização Ridge ou Lasso, onde $\alpha = 0$ é Ridge puro e $\alpha = 1$ é Lasso puro. O outro parâmetro, $\lambda$, regula a intensidade da penalização.
 
 Os resultados para várias parametrizações é mostrado abaixo. 
 
@@ -5543,10 +5672,11 @@ head(resultados_net, 20)
 
 
 ## Pré-processando com Principal Component Analysis
+`r slide_atual = slide_atual + 1`
 
-Uma outra forma de reduzir a dimensionalidade do probelam é usar o método PCA para transformar as variáveis em componentes principais em menor número mas com boa parte da informação original.
+Uma outra forma de reduzir a dimensionalidade do probelam é usar o método `r a_r("PCA (Principal Component Analysis)")` para transformar as variáveis em componentes principais em menor número mas com boa parte da informação original.
 
-veja como pedimos esse pré-processamento.
+Veja como estabelecemos esse pré-processamento.
 
 ```{r, cache=TRUE}
 
@@ -5593,8 +5723,9 @@ resultados_net_pca
 
 
 ## Árvore de decisão
+`r slide_atual = slide_atual + 1`
 
-A árvore de decisão particiona o espaço formado pelas variáveis explicativas em subespaços baseando-se na "pureza" desses subespaços com relação à variável dependente.
+A `r a_r("árvore de decisão")` particiona o espaço formado pelas variáveis explicativas em subespaços baseando-se na "pureza" desses subespaços com relação à variável dependente.
 
 ![](imagens/decisiontree.png)
 
@@ -5631,13 +5762,14 @@ resultados_tree
 
 
 ## Random Forests
+`r slide_atual = slide_atual + 1`
 
 
 A forma como a árvore de decisão é criada faz com que ela tenha muita variância. 
 
 Cada decisão de particionamento é tomada a partir de características que podem ser muito específicas aos dados de treinamento.
 
-Uma ideia usada nas Random Forests é criar conjuntos de treinamento criados a partir do conjunto original, mas retirando amostras de mesmo tamanho COM REPOSIÇÃO. Além disso, cada vez que a árvore é particionada, a partição só pdoe acontecer em $m$ das variáveis explicativas. 
+Uma ideia usada nas `r a_r("Random Forests")` é criar conjuntos de treinamento criados a partir do conjunto original, mas retirando amostras de mesmo tamanho COM REPOSIÇÃO. Além disso, cada vez que a árvore é particionada, a partição só pdoe acontecer em $m$ das variáveis explicativas. 
 
 O resultado final é uma média do resultado dessas várias árvores
 
@@ -5678,8 +5810,9 @@ resultados_ranger
 
 
 ## Montando um modelo ensemble
+`r slide_atual = slide_atual + 1`
 
-Podemos montar um modelo ensemble, onde cada modelo original vota e a escolha final recai sobre a classificação que receber mais votos
+Podemos montar um modelo `r a_r("ensemble")`, onde cada modelo original vota e a escolha final recai sobre a classificação que receber mais votos
 
 
 ```{r, message=FALSE, warning=FALSE }
@@ -5734,6 +5867,7 @@ resultado_ensemble_pra_mostrar
 
 
 ## Uma forma de avaliar o impacto das variáveis  
+`r slide_atual = slide_atual + 1`
 
 É possível propor uma forma de avaliação do impacto das variáveis indireta e agnóstica ao modelo, ou seja, que pode ser usada da mesma forma para qualquer modelo e .
 
@@ -5741,9 +5875,9 @@ Para avaliar o impacto de cada variável nos resultados de cada um dos 5 modelos
 
 Dois grupos de casos sintéticos foram gerados. 
 
-No primeiro grupo, para cada variável explicativa, foram criados casos onde o valor das outras variáveis. 
+No primeiro grupo, para cada variável explicativa $x_i$, foram criados casos onde o valor de $x_i$ varia em relação a seus quantis, enquanto as outras permanecem parada no valor das suas medianas. 
 
-No segundo grupo, para avaliar uma região onde os casos têm mais chance de ser malignos, as variáveis que não estão sendo avaliadas a cada gráfico são mantidas no quantil 0.65.
+No segundo grupo, para avaliar uma região onde os casos têm mais chance de ser malignos, as variáveis que não estão sendo avaliadas a cada gráfico são mantidas no quantil 0,65.
 
 ```{r, cache=TRUE, out.width="90%"}
 
@@ -5890,6 +6024,9 @@ prev %>%
 
 
 ## Modelos escolhidos e seus thresholds: Model Selection
+`r slide_atual = slide_atual + 1`
+
+
 
 ```{r, warning=FALSE, message=FALSE }
 
@@ -6022,6 +6159,9 @@ plota_roc_ensemble()
 
 
 ## Avaliação nos dados de teste: Model Assessment
+`r slide_atual = slide_atual + 1`
+
+
 
 ```{r}
 
@@ -6159,6 +6299,7 @@ pred_errados_teste
 
 
 ## Avaliando regiões de fraqueza do modelo
+`r slide_atual = slide_atual + 1`
 
 
 
@@ -6206,13 +6347,16 @@ ggplot() +
 
 
 # COMUNICANDO OS RESULTADOS
+`r slide_atual = slide_atual + 1`
 
 ## Criando visualizações interativas com Shiny
+`r slide_atual = slide_atual + 1`
 
-Shiny é um pacote R que permite a criação de aplicações WEB interativas que ativam código em R, com as possibilidades de formatação de tabelas, geração de gráficos, execução de modelos etc que as bibliotecas do R disponibilizam.
+`r a_r("Shiny")` é um pacote R que permite a criação de `r a_r("aplicações WEB interativas")` que ativam código em R, com as possibilidades de formatação de tabelas, geração de gráficos, execução de modelos etc que as bibliotecas do R disponibilizam.
 
 
 ## Uma aplicação Shiny mínima 
+`r slide_atual = slide_atual + 1`
 
 
 Os códigos desta seção que fala do Shiny não são executados diretamente, apenas são mostrados.
@@ -6221,7 +6365,7 @@ Uma aplicação Shiny mínima tem 4 itens:
 
 - Carregamento da biblioteca `shiny`
 
-- Definição da interface do usuário, ou seja, a página HTML com a qual o usuário vai interagir. Essa interface é definida com o uso da função `fluidPage()`
+- Definição da interface do usuário, ou seja, a página HTML com a qual o usuário vai interagir. Essa interface é definida com o uso da função `r a_r("fluidPage()")`
 
 - Definição do comportamento da aplicação com a função `server()`
 
@@ -6244,23 +6388,24 @@ shinyApp(ui, server)
 
 
 ## Uma aplicação simples funcional
+`r slide_atual = slide_atual + 1`
 
 
 Abaixo uma aplicação Shiny simples
 
-Na função ***ui() do aplicativo shiny%%%, definimos a interface.
+Na função `r a_r("ui() do aplicativo shiny")`, definimos a interface.
 
 No exemplo abaixo, além dos títulos, há um select e espaços para um gráfico e duas tabelas
 
-Na função ***server() do aplicativo shiny%%%, definimos o comportamento
+Na função `r a_r("server() do aplicativo shiny")`, definimos o comportamento
 
 No exemplo abaixo, definimos como o gráfico e as tabelas são gerados a partir do conteúdo do select contido na interface.
 
 Repare que há duas tabelas, cada uma gerada com uma biblioteca diferente.
 
-A biblioteca ***reactable%%% permite que tenhamos mais controle sobre a estética
+A biblioteca `r a_r("reactable")` permite que tenhamos mais controle sobre a estética
 
-A biblioteca ***rhandontable%%% parece mais com uma tabela de Excel, permitindo inclusive copiar e colar os números.
+A biblioteca `r a_r("rhandontable")` parece mais com uma tabela de Excel, permitindo inclusive copiar e colar os números.
 
 
 ```{r, eval=FALSE}
@@ -6361,8 +6506,9 @@ shinyApp(ui, server)
 
 
 ## Programação reativa  
+`r slide_atual = slide_atual + 1`
 
-Diferentemente da programação feita em scripts, a execução no Shiny não segue a ordem dos comandos. É o conceito da ***programação reativa%%%
+Diferentemente da programação feita em scripts, a execução no Shiny não segue a ordem dos comandos. É o conceito da `r a_r("programação reativa")`
 
 A execução das funções do tipo render (que já vimos), reactive, observe e observeEvent é preguiçosa. Só acontece quando os inputs são alterados.
 
@@ -6371,6 +6517,7 @@ No caso do nosso aplicativo simples, apenas quando o input "pais" é alterado, a
 ![](diagramas/reactive_1.png)
 
 ## Produtores e consumidores
+`r slide_atual = slide_atual + 1`
 
 Temos 2 papéis para os objetos: produtores e consumidores
 
@@ -6378,12 +6525,13 @@ Os inputs são produtores e os outputs são consumidores.
 
 Vamos começar a ver agora objetos que funcionam tanto como produtores como consumidores.
 
-As ***reactive expressions do shiny%%% são objetos que assumem os dois papéis.
+As `r a_r("reactive expressions do shiny")` são objetos que assumem os dois papéis.
 
 Elas possibilitam que cálculos e tratamentos que são comuns a várias saídas sejam executados apenas uma vez. 
 
 
 ## Usando reactive para evitar duplicação
+`r slide_atual = slide_atual + 1`
 
 
 Na aplicação que desenhamos anteriormente, o select de país filtra da mesma forma os dados que são mostrados no gráfico e nas tabelas.
@@ -6397,9 +6545,10 @@ Assim evitamos mais facilmente, também, duplicar código.
 
 
 ## Reactive expressions
+`r slide_atual = slide_atual + 1`
 
 
-Esta é a sintaxe das ***reactive expressions%%%.
+Esta é a sintaxe das `r a_r("reactive expressions")`.
 
 ```{r, eval=FALSE }
 
@@ -6508,10 +6657,11 @@ shinyApp(ui, server)
 
 
 ## Visualização Geoespacial
+`r slide_atual = slide_atual + 1`
 
-A biblioteca ***sf%%% tem várias funções para lidar com dados geoespaciais.
+A biblioteca `r a_r("sf")` tem várias funções para lidar com dados geoespaciais.
 
-A função ***st_read%%% lê vários formatos de dados geoespaciais para um objeto da classe `sf`, ou `simple features`.
+A função `r a_r("st_read")` lê vários formatos de dados geoespaciais para um objeto da classe `sf`, ou `simple features`.
 
 
 
@@ -6524,8 +6674,9 @@ gd <- read_sf("dados/gd/Geração_Distribuída.shp")
 
 
 ## Classe sf
+`r slide_atual = slide_atual + 1`
 
-`sf` é uma classe que extende a classe data.frame contendo uma coluna de dados geoespaciais.
+`r a_r("sf")` é uma classe que extende a classe data.frame contendo uma coluna de dados geoespaciais.
 
 Cada linha do data.frame é relacionada a um dado geoespacial, que pode ser um ponto, um polígono etc.
 
@@ -6539,6 +6690,7 @@ str(gd)
 
 
 ## Operações espaciais com sf
+`r slide_atual = slide_atual + 1`
 
 
 ```{r}
@@ -6593,16 +6745,17 @@ enderecos_combinados <- comb_1 %>%
 
 
 ## Biblioteca ggmap
+`r slide_atual = slide_atual + 1`
 
-A biblioteca ***ggmap%%% deixa que usemos um background em um plot de mapa.
+A biblioteca `r a_r("ggmap")` deixa que usemos um background em um plot de mapa.
 
 Ele funciona em camadas como o ggplot, e aceita as mesmas funcionalidades para plotar os dados, usando o eixo x como latitude e o eixo y como longitude
 
-No código abaixo, usamos ***get_map%%% para pegar o fundo, passando os parâmetros desejados. Existem várias fontes de dados e vários tipos de fundo
+No código abaixo, usamos `r a_r("get_map")` para pegar o fundo, passando os parâmetros desejados. Existem várias fontes de dados e vários tipos de fundo
 
-O tema incluído por ***theme_inset%%% é mais adequado a mapas: não mostra os eixos, com ticks e rótulos, por exemplo.
+O tema incluído por `r a_r("theme_inset")` é mais adequado a mapas: não mostra os eixos, com ticks e rótulos, por exemplo.
 
-As coordenadas são mantidas fixas, também, com uso de ***coord_fixed%%%
+As coordenadas são mantidas fixas, também, com uso de `r a_r("coord_fixed")`
 
 ```{r, cache=TRUE, message=FALSE, warning=FALSE}
 
@@ -6618,6 +6771,7 @@ ggmap(map) +
 
 
 ## Plotando objetos no mapa
+`r slide_atual = slide_atual + 1`
 
 
 Podemos plotar os objetos como pontos no mapa, por exemplo, usando geom_point()
@@ -6646,9 +6800,10 @@ ggmap(map) +
 
 
 ## Plotando a densidade de objetos no mapa
+`r slide_atual = slide_atual + 1`
 
 
-Usando ***stat_density_2d%%%, podemos plotar
+Usando `r a_r("stat_density_2d")`, podemos plotar
 
 
 ```{r}
@@ -6678,6 +6833,7 @@ ggmap(ggmap = map) +
 
 
 ## Dashboard exemplo
+`r slide_atual = slide_atual + 1`
 
 
 Este dashboard de exemplo tem algumas funcionalidades interessantes que vamos explorar nos próximos slides
@@ -7081,25 +7237,28 @@ shinyApp(ui, server)
 
 
 ## Mapa interativo
+`r slide_atual = slide_atual + 1`
 
 O usuário pode selecionar áreas do mapa.
 
 A seleção dessa área leva a uma seleção de pontos
 
-Essa opção é habilitada com `brushOpts` e os pontos selecionados são acessados com `brushedPoints`
+Essa opção é habilitada com `r a_r("brushOpts")` e os pontos selecionados são acessados com `brushedPoints`
 
 Este tipo de interação pode ser usado com qualquer tipo de gráfico
 
 ## Spinner de espera
+`r slide_atual = slide_atual + 1`
 
 Esta aplicação lida com mais de 100.000 dados a respeito de instalações de geração distribuída.
 
 Portanto, o gráfico demora um pouco para ser plotado.
 
-Para que o usuário saiba que a aplicação está calculando alguma coisa e não travada, usamos um `waiter`
+Para que o usuário saiba que a aplicação está calculando alguma coisa e não travada, usamos um `r a_r("waiter")`
 
 
 ## Uso de váriáveis globais de estado
+`r slide_atual = slide_atual + 1`
 
 Algumas variáveis de estado são criadas para ajudar a controlar a aplicação.
 
@@ -7114,6 +7273,7 @@ Em aplicações Shiny exploratórias, é comum que os campos que participam dos 
 Para que as funções do tidyverse usem o conteúdo da variável como o campo a ser considerado (e não o próprio nome da variável), temos que lançar mão das funções `group_by_at`, `summarise_at`, `.data[[variável]]` e o operador `!!`.
 
 ## Diagramação da página
+`r slide_atual = slide_atual + 1`
 
 A diagramação da página é toda feita com as funções de diagramação do Shiny. 
 
@@ -7122,16 +7282,43 @@ Entretanto, cada objeto é definido anteriormente, o que é diferente do templat
 Isso parece besteira, mas separar a criação dos objetos da diagramação destes objetos facilita muito uma reorganizaçào da diagramação e causa menos problemas relacionados a erros de sintaxe como falta de vírgulas e parênteses
 
 ## Criando relatórios com R Markdown
+`r slide_atual = slide_atual + 1`
 
 ## Livros
+`r slide_atual = slide_atual + 1`
 
 [Referência Bookdown](https://bookdown.org/yihui/bookdown/html.html)
 
 
+# SÉRIES TEMPORAIS
+`r slide_atual = slide_atual + 1`
+
+## tidyverts
+`r slide_atual = slide_atual + 1`
+
+
+Os pacotes integrantes do conjunto tidyverts tratam as séries temporais do jeito tidy
+
+
+<table style = "width:90%">
+<tr>
+<td>-Funções básicas para o tsibble (tibble temporal)![tsibble](imagens/tsibble.png)</td>
+<td>-Funções pra extrações de features e estatísticas![feasts](imagens/feasts.png)</td>
+<td>-Funções para projeção![fable](imagens/fable.png)</td>
+</table>
+
+
+## tidyverts
+`r slide_atual = slide_atual + 1`
+
+
+
 # DESENVOLVIMENTO DE PACOTES
+`r slide_atual = slide_atual + 1`
 
 
 ## Filosofia
+`r slide_atual = slide_atual + 1`
 
 Tudo que pode ser automatizado deve ser automatizado *devtools*
 
@@ -7139,6 +7326,7 @@ Tudo que pode ser automatizado deve ser automatizado *devtools*
 
 
 ## Preparando o ambiente 
+`r slide_atual = slide_atual + 1`
 
 
 Pacotes a instalar para começar:
@@ -7161,6 +7349,7 @@ devtools::has_devel()
 
 
 ## Criando a estrutura
+`r slide_atual = slide_atual + 1`
 
 
 New Project -> New Directory -> R Package
@@ -7169,12 +7358,15 @@ The main difference between library() and require() is what happens if a package
  
 
 # Apêndices
+`r slide_atual = slide_atual + 1`
 
 ## Índice remissivo
+`r slide_atual = slide_atual + 1`
 
 `r escreve_remissivo()`
 
 ## Bibliografia
+`r slide_atual = slide_atual + 1`
 
 
 
