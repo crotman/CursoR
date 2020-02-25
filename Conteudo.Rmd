@@ -63,6 +63,7 @@ library(sf)
 library(leaflet)
 library(ggmap)
 library(RColorBrewer)
+library(fpp3)
 
 library(electionsBR)
 library(worldmet)
@@ -7308,12 +7309,150 @@ Os pacotes integrantes do conjunto tidyverts tratam as séries temporais do jeit
 </table>
 
 
-## tidyverts
+## tsibbles
 `r slide_atual = slide_atual + 1`
+
+
+***tsibble%%% é uma classe derivada da tibbl que tem funcionalidades para séries temporais
+
+
+```{r}
+
+
+ipca <- BETS::BETSget(433)
+
+
+```
+
+
+A função ***as_tsibble()%%% cria um tibble a partir de vários tipos de objetos que armazenam séries temporais
+
+O tsibble representa bem séries temporais regulares e reconhece o intervalo entre os valores
+
+
+```{r}
+
+tsbl_ipca <- as_tsibble(ipca) %>% 
+  mutate(value = value/100)
+
+
+print(tsbl_ipca)
+
+```
+
+
+## tsibbles com várias séries a partir de um tibble
+
+No código abaixo calculamos o número de instalações de Geração Distribuída por UF as partir dos dados a respeito das instalações.
+
+Repare que a função ***yearmonth()### cria uma data mensal que é específica para períodos de um mês
+
+
+
+```{r}
+dados_gd <- read_rds("dados/gd/gd.rds")
+
+meses <- tibble(mes = seq.Date(from = make_date(2009,1,1), to = make_date(2020,3,1), by = "month" ) %>%  yearmonth())
+
+
+dados_gd_cum <- dados_gd %>% 
+    rename(
+        uf = USER_SigUF
+    ) %>% 
+    crossing(meses) %>% 
+    filter(DthConexao < mes) %>%
+    group_by(
+        uf,
+        mes
+    ) %>% 
+    summarise(
+        n = n(),
+        potencia = sum(USER_MdaPo)
+    )
+
+
+```
+
+
+A função as_tibble aceita um campo como referência da data, via parâmetro `index`, e um campo como chave de cada série contida no tibble: `key`
+
+
+```{r}
+
+
+dados_gd_tsbl <- as_tsibble(dados_gd_cum, key = uf, index = mes ) 
+
+
+dados_gd_tsbl
+
+```
+
+
+## Mudando a periodicidade
+
+
+Podemos mudar a periodicidade da série indexando por uma transformação do índice atual, usando ***group_by_key%%% e  ***index_by%%%.
+
+No caso, queremos as informações no final do ano, portanto vamos usar ***last()%%%.
+
+
+
+
+```{r}
+
+gd_anual <- dados_gd_tsbl %>% 
+    group_by_key() %>% 
+    index_by(ano = year(mes) ) %>% 
+    summarise(
+        n = last(n),
+        potencia = last(potencia)
+    )
+
+gd_trimestre <- dados_gd_tsbl %>% 
+    group_by_key() %>% 
+    index_by(trimestre = yearquarter(mes)) %>% 
+    summarise(
+        n = last(n), 
+        potencia = last(potencia)
+    )
+
+
+gd_anual
+
+gd_trimestre
+
+
+```
+
+
+
+
+```{r}
+
+tsbl_ipca %>% 
+  filter(index > make_date(1994,7,1)) %>% 
+  autoplot(value, color = "darkblue", size = 1) +
+  scale_y_continuous(labels = percent_format(accuracy = 1) ) + 
+  scale_x_date(date_breaks =  "1 year", labels = year) +
+  labs(
+    x = "",
+    y = "IPCA"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 90)
+  )
+
+
+```
+
+
 
 
 
 # DESENVOLVIMENTO DE PACOTES
+
+
 `r slide_atual = slide_atual + 1`
 
 
