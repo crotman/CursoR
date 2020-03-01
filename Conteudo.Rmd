@@ -1,14 +1,15 @@
 ---
-title: "R para Análise de Dados"
-author: "Bruno Crotman (crotman@gmail.com)"
-date: "11/02/2020"
 output: 
     slidy_presentation: 
-      css: styles.css
+      css: w3c-blue.css
       fig_caption: yes
       toc: yes
       toc_depth: 3
-      
+      includes:
+        in_header: header.html
+        before_body: doc_prefix.html
+        after_body: doc_suffix.html
+
 bibliography: bibliography.bib
       
 ---
@@ -64,6 +65,7 @@ library(leaflet)
 library(ggmap)
 library(RColorBrewer)
 library(fpp3)
+library(gtrendsR)
 
 library(electionsBR)
 library(worldmet)
@@ -110,6 +112,64 @@ escreve_remissivo <- function(){
 
 
 ```
+
+# CURSO DE R PARA ANÁLISE DE DADOS
+`r slide_atual = slide_atual + 1`
+
+## Instrutor
+`r slide_atual = slide_atual + 1`
+
+Bruno Crotman (crotman@gmail.com)
+
+- Trabalha há 5 anos na Empresa de Pesquisa Energétic fomentando o trabalho com dados em todas as áreas da empresa
+
+- Trabalhou por 5 anos no Banco BBM na área de Pesquisa Quantitativa
+
+- Graduação: Ciência da Computação, UFRJ
+
+- Mestrado: Engenharia de Software baseada em otimização, Unirio. Orientador: Prof. Márcio Barros
+
+- Doutorado (em curso): Engenharia de Software baseada em teoria dos jogos e ciência de dados, Unirio. Orientador: Prof. Márcio Barros
+
+## Conteúdo:
+`r slide_atual = slide_atual + 1`
+
+- Introdução
+
+- Fundamentos da Linguagem
+  + R e RStudio
+  + Tipos de dados, Data Frame
+  + Vetorização
+
+- Introdução à Programação Funcional
+  + biblioteca purrr
+  + paralelização
+
+- Obtenção e Organização dos dados
+  + Obtenção de dados de arquivos
+  + Obtenção de dados da WEB
+  + Organização dos dados para análise
+
+- Visualização de dados
+  + Boas Práticas
+  + Melhores gráficos
+  + A famosa ggplot
+  + Dados espaciais
+  
+- Rudimentos de aprendizado estatístico
+  + Desmistificação
+  + Processo do aprendizado estatístico (seleção do modelo, validação do modelo)
+  + Na prática: broom
+  + Na prática: caret
+
+- Comunicação
+  + Aplicativos Web Shiny
+  + Relatórios Markdown
+  
+- Séries Temporais
+  + tidyverts
+  + Visualização
+  + Modelos. ARIMA etc.
 
 
 
@@ -227,6 +287,13 @@ Após a possível execução de modelos, podemos publicar os resultados.
 
 [Estimador de posição de fundos multimercado](http://crotman.shinyapps.io/posicaofundos)
 
+[Cenários futuros para expansão da matriz energética](https://crotman.shinyapps.io/PNE-Planel)
+
+[Localização dos equipamentos de geração distribuída](https://crotman.shinyapps.io/DashboardGD)
+
+[Passos de um algoritmo](https://crotman.shinyapps.io/seqalign)
+
+[Equilíbrio de Nash pra vários cenários](https://crotman.shinyapps.io/GTPI)
 
 
 
@@ -4685,6 +4752,181 @@ ggplot(gdps_tratado, aes( fill = country, area = PIB, label = country)) +
 ```
 
 
+## Visualização Geoespacial
+`r slide_atual = slide_atual + 1`
+
+A biblioteca `r a_r("sf")` tem várias funções para lidar com dados geoespaciais.
+
+A função `r a_r("st_read")` lê vários formatos de dados geoespaciais para um objeto da classe `sf`, ou `simple features`.
+
+
+
+```{r }
+
+gd <- read_sf("dados/gd/Geração_Distribuída.shp")
+
+
+```
+
+
+## Classe sf
+`r slide_atual = slide_atual + 1`
+
+`r a_r("sf")` é uma classe que extende a classe data.frame contendo uma coluna de dados geoespaciais.
+
+Cada linha do data.frame é relacionada a um dado geoespacial, que pode ser um ponto, um polígono etc.
+
+```{r}
+
+str(gd)
+
+
+```
+
+
+
+## Operações espaciais com sf
+`r slide_atual = slide_atual + 1`
+
+
+```{r}
+
+enderecos <- tribble(
+  
+  ~nome,    ~endereco,
+  "RB1",    "Avenida Rio Branco 1, Centro, Rio de Janeiro",
+  "Marques dos Reis",    "Praça Pio X 54, Centro, Rio de Janeiro"
+  
+) 
+
+
+enderecos_com_geo <- enderecos %>% 
+  mutate_geocode(location = endereco)
+
+enderecos_id <- enderecos_com_geo %>% 
+  mutate(id = row_number()) 
+
+comb_1 <- enderecos_id %>% 
+  rename_all(function(x){str_glue("{x}_1")})
+
+comb_2 <- enderecos_id %>% 
+  rename_all(function(x){str_glue("{x}_2")})
+
+
+
+ponto_4326 <- function (lat, lon){
+  st_point(c(lat, lon)) %>% 
+    st_sfc(crs = 4326)
+}
+
+enderecos_combinados <- comb_1 %>% 
+  crossing(comb_2) %>% 
+  filter(id_1 < id_2) %>% 
+  mutate(
+    ponto_1 = map2(.x = lon_1, .y = lat_1, .f = ponto_4326 ) ,
+    ponto_2 = map2(.x = lon_2, .y = lat_2, .f = ponto_4326 ) ,
+    dist = map2(.x = ponto_1, .y = ponto_2, st_distance ) 
+  )
+
+
+
+
+
+
+```
+
+
+
+
+
+
+## Biblioteca ggmap
+`r slide_atual = slide_atual + 1`
+
+A biblioteca `r a_r("ggmap")` deixa que usemos um background em um plot de mapa.
+
+Ele funciona em camadas como o ggplot, e aceita as mesmas funcionalidades para plotar os dados, usando o eixo x como latitude e o eixo y como longitude
+
+No código abaixo, usamos `r a_r("get_map")` para pegar o fundo, passando os parâmetros desejados. Existem várias fontes de dados e vários tipos de fundo
+
+O tema incluído por `r a_r("theme_inset")` é mais adequado a mapas: não mostra os eixos, com ticks e rótulos, por exemplo.
+
+As coordenadas são mantidas fixas, também, com uso de `r a_r("coord_fixed")`
+
+```{r, cache=TRUE, message=FALSE, warning=FALSE}
+
+map <- get_map(location = "Brazil",  zoom = 4, source = "google", maptype = "toner-lite")
+
+ggmap(map) +
+  coord_fixed() +
+  theme_inset()
+
+
+
+```
+
+
+## Plotando objetos no mapa
+`r slide_atual = slide_atual + 1`
+
+
+Podemos plotar os objetos como pontos no mapa, por exemplo, usando geom_point()
+
+
+```{r}
+
+ggmap(map) + 
+  geom_point(
+    data = gd, 
+    alpha = 0.01,
+    size = 0.5,
+    aes(
+      x = X,
+      y = Y
+    ),
+    color = "darkblue"
+  ) +
+  theme_inset()
+
+
+
+```
+
+
+
+
+## Plotando a densidade de objetos no mapa
+`r slide_atual = slide_atual + 1`
+
+
+Usando `r a_r("stat_density_2d")`, podemos plotar
+
+
+```{r}
+
+
+map <- get_map(location = "Brazil", zoom = 4,  source = "google", maptype = "toner-lite")
+
+
+ggmap(ggmap = map) +
+  stat_density_2d(
+    aes(x = X, y = Y, fill = ..level.. ), 
+    bins = 70,
+    geom = "polygon", 
+    data = gd  ,
+    alpha = .2
+  ) +
+  scale_fill_gradientn(colors = brewer.pal(10, "YlOrRd")) +  
+  theme_inset()
+
+
+
+
+
+
+
+```
+
 
 
 # MODELOS DE APRENDIZADO ESTATÍSTICO
@@ -6657,181 +6899,6 @@ shinyApp(ui, server)
 
 
 
-## Visualização Geoespacial
-`r slide_atual = slide_atual + 1`
-
-A biblioteca `r a_r("sf")` tem várias funções para lidar com dados geoespaciais.
-
-A função `r a_r("st_read")` lê vários formatos de dados geoespaciais para um objeto da classe `sf`, ou `simple features`.
-
-
-
-```{r }
-
-gd <- read_sf("dados/gd/Geração_Distribuída.shp")
-
-
-```
-
-
-## Classe sf
-`r slide_atual = slide_atual + 1`
-
-`r a_r("sf")` é uma classe que extende a classe data.frame contendo uma coluna de dados geoespaciais.
-
-Cada linha do data.frame é relacionada a um dado geoespacial, que pode ser um ponto, um polígono etc.
-
-```{r}
-
-str(gd)
-
-
-```
-
-
-
-## Operações espaciais com sf
-`r slide_atual = slide_atual + 1`
-
-
-```{r}
-
-enderecos <- tribble(
-  
-  ~nome,    ~endereco,
-  "RB1",    "Avenida Rio Branco 1, Centro, Rio de Janeiro",
-  "Marques dos Reis",    "Praça Pio X 54, Centro, Rio de Janeiro"
-  
-) 
-
-
-enderecos_com_geo <- enderecos %>% 
-  mutate_geocode(location = endereco)
-
-enderecos_id <- enderecos_com_geo %>% 
-  mutate(id = row_number()) 
-
-comb_1 <- enderecos_id %>% 
-  rename_all(function(x){str_glue("{x}_1")})
-
-comb_2 <- enderecos_id %>% 
-  rename_all(function(x){str_glue("{x}_2")})
-
-
-
-ponto_4326 <- function (lat, lon){
-  st_point(c(lat, lon)) %>% 
-    st_sfc(crs = 4326)
-}
-
-enderecos_combinados <- comb_1 %>% 
-  crossing(comb_2) %>% 
-  filter(id_1 < id_2) %>% 
-  mutate(
-    ponto_1 = map2(.x = lon_1, .y = lat_1, .f = ponto_4326 ) ,
-    ponto_2 = map2(.x = lon_2, .y = lat_2, .f = ponto_4326 ) ,
-    dist = map2(.x = ponto_1, .y = ponto_2, st_distance ) 
-  )
-
-
-
-
-
-
-```
-
-
-
-
-
-
-## Biblioteca ggmap
-`r slide_atual = slide_atual + 1`
-
-A biblioteca `r a_r("ggmap")` deixa que usemos um background em um plot de mapa.
-
-Ele funciona em camadas como o ggplot, e aceita as mesmas funcionalidades para plotar os dados, usando o eixo x como latitude e o eixo y como longitude
-
-No código abaixo, usamos `r a_r("get_map")` para pegar o fundo, passando os parâmetros desejados. Existem várias fontes de dados e vários tipos de fundo
-
-O tema incluído por `r a_r("theme_inset")` é mais adequado a mapas: não mostra os eixos, com ticks e rótulos, por exemplo.
-
-As coordenadas são mantidas fixas, também, com uso de `r a_r("coord_fixed")`
-
-```{r, cache=TRUE, message=FALSE, warning=FALSE}
-
-map <- get_map(location = "Brazil",  zoom = 4, source = "google", maptype = "toner-lite")
-
-ggmap(map) +
-  coord_fixed() +
-  theme_inset()
-
-
-
-```
-
-
-## Plotando objetos no mapa
-`r slide_atual = slide_atual + 1`
-
-
-Podemos plotar os objetos como pontos no mapa, por exemplo, usando geom_point()
-
-
-```{r}
-
-ggmap(map) + 
-  geom_point(
-    data = gd, 
-    alpha = 0.01,
-    size = 0.5,
-    aes(
-      x = X,
-      y = Y
-    ),
-    color = "darkblue"
-  ) +
-  theme_inset()
-
-
-
-```
-
-
-
-
-## Plotando a densidade de objetos no mapa
-`r slide_atual = slide_atual + 1`
-
-
-Usando `r a_r("stat_density_2d")`, podemos plotar
-
-
-```{r}
-
-
-map <- get_map(location = "Brazil", zoom = 4,  source = "google", maptype = "toner-lite")
-
-
-ggmap(ggmap = map) +
-  stat_density_2d(
-    aes(x = X, y = Y, fill = ..level.. ), 
-    bins = 70,
-    geom = "polygon", 
-    data = gd  ,
-    alpha = .2
-  ) +
-  scale_fill_gradientn(colors = brewer.pal(10, "YlOrRd")) +  
-  theme_inset()
-
-
-
-
-
-
-
-```
-
 
 ## Dashboard exemplo
 `r slide_atual = slide_atual + 1`
@@ -7425,9 +7492,18 @@ gd_trimestre
 ```
 
 
+## Plotando uma série
+
+
+A função ***autoplot()### cuida das principais tarefas para plotar uma série
+
 
 
 ```{r}
+
+
+
+
 
 tsbl_ipca %>% 
   filter(index > make_date(1994,7,1)) %>% 
@@ -7445,6 +7521,87 @@ tsbl_ipca %>%
 
 
 ```
+
+
+## Plot sazonal
+
+A função ***gg_season*** ajuda a fazer um gráfico mostrando os períodos sazonais para comparação
+
+
+```{r}
+
+tsbl_ipca %>% 
+  filter(year(index) > 2009) %>% 
+  gg_season(value, period = "year", labels = "both") +
+  scale_y_continuous(
+    labels = percent_format(accuracy = 0.1), 
+    breaks = seq(0.000, by = 0.001,to =  0.015) ) + 
+  scale_x_date(
+    date_labels = "%b",
+    date_breaks = "1 month"
+  ) +
+  labs(
+    x = "",
+    y = "IPCA"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 90)
+  )
+  
+
+
+
+
+
+```
+
+
+
+
+
+
+```{r}
+
+
+tsbl_ipca %>% 
+  filter(year(index) > 1995) %>% 
+  gg_season(value, period = "year") +
+  scale_y_continuous(
+    labels = percent_format(accuracy = 0.1), 
+    breaks = seq(0.000, by = 0.002,to =  0.03) ) + 
+  scale_x_date(
+    date_labels = "%b",
+    date_breaks = "1 month"
+  ) +
+  labs(
+    x = "",
+    y = "IPCA"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 90)
+  )
+
+
+
+```
+
+
+
+```{r}
+
+
+buscas <- gtrends("xvideos", geo = "BR", time = "today 1-m", onlyInterest = TRUE)
+
+buscas$interest_over_time
+
+
+
+
+
+```
+
 
 
 
