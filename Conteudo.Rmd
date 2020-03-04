@@ -121,23 +121,25 @@ escreve_remissivo <- function(){
 
 Bruno Crotman (crotman@gmail.com)
 
-- Trabalha há 5 anos na Empresa de Pesquisa Energétic fomentando o trabalho com dados em todas as áreas da empresa
+- Trabalha há 5 anos na Empresa de Pesquisa Energética fomentando o trabalho com dados em todas as áreas da empresa
 
 - Trabalhou por 5 anos no Banco BBM na área de Pesquisa Quantitativa
 
-- Graduação: Ciência da Computação, UFRJ
+- Doutorado (em curso): Engenharia de Software baseada em teoria dos jogos e ciência de dados, Unirio. Orientador: Prof. Márcio Barros
 
 - Mestrado: Engenharia de Software baseada em otimização, Unirio. Orientador: Prof. Márcio Barros
 
-- Doutorado (em curso): Engenharia de Software baseada em teoria dos jogos e ciência de dados, Unirio. Orientador: Prof. Márcio Barros
+- Graduação: Ciência da Computação, UFRJ
 
 ## Conteúdo:
 `r slide_atual = slide_atual + 1`
 
+
 - Introdução
+  + Motivação
+  + R e RStudio
 
 - Fundamentos da Linguagem
-  + R e RStudio
   + Tipos de dados, Data Frame
   + Vetorização
 
@@ -148,12 +150,12 @@ Bruno Crotman (crotman@gmail.com)
 - Obtenção e Organização dos dados
   + Obtenção de dados de arquivos
   + Obtenção de dados da WEB
-  + Organização dos dados para análise
+  + Organização e manipulação dos dados para análise
 
 - Visualização de dados
   + Boas Práticas
   + Melhores gráficos
-  + A famosa ggplot
+  + ggplot
   + Dados espaciais
   
 - Rudimentos de aprendizado estatístico
@@ -295,6 +297,7 @@ Após a possível execução de modelos, podemos publicar os resultados.
 
 [Equilíbrio de Nash pra vários cenários](https://crotman.shinyapps.io/GTPI)
 
+[Ajuda pra escolher o local de um consultório de psicologia](https://crotman.shinyapps.io/psirio)
 
 
 
@@ -1094,7 +1097,13 @@ O que vocês acham? Melhor trocar, manter a escolha original ou tanto faz?
 ## Simulando o Monty Hall
 `r slide_atual = slide_atual + 1`
 
-Note o que há de interessante no código (comentado)
+Note o que há de interessante no código (comentado):
+
+- A função `r a_r("sample()")`
+
+- A `r a_r("seleção negativa de elementos com -")`
+
+- A função `r a_r("replicate()")`
 
 ```{r monty_hall}
 set.seed(88)
@@ -1120,7 +1129,7 @@ joga_monty_hall <- function(troca){
 }
 
 n <- 1000
-#replicate executa múltiplas vezes um comando e armazena os resultados em uma estruturaúnica
+#replicate executa múltiplas vezes um comando e armazena os resultados em uma estrutura única
 troca <- replicate(n = n, joga_monty_hall(troca = TRUE))
 fica  <- replicate(n = n, joga_monty_hall(troca = FALSE))
 ```
@@ -1193,6 +1202,11 @@ O exemplo anterior era muito simplista: ninguém chuta tudo.
 
 Imagine que sabemos qual a chance de aparecer uma pergunta onde podemos descartar 0 alternativas, a chance de uma onde descartamos 1 e assim por diante.
 
+Na função `rbinom()`, a cada simulação, sorteamos uma de duas categorias para cada um dos n eventos. A `r a_r("rmultinom()")` sorteia uma de k categorias para cada um dos n eventos. Um vetor de k elementos indica a probabilidade de cada categoria.
+
+A `rmultinom()` nos ajuda a compor provas de acordo com a proficiência de quem vai fazer a prova.
+
+
 
 ```{r cfa_mais}
 #definindo a chance podermos eliminar 0, 1, 2, ... 4 alternativas
@@ -1219,11 +1233,16 @@ n_questoes_cada_elimina[1:4,]
 acertos_concatenados[1:20]
 ```
 
+Como geramos os acertos concatenados em um vetor, o ideal é transformá-los numa matriz onde cada linha corresponde a uma simulação e cada coluna corresponde aos acertos conseguidos em cada tipo de questão. Usamos a função A `matrix()`, informando que estamos passando a matriz linha a linha e informando a quantidade de linhas.
+
+
 ```{r cfa_3}
 matriz_acertos <- matrix(acertos_concatenados, byrow = TRUE, nrow = n_simul )
 
 matriz_acertos[1:5,]
 ```
+
+A `rowSums()` nos ajuda a ter a quantidade de acertos em cada simulação de prova.
 
 
 ```{r cfa_4}
@@ -1238,16 +1257,6 @@ sum(acertos > n_aprovado)/n_simul
 mostra_chances(acertos, n_questoes)
 ```
 
-
-
-<!-- ## Exemplo inicial de visualização de dados -->
-
-
-<!-- ```{r ggplot, eval=TRUE, code = readLines("exemplos\\exemplo_inicial_ggplot.r")} -->
-
-
-
-<!-- ``` -->
 
 
 
@@ -2746,7 +2755,7 @@ rs <- rsDriver(
   browser = "firefox", 
   extraCapabilities = list(
     `mox:firefoxOptions` = list(
-      binary = "C:/Program Files (x86)/Mozilla Firefox/firefox.exe"
+      binary = "C:/Program Files/Mozilla Firefox/firefox.exe"
     )
   )
 )
