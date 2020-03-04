@@ -366,6 +366,7 @@ Eles são salvos em um arquivo de extensão ".r"
 
 * Cheat sheets
 
+* Verificação ortográfica (versão 1.3, ainda não lançada)
 
 ## Baixando o material do github
 `r slide_atual = slide_atual + 1`
@@ -1085,9 +1086,9 @@ for ____{
 
 ![](imagens/montyhall.png){width=20%}
 
-Um dos seus jogos consistia em mostrar três portas ao otár... (ops) convidado. Em uma delas tem um carro.
+Um dos seus jogos consistia em mostrar três portas ao otár... (ops) convidado. Atrás de uma delas sempre tem um carro. Atrás das outras, alguma brincadeira
 
-Antes do resultado, o apresentador revela uma das portas e pergunta se o convidado que trocar a escolha.
+Após a escolha inicial, o apresentador revelava uma das portas e perguntava se o convidado queria trocar a porta escolhida originalmente.
 
 ![](imagens/montyhall2.jpg){width=20%}
 
@@ -1150,7 +1151,7 @@ sum(fica)/n
 
 Vamos ver... mas dá pra simular sem saber quase nada.
 
-Vamos usar uma das funções da família `r<familia de distribuição de prob>()`. Neste caso, a `r a_r("rbinom")`, que simula a distribução binomial (aquela que equivale ao evento de jogar n moedas (ou alguma coisa com dois lados) para cima e ver quantas deram cara).
+Vamos usar uma das funções da família `r<familia de distribuição de prob>()`. Neste caso, a `r a_r("rbinom")`, que simula a distribução binomial, aquela que equivale a jogar n moedas para cima e ver quantas deram cara, ou seja, quantos desfechos chamados de "sucessos" são obtidos em n eventos com desfecho binário. Nestes eventos há uma probabilidade fixa para um desfecho considerado "sucesso".
 
 
 ```{r cfa}
@@ -1202,7 +1203,7 @@ O exemplo anterior era muito simplista: ninguém chuta tudo.
 
 Imagine que sabemos qual a chance de aparecer uma pergunta onde podemos descartar 0 alternativas, a chance de uma onde descartamos 1 e assim por diante.
 
-Na função `rbinom()`, a cada simulação, sorteamos uma de duas categorias para cada um dos n eventos. A `r a_r("rmultinom()")` sorteia uma de k categorias para cada um dos n eventos. Um vetor de k elementos indica a probabilidade de cada categoria.
+Na função `rbinom()`, a cada simulação, sorteamos uma de dois tipos de desfecho para cada um dos n eventos. A `r a_r("rmultinom()")` sorteia um de k tipos de desfecho para cada um dos n eventos. Um vetor de k elementos indica a probabilidade de cada tipo de desfecho.
 
 A `rmultinom()` nos ajuda a compor provas de acordo com a proficiência de quem vai fazer a prova.
 
