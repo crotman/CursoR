@@ -114,7 +114,6 @@ escreve_remissivo <- function(){
 ```
 
 # CURSO DE R PARA ANÁLISE DE DADOS
-`r slide_atual = slide_atual + 1`
 
 ## Instrutor
 `r slide_atual = slide_atual + 1`
@@ -131,7 +130,7 @@ Bruno Crotman (crotman@gmail.com)
 
 - Graduação: Ciência da Computação, UFRJ
 
-## Conteúdo:
+## Conteúdo
 `r slide_atual = slide_atual + 1`
 
 
@@ -300,7 +299,6 @@ Após a possível execução de modelos, podemos publicar os resultados.
 [Ajuda pra escolher o local de um consultório de psicologia](https://crotman.shinyapps.io/psirio)
 
 
-
 ## Ambiente R/RStudio
 `r slide_atual = slide_atual + 1`
 
@@ -352,7 +350,7 @@ Eles são salvos em um arquivo de extensão ".r"
 ## Funcionalidades interessantes do RStudio
 `r slide_atual = slide_atual + 1`
 
-* Atalhos de teclado: **ctrl**+**enter** (rodar linhas selecionadas), **ctrl**+**shift**+**enter** (rodar script),  **ctrl**+**1** (foco no script), **ctrl**+**2** ** (foco no console), **ctrl**+**shift**+**F10** ** (reiniciar R), **ctrl**+**shift**+**C** (comentar/descomentar bloco)  ...
+* Atalhos de teclado: **ctrl**+**enter** (rodar linhas selecionadas), **ctrl**+**shift**+**enter** (rodar script),  **ctrl**+**1** (foco no script), **ctrl**+**2** (foco no console), **ctrl**+**shift**+**F10** (reiniciar R), **ctrl**+**shift**+**C** (comentar/descomentar bloco)  ...
 
 * Refactoring
 
@@ -379,6 +377,8 @@ Os exemplos de código, as imagens e os dados mostrados nesta apresentação est
 O repositório fica em [github/crotman/cursoR](https://github.com/crotman/CursoR).
 
 Para baixar este repositório no RStudio, crie um projeto em File/New Project, do tipo Github e use o endereço do repositório: https://github.com/crotman/CursoR.git.
+
+O projeto tanbém está disponível no RStudio Cloud: [Projeto Curso R](https://rstudio.cloud/project/575191). A vantagem é que as bibliotecas já estão todas instaladas. 
 
 Todo material é disponibilizado sob a licença [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 
