@@ -1397,7 +1397,7 @@ map2(
 
 Uma lista de vetores nomeados deve ser passada para a `pmap()`. Esses são os argumentos passados para a função.
 
-Lembre que um Data Frame/Tibble é exatamente issouma lista de vetores nomeados.
+Lembre que um Data Frame/Tibble é exatamente isso: uma lista de vetores nomeados.
 
 O detalhe é que os nomes dos vetores deve bater com o nome dos parâmetros da função 
 
@@ -1432,7 +1432,7 @@ A programação funcional deixa o código mais expressivo e maioria das vezes ma
 
 Existem algumas características avançadas da programação funcional que facilitam bastante o trabalho.
 
-A principal delas é a facilidade com que podemos converter um código que roda em série para um código que roda em paralelocom a biblioteca `furrr`, que veremos adiante.
+A principal delas é a facilidade com que podemos converter um código que roda em série para um código que roda em paralelo com a biblioteca `furrr`, que veremos adiante.
 
 
 
@@ -1530,14 +1530,14 @@ Não é por coincidência que as funções de tratamento das bibliotecas tidyver
 ## Um mapa conceitual da bibioteca de transformação de dados `dplyr`
 `r slide_atual = slide_atual + 1`
 
-`r a_r("dplyr")` é a biblioteca mais básica do conjunto `tidyverse`
+`r a_r("dplyr")` é a biblioteca mais central do conjunto `tidyverse`
 
 ![](imagens/conceptual_dplyr.jpg)
 
 Fonte: [@dplyrrberlin]
 
 
-## CRAN: uma Disneylândia dos dados?
+## CRAN: além de bibliotecas de funções, bibliotecas de dados
 `r slide_atual = slide_atual + 1`
 
 `r a_r("CRAN")` é o repositório de bibliotecas mantido pelo R com contribuição de populares.
@@ -1626,7 +1626,7 @@ Algumas `r a_r("funções helpers da dplyr")` nos ajudam a usar a função `sele
 Pra mostrar mais funcionalidades da função `select`, vamos usar uma base com dados eleitorais brasileiros, que retorna mais colunas
 
 
-```{r  candidatos , cache=TRUE}
+```{r  candidatos , cache=TRUE, message= FALSE, warning=FALSE }
 
 candidatos <- candidate_fed(2018)
 
@@ -1874,7 +1874,7 @@ Outras funções úteis são as que fazem operações acumuladas e as operaçõe
 
 `r a_r("BETS")` é uma biblioteca criada pela FGV que dá acesso a `r a_r("séries temporais econômicas")`
 
-```{r bets, cache = TRUE}
+```{r bets, cache = TRUE, warning=FALSE, message=FALSE}
 
 series <- BETS::BETSsearch("exchange dollar")
 
@@ -2266,7 +2266,7 @@ ggplot(maiores_temp_dia) +
 
 Até agora acessamos dados que estavam disponíveis em bibliotecas, mas muitas vezes encontramos dados em arquivos.
 
-De modo geral, as funções da biblioteca `r a_r("readr")` são mais rápidas do que as da biblioteca base, e também mostram barra de progresso no console. É possível reconhecê-las pelo `_` ao invés de `.` 
+De modo geral, as funções da biblioteca `r a_r("readr")` são mais rápidas do que as da biblioteca base, e além disso mostram barra de progresso no console. É possível reconhecê-las pelo `_` ao invés de `.` 
 
 ## Leitura de dados de arquivos 
 `r slide_atual = slide_atual + 1`
@@ -2279,64 +2279,77 @@ Fonte: [@cheatsheetimport]
 
 
 
-## Leitura de dados de arquivos - Exemplo: CVM
+## Baixando arquivos em lote - Exemplo: CVM
 `r slide_atual = slide_atual + 1`
 
 
-O portal da CVM é uma das minas de ouro de dados
-
+O portal da CVM é uma fonte interessante de dados
 
 O código abaixo baixa os dados que ainda não estão na nossa base.
 
-Note que vamos usar um `r a_r("exemplo de programação funcional")`. Semm uso de loop vamos executar uma função para cada linha do data frame/tibble.
+Note que vamos usar `r a_r("programação funcional no exemplo")`. Sem uso de loop vamos executar uma função para cada linha do data frame/tibble.
 
+Esta função vai salvar os dados como um objeto %%%rds***. Este formato é binário, diferentemente do formato csv (textual). Podemos compactar estes dados ou não. Se usarmos compactação, a leitura e escrita são mais lentas, mas os arquivos ocupam menos espaço.  
 
 
 ```{r fundos, message=FALSE, warning=FALSE}
-
 existem <- tibble(arquivo = list.files("dados/fundos"))
 
 
 salva <- function(endereco, arquivo){
-    
-
     print(endereco)
-    conteudo <- read_csv2(endereco)
-    
-    write_csv(conteudo, paste0("dados/fundos/",arquivo))
-    
+    read_csv2(endereco) %>% 
+      mutate_at(
+        vars(-one_of(c("CNPJ_FUNDO", "NR_COTST", "DT_COMPTC"))),
+        as.numeric
+      ) %>% 
+      mutate_at(
+        vars(one_of("DT_COMPTC")),
+        as.Date.POSIXct  
+      ) %>% 
+      mutate_at(
+        vars(one_of("CNPJ_FUNDO")),
+        as.character
+      ) %>% 
+      mutate_at(
+        vars(one_of("NR_COTST")),
+        as.numeric
+      ) %>% 
+      write_rds(paste0("dados/fundos/",arquivo), compress = "xz")
 }
 
 
-
 baixa_faltantes <- tibble(data_dado = seq(ymd("2017-01-01"), by = "month", ymd(today()-4) )) %>% 
-    mutate(data_formato = stamp_date("999912")(data_dado)) %>% 
+    mutate(data_formato = format(data_dado, "%Y%m")) %>% 
     mutate(
         endereco = paste0(
             "http://dados.cvm.gov.br/dados/FI/DOC/INF_DIARIO/DADOS/",
             "inf_diario_fi_",
             data_formato,
             ".csv")) %>% 
-    mutate(arquivo = paste("inf_diario_fi_",data_formato,".csv")) %>% 
+    mutate(arquivo = paste0("inf_diario_fi_",data_formato,".rds")) %>% 
     anti_join(existem, by = c("arquivo" = "arquivo")) %>% 
     select(-data_formato) %>% 
     mutate(data = pmap(.l = list(endereco, arquivo), salva))
+```
 
 
-le_arquivo <- function(arquivo){
-  
-    print(arquivo)
-      
-    conteudo <- read_csv(arquivo, progress = FALSE)
+## Leitura de dados de arquivos em uma pasta - Exemplo: CVM
+`r slide_atual = slide_atual + 1`
 
-    conteudo
-    
-}
+Após a operação de baixar os dados dos arquivos, podemos ler todos os arquivos de uma pasta e colocá-los em um só tibble, já que eles são do mesmo formato.
 
+Usamos %%%execução em paralelo no exemplo***, que é possibilitada ao chamarmos uma função future_<map> ao invés de <map>.
+
+
+
+```{r fundos, message=FALSE, warning=FALSE}
+
+plan(multiprocess)
 
 todos_os_fundos <- tibble(arquivo = list.files("dados/fundos")) %>%
-    mutate(arquivo = paste0("dados/fundos/",arquivo )) %>%
-    mutate(data = map(arquivo, le_arquivo)) %>% 
+    mutate(arquivo = paste0("dados/fundos/",arquivo)) %>%
+    mutate(data = future_map(arquivo, read_rds, .progress = TRUE)) %>% 
     unnest()
 
 
@@ -2364,9 +2377,18 @@ cotas_verde
 
 ```
 
-
-
 ## Leitura de conteúdo de páginas web
+`r slide_atual = slide_atual + 1`
+
+Existem duas dois tipos de atividades envolvidas na leitura de páginas web:
+
+* Extração do conteúdo que interessa a partir da página já obtida
+
+* Automatização da navegação com uso de emuladores de browser
+
+Vamos ver primeiro como ler o conteúdo de uma página e depois como usar um emulador para navegar em um portal e obter o que desejamos
+
+## Leitura de conteúdo de páginas web 
 `r slide_atual = slide_atual + 1`
 
 Para efetuar a `r a_r("leitura de páginas WEB")`, é necessário conhecer como é a estrutura de uma página web.
@@ -2382,7 +2404,6 @@ Podem existir objetos de vários tipos em uma página: links, inputs de dados, t
 
 ## Leitura de conteúdo de páginas WEB (cont.)
 `r slide_atual = slide_atual + 1`
-
 
 Para retirar da página web o conteúdo de que precisamos, temos que analisar como é esta árvore de objetos e que nós desta árvore nos interessam.
 
@@ -2426,18 +2447,14 @@ existem <- tibble(arquivo = list.files("dados/titulos"))
 
 
 salva_planilha <- function(name, endereco){
-    
     arquivo <- endereco
     destino <- name
-
     print(arquivo)
-        
     download.file(
         arquivo, 
-        paste0("dados/titulos/",destino,".xls" ),
+        paste0("dados/titulos/",destino ),
         mode = "wb" ##PRA ARQUIVOS BINÁRIOS,
         )
-    
 }
 
 
@@ -2447,11 +2464,11 @@ links <- read_html("https://sisweb.tesouro.gov.br/apex/f?p=2031:2:0::::") %>%
     html_attr("href") %>% 
     enframe(value = "endereco") %>%
     filter(str_detect(endereco, "cosis/sistd/obtem_arquivo/")) %>%
-    mutate(destino = paste0(name,".xls")) %>% 
+    mutate(destino = str_extract(endereco, "[0-9]*:[0-9]*$") %>% str_remove(":")  ) %>% 
+    mutate(destino = paste0(destino,".xls")) %>%
     anti_join(existem, by = c("destino" = "arquivo")) %>%
-    select(-destino) %>% 
     mutate(endereco = paste0("https://sisweb.tesouro.gov.br/apex/",endereco) ) %>% 
-    mutate(data = map2(name, endereco, salva_planilha ))
+    mutate(data = map2(destino, endereco, salva_planilha ))
 
 ```
 
@@ -2469,7 +2486,7 @@ Precisamos ler todas as sheets de todos os arquivos em um diretório (onde baixa
 
 A função abaixo lê as sheets de um arquivo.
 
-Aqui fazemos o primeiro uso de uma funçãoda biblioteca `r a_r("stringr")`, que trata strings, ou seja, cadeias de caracteres. 
+Aqui fazemosuso de uma função da biblioteca `r a_r("stringr")`, que trata strings, ou seja, cadeias de caracteres. 
 
 A função `r a_r("str_glue()")` possibilita a criação de novas strings a partir de variáveis já existentes de uma forma expressiva.
 
@@ -2509,9 +2526,12 @@ Munidos destas duas funções, podemos guardar tudo em um só data frame.
 Primeiro, definindo as sheets a ler
 
 ```{r arruma_titulos, warning=FALSE, cache=TRUE}
+
+plan(multiprocess)
+
 sheets_pra_ler <- list.files("dados/titulos") %>% 
     enframe(value = "arquivo") %>%
-    mutate(sheet = map(arquivo, le_sheets)) %>% 
+    mutate(sheet = future_map(arquivo, le_sheets, .progress = TRUE)) %>% 
     unnest(cols = sheet) 
 ```
 
