@@ -2135,7 +2135,7 @@ limbo
 A função `r a_r("group_by()")` será bastante usada.
 
 Quem conhece SQL pode estranhar um pouco o comportamento desta função, pois ela não agrupa os dados diminuindo o número de linhas imediatamente.
-
+ 
 Mas veja que ela indica que há agrupamento
 
 Ela particiona o tibble. As operações passam a ser executadas em cada partição.
@@ -2302,10 +2302,6 @@ salva <- function(endereco, arquivo){
       mutate_at(
         vars(-one_of(c("CNPJ_FUNDO", "NR_COTST", "DT_COMPTC"))),
         as.numeric
-      ) %>% 
-      mutate_at(
-        vars(one_of("DT_COMPTC")),
-        as.Date.POSIXct  
       ) %>% 
       mutate_at(
         vars(one_of("CNPJ_FUNDO")),
