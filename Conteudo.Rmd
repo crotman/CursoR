@@ -1336,7 +1336,7 @@ Funções podem ser declaradas inline.
 
 ```{r}
 
-map(.x = 1:5, .f = function(x){rnorm(n = 4, mean = x, sd = .2)} )
+map(.x = 1:5, .f = function(x){rnorm(n = 4, mean = x, sd = .01)} )
 
 ```
 
@@ -1346,7 +1346,7 @@ Ou então `r a_r("shortcuts para funções")` podem ser usados
 
 ```{r}
 
-map(.x = 1:5, .f = ~rnorm(n = 4, mean = .x, sd = .2) )
+map(.x = 1:5, .f = ~rnorm(n = 4, mean = .x, sd = .01) )
 
 ```
 
@@ -1354,7 +1354,7 @@ Os argumentos são repassados pela `map` para a função executada. Podemos ent�
 
 ```{r}
 
-map(.x = 1:5, .f = rnorm, n = 4, sd = .2 )
+map(.x = 1:5, .f = rnorm, n = 4, sd = .01 )
 
 
 ```
@@ -1889,7 +1889,7 @@ No código abaixo, calculamos o retorno da série, a `r a_r("volatilidade histó
 
 dolar <- BETS::BETSget(1) 
 
-dolar_com_vol <- dolar %>% 
+dolar_com_info <- dolar %>% 
     filter(date > ymd("1994-07-01")) %>% 
     arrange(date) %>% 
     mutate(
@@ -1898,7 +1898,10 @@ dolar_com_vol <- dolar %>%
         dia = row_number(),
         fator_ewma = (1/0.94)^dia*1e-20
     ) %>% 
-    filter(!is.na(retorno)) %>% 
+    filter(!is.na(retorno))
+  
+  
+dolar_com_vol <- dolar_com_info %>% 
     mutate(vol = sqrt(cumvar(retorno)) * sqrt(252) ) %>% 
     mutate(vol_ewma = sqrt(cumsum(retorno_quad * fator_ewma)/cumsum(fator_ewma)) * sqrt(252) ) %>% 
     rename(dolar = value) %>% 
@@ -1922,7 +1925,7 @@ datatable(dolar_com_vol) %>%
 ```{r dolar_vol, cache=TRUE}
 
 dolar_ajeitado <- dolar_com_vol %>% 
-    gather(variavel, valor, - date)
+    pivot_longer(cols = -date, names_to = "variavel", values_to = "valor")
 
 
 dolar_ajeitado %>% 
@@ -2290,7 +2293,7 @@ O código abaixo baixa os dados que ainda não estão na nossa base.
 
 Note que vamos usar `r a_r("programação funcional no exemplo")`. Sem uso de loop vamos executar uma função para cada linha do data frame/tibble.
 
-Esta função vai salvar os dados como um objeto %%%rds***. Este formato é binário, diferentemente do formato csv (textual). Podemos compactar estes dados ou não. Se usarmos compactação, a leitura e escrita são mais lentas, mas os arquivos ocupam menos espaço.  
+Esta função vai salvar os dados como um objeto `r a_r("rds")`. Este formato é binário, diferentemente do formato csv (textual). Podemos compactar estes dados ou não. Se usarmos compactação, a leitura e escrita são mais lentas, mas os arquivos ocupam menos espaço.  
 
 
 ```{r fundos, message=FALSE, warning=FALSE}
@@ -2334,13 +2337,13 @@ baixa_faltantes <- tibble(data_dado = seq(ymd("2017-01-01"), by = "month", ymd(t
 ## Leitura de dados de arquivos em uma pasta - Exemplo: CVM
 `r slide_atual = slide_atual + 1`
 
-Após a operação de baixar os dados dos arquivos, podemos ler todos os arquivos de uma pasta e colocá-los em um só tibble, já que eles são do mesmo formato.
+Após a  operação de baixar os dados dos arquivos, podemos ler todos os arquivos de uma pasta e colocá-los em um só tibble, já que eles são do mesmo formato.
 
-Usamos %%%execução em paralelo no exemplo***, que é possibilitada ao chamarmos uma função future_<map> ao invés de <map>.
+Usamos `r a_r("execução em paralelo no exemplo")`, que é possibilitada ao chamarmos uma função future_<map> ao invés de <map>.
 
 
 
-```{r fundos, message=FALSE, warning=FALSE}
+```{r fundos2, message=FALSE, warning=FALSE}
 
 plan(multiprocess)
 
@@ -4784,11 +4787,11 @@ ggplot(gdps_tratado, aes( fill = country, area = PIB, label = country)) +
 
 Gráficos animados devem ser usados com moderação.
 
-A %%%gganimate*** ajuda a faxer animações depois que você tiver pensado duas vezes e sucumbido a elas.
+A `r a_r("gganimate")` ajuda a faxer animações depois que você tiver pensado duas vezes e sucumbido a elas.
 
 Ela é uma camada adicionada a um gráfico ggplot que define um particionamento do tibble referenciado pelo gráfico de forma a gerar múltiplos frames.
 
-A função %%%transition_time()*** define o campo que particiona o gráfico. 
+A função `r a_r("transition_time()")` define o campo que particiona o gráfico. 
 
 
 
@@ -4822,11 +4825,11 @@ anim_save(filename = "imagens/animate_1.gif")
 ## Na onda da bar race
 `r slide_atual = slide_atual + 1`
 
-Vocês provavelmente já se depararam com a famigerada ***bar race%%%.
+Vocês provavelmente já se depararam com a famigerada ")`bar race`r a_r(".
 
 Veja como construir sua própria bar race
 
-```{r}
+```{r, eval=FALSE}
 
 fundos_escolhidos <- tribble(  
     ~cnpj,                       ~nome,
@@ -4929,6 +4932,13 @@ anim_save(filename = "imagens/bar_race.gif")
 
 
 ![](imagens/bar_race.gif)
+
+
+## Visualização Geoespacial
+`r slide_atual = slide_atual + 1`
+
+
+
 
 
 
@@ -7560,7 +7570,7 @@ Os pacotes integrantes do conjunto tidyverts tratam as séries temporais do jeit
 `r slide_atual = slide_atual + 1`
 
 
-***tsibble%%% é uma classe derivada da tibbl que tem funcionalidades para séries temporais
+")`tsibble`r a_r(" é uma classe derivada da tibbl que tem funcionalidades para séries temporais
 
 
 ```{r}
@@ -7572,7 +7582,7 @@ ipca <- BETS::BETSget(433)
 ```
 
 
-A função ***as_tsibble()%%% cria um tibble a partir de vários tipos de objetos que armazenam séries temporais
+A função ")`as_tsibble()`r a_r(" cria um tibble a partir de vários tipos de objetos que armazenam séries temporais
 
 O tsibble representa bem séries temporais regulares e reconhece o intervalo entre os valores
 
@@ -7592,7 +7602,7 @@ print(tsbl_ipca)
 
 No código abaixo calculamos o número de instalações de Geração Distribuída por UF as partir dos dados a respeito das instalações.
 
-Repare que a função ***yearmonth()### cria uma data mensal que é específica para períodos de um mês
+Repare que a função ")`yearmonth()### cria uma data mensal que é específica para períodos de um mês
 
 
 
@@ -7638,9 +7648,9 @@ dados_gd_tsbl
 ## Mudando a periodicidade
 
 
-Podemos mudar a periodicidade da série indexando por uma transformação do índice atual, usando ***group_by_key%%% e  ***index_by%%%.
+Podemos mudar a periodicidade da série indexando por uma transformação do índice atual, usando ")`group_by_key`r a_r(" e  ")`index_by`r a_r(".
 
-No caso, queremos as informações no final do ano, portanto vamos usar ***last()%%%.
+No caso, queremos as informações no final do ano, portanto vamos usar ")`last()`r a_r(".
 
 
 
@@ -7675,7 +7685,7 @@ gd_trimestre
 ## Plotando uma série
 
 
-A função ***autoplot()### cuida das principais tarefas para plotar uma série
+A função ")`autoplot()### cuida das principais tarefas para plotar uma série
 
 
 
@@ -7705,7 +7715,7 @@ tsbl_ipca %>%
 
 ## Plot sazonal
 
-A função ***gg_season*** ajuda a fazer um gráfico mostrando os períodos sazonais para comparação
+A função ")`gg_season")` ajuda a fazer um gráfico mostrando os períodos sazonais para comparação
 
 
 ```{r}
