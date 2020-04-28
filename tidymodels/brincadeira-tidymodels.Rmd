@@ -1,0 +1,22 @@
+---
+title: "Untitled"
+author: "Bruno Crotman"
+date: "28/04/2020"
+output: slidy_presentation
+---
+
+```{r}
+
+library(tidyverse)
+library(tidymodels)
+
+```
+
+
+## Brincadeira Tidymodels
+
+```{r}
+
+
+```
+
