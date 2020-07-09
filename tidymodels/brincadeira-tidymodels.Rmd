@@ -9,6 +9,7 @@ output: slidy_presentation
 
 library(tidyverse)
 library(tidymodels)
+library(lubridate)
 
 ```
 
@@ -17,6 +18,156 @@ library(tidymodels)
 
 ```{r}
 
+# 
+# calendario <- read_csv("airbnb/calendar.csv")
+# 
+# anuncios <- read_csv("airbnb/listings.csv")
+
+calendario_selecao <-  calendario %>% 
+    mutate(
+        price = str_remove(price, "\\$") %>% parse_number(),
+        adjusted_price = str_remove(adjusted_price, "\\$") %>% parse_number(),
+        listing_id = as.integer(listing_id)
+    )  %>% 
+    filter(
+        date == make_date(2019,11,30)
+    )
+
+anuncios_selecao <- anuncios %>% 
+    mutate(
+        id = as.integer(id),
+        neighbourhood_cleansed = as_factor(neighbourhood_cleansed)
+    ) %>% 
+    select(
+        id,
+        neighbourhood_cleansed,
+        host_is_superhost,
+        accommodates,
+        starts_with("review_")
+    ) %>% 
+    filter(
+        accommodates == 4,
+        !is.na(host_is_superhost)
+    ) %>% 
+    rowwise() %>% 
+    mutate(
+        mean_review = mean(c_across(starts_with("review") & !matches("rating")    ))
+    )
+
+
+
+
+anuncios_calendario <- anuncios_selecao %>% 
+    left_join(
+        calendario_selecao,
+        by = c("id" = "listing_id")
+    ) %>% 
+    filter(
+        price < 400,
+        neighbourhood_cleansed %in% c("Copacabana", "Ipanema")
+    )
+    
+
+
+
 
 ```
+
+
+
+```{r}
+
+ggplot(anuncios_calendario) +
+    geom_density(
+        aes(
+            x = price,
+            color = neighbourhood_cleansed 
+        )
+    )
+
+
+```
+
+
+
+
+```{r}
+
+ggplot(anuncios_calendario) +
+    geom_histogram(
+        aes(
+            x = review_scores_rating,
+            y = after_stat(density),
+            fill = neighbourhood_cleansed
+        ),
+        binwidth = 1,
+        position = "dodge"
+        
+    )
+
+
+
+```
+
+
+
+
+```{r}
+
+
+por_preco <- tibble(
+    preco_min = seq(45, to = 345, by = 10),
+    preco_max = seq(55, to = 355, by = 10),
+    preco_medio = seq(50, to = 350, by = 10)
+)  
+    
+
+
+demanda <- por_preco %>% 
+    crossing(anuncios_calendario) %>% 
+    filter(
+        preco_min <= price,
+        preco_max > price
+    )
+
+
+ocupacao <- demanda %>% 
+    group_by(
+        preco_medio,
+        host_is_superhost,
+        neighbourhood_cleansed
+    ) %>% 
+    summarise(ocupacao = sum(available)/n())
+
+
+ggplot(ocupacao,
+        aes(
+            x = preco_medio,
+            y = ocupacao,
+            color = host_is_superhost
+        )
+       
+       ) +
+    geom_line(
+    ) +
+    geom_smooth() +
+    facet_wrap(~neighbourhood_cleansed) +
+    theme_minimal() +
+    theme(
+        legend.position = "top"
+    ) 
+
+
+
+```
+
+
+
+
+
+
+
+
+
+
 
