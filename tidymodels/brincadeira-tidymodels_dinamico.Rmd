@@ -1,0 +1,440 @@
+---
+title: "Airbnb"
+author: "Bruno Crotman"
+date: "09/07/2020"
+output: html_document
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+
+library(shiny)
+library(tidyverse)
+# library(tidymodels)
+library(lubridate)
+library(feather)
+library(shinyWidgets)
+library(ggiraph)
+
+knitr::opts_chunk$set(echo = TRUE)
+
+
+
+
+```
+
+Esse documento é um estudo com dados do Airbnb, feito com o objetivo de demonstrar algumas funcionalidades de documentos dinâmicos em RMarkdown/Shiny e funcionalidades de desenvolvimento e execução de modelos usando tidymodels  
+
+# Exploração dos dados do Airbnb
+
+
+Foram disponibilizados no Kaggle dados retirados do site do Airbnb.
+
+## Preços
+
+O gráfico abaixo mostra um histograma do preço em determinado período de tempo em determinados bairros 
+
+De modo geral, os preços aumentam muito durante os feriados mais disputados e de acordo com o bairro e o numero de pessoas que podem ser acomodadas.
+
+```{r hist_precos, echo=FALSE}
+
+anuncios_calendario <- read_feather("airbnb/anuncios_calendario.feat") %>% 
+  mutate(
+    faixa = (price - 5L) %/% 10L,
+    faixa_preco_min = faixa * 10L + 5L ,
+    faixa_preco_max = faixa_preco_min + 10L,
+    faixa_preco_medio = faixa_preco_min + 5L
+  ) %>% 
+  select(
+    -faixa
+  )
+  
+
+inputPanel(
+  selectInput("bairros_hist_precos", label = "Bairros:",
+              choices = anuncios_calendario$neighbourhood_cleansed %>% unique() %>% sort() ,
+              selected = c("Copacabana", "Ipanema"),
+              multiple = TRUE
+              ),
+
+  numericInput("limite_hist_precos", label = "Limite de preço:",
+                 value = 400,
+                 min = 0,
+                 max = max(anuncios_calendario$price),
+                 step = 1
+              ),
+
+  numericRangeInput("pessoas_que_acomoda_hist_precos", label = "Pessoas que acomoda:",
+                    value = c(4,4),
+                    separator = "a"
+              ),
+
+  dateRangeInput("periodo_hist_precos", label = "Período:" ,
+                 min = make_date(2019,11,23),
+                 max = make_date(2020,11,20),
+                 start = make_date(2019,11,23),
+                 end = make_date(2019,12,23)
+  ),
+  
+  checkboxGroupInput(
+    inputId = "tipo_ap_hist_precos",
+    label = "Tipo de habitação",
+    choices = anuncios_calendario$room_type %>% unique() %>% sort(),
+    selected = "Entire home/apt"
+    
+  ) ,
+    
+  numericInput("quantil_hist_precos", label = "Quantil destacado na linha vertical:",
+               value = 0.5,
+               min = 0.05,
+               max = 0.95,
+               step = 0.05
+              )
+
+  
+  
+)
+
+renderGirafe({
+  
+dado_grafico <- anuncios_calendario %>% 
+    filter(
+      neighbourhood_cleansed %in% input$bairros_hist_precos,
+      price <= input$limite_hist_precos,
+      between(accommodates, input$pessoas_que_acomoda_hist_precos[1], input$pessoas_que_acomoda_hist_precos[2]),
+      between(date, input$periodo_hist_precos[1], input$periodo_hist_precos[2]),
+      room_type %in% input$tipo_ap_hist_precos
+    ) 
+    # filter(
+    #    neighbourhood_cleansed %in% c("Copacabana", "Ipanema"),
+    #    price < 300
+    # )
+
+dado_quantil <- dado_grafico %>% 
+  group_by(
+    neighbourhood_cleansed
+  ) %>% 
+  summarise(
+    quantil = quantile(price, probs = input$quantil_hist_precos)
+  )
+  
+  
+grafico <- ggplot(dado_grafico,
+        aes(
+            x = price,
+            color = neighbourhood_cleansed,
+            fill =  neighbourhood_cleansed
+        )
+        
+    ) +
+    geom_density(alpha = 0.2) +
+    geom_vline_interactive(
+      data = dado_quantil, 
+      aes(
+        xintercept = quantil ,
+        color = neighbourhood_cleansed,
+        fill =  neighbourhood_cleansed,
+        tooltip = str_glue("{neighbourhood_cleansed}, q={input$quantil_hist_precos}:{quantil}")
+      ),
+      size = 2,
+      show.legend = FALSE
+    ) +
+    theme_minimal() +
+    theme(
+      legend.position = "top"
+    ) +
+    labs(
+      x = "Preço diária",
+      y = "",
+      fill = "Bairro",
+      color = "Bairro"
+    )
+
+  girafe(
+    ggobj =  grafico, 
+    width_svg = 10 ,
+    options = list(opts_tooltip(use_fill = TRUE)),
+                 
+  )
+  
+  
+})
+
+
+
+```
+
+
+## Reviews
+
+Abaixo é mostrados o histograma das notas de cada tipo. A maioria absoluta das notas 
+
+
+```{r reviews, echo=FALSE}
+
+inputPanel(
+  selectInput("bairro_review", label = "Bairros:",
+              choices = anuncios_calendario$neighbourhood_cleansed %>% unique() %>% sort() ,
+              selected = c("Copacabana", "Ipanema"),
+              multiple = TRUE
+              ),
+
+  
+  numericRangeInput("intervalo_review", label = "Intervalo de notas mostrado:",
+                 value = c(6,10),
+                 separator = "a"
+              ),
+
+  
+  checkboxGroupInput("tipo_review", label = "Tipo de nota:",
+              choiceNames = c(
+                "Geral", 
+                "Média das categorias",
+                "Precisão",
+                "Limpeza",
+                "Check-in",
+                "Comunicação",
+                "Localização",
+                "Valor"
+              ),
+              choiceValues =  c(
+                "review_scores_rating", 
+                "mean_review",
+                "review_scores_accuracy",
+                "review_scores_cleanliness",
+                "review_scores_checkin",
+                "review_scores_communication",
+                "review_scores_location",
+                "review_scores_value"
+              ),
+              
+              selected = c("review_scores_rating", "mean_review")
+
+          ),
+  
+  numericRangeInput("pessoas_que_acomoda_review", label = "Pessoas que acomoda:",
+                    value = c(4,4),
+                    separator = "a"
+              ),
+
+  
+  checkboxGroupInput(
+    inputId = "tipo_ap_review",
+    label = "Tipo de habitação",
+    choices = anuncios_calendario$room_type %>% unique() %>% sort(),
+    selected = "Entire home/apt"
+    
+  ) 
+  
+  
+
+  
+  
+)
+
+renderGirafe({
+
+
+  dado_grafico <- anuncios_calendario %>% 
+    filter(
+      neighbourhood_cleansed %in% input$bairro_review,
+      between(accommodates, input$pessoas_que_acomoda_review[1],input$pessoas_que_acomoda_review[2]),
+      room_type %in% input$tipo_ap_review
+    ) %>%
+    select(
+      id,
+      neighbourhood_cleansed,
+      starts_with("review_"),
+      mean_review
+    ) %>%
+    group_by(id, neighbourhood_cleansed) %>% 
+    summarise(across(everything(), mean)) %>% 
+    ungroup() %>%  
+    select(-id) %>% 
+    pivot_longer(
+      cols = -neighbourhood_cleansed,
+      names_to = "tipo_review",
+      values_to = "review"
+    ) %>% 
+    filter(
+      tipo_review %in% input$tipo_review,
+      between(review,input$intervalo_review[1], input$intervalo_review[2] )
+    )
+  
+
+  
+  grafico <- ggplot(dado_grafico) +
+      geom_histogram_interactive(
+          aes(
+              x = review,
+              y = after_stat(ndensity),
+              fill = neighbourhood_cleansed
+          ),
+          position = "dodge",
+          binwidth = 0.1
+    ) +
+    facet_grid(tipo_review ~ .)+
+      theme_minimal() +
+      theme(
+        legend.position = "top"
+      ) 
+  
+
+
+  girafe(
+    ggobj =  grafico, 
+    width_svg = 10 ,
+    options = list(opts_tooltip(use_fill = TRUE)),
+                 
+  )
+  
+  
+})
+
+
+
+```
+
+
+
+
+```{r demanda, echo=FALSE}
+
+
+inputPanel(
+  selectInput("bairro_demanda", label = "Bairros:",
+              choices = anuncios_calendario$neighbourhood_cleansed %>% unique() %>% sort() ,
+              selected = c("Copacabana", "Ipanema"),
+              multiple = TRUE
+              ),
+
+  numericInput("limite_hist_demanda", label = "Limite de preço:",
+                 value = 400,
+                 min = 0,
+                 max = max(anuncios_calendario$price),
+                 step = 1
+              ),
+
+  checkboxGroupInput("tipo_demanda", label = "Tipos de nota a filtar:",
+              choiceNames = c(
+                "Geral", 
+                "Média das categorias",
+                "Precisão",
+                "Limpeza",
+                "Check-in",
+                "Comunicação",
+                "Localização",
+                "Valor"
+              ),
+              choiceValues =  c(
+                "review_scores_rating", 
+                "mean_review",
+                "review_scores_accuracy",
+                "review_scores_cleanliness",
+                "review_scores_checkin",
+                "review_scores_communication",
+                "review_scores_location",
+                "review_scores_value"
+              ),
+              
+              selected = c("review_scores_rating", "mean_review")
+
+          ),
+  
+    dateRangeInput("periodo_demanda", label = "Período:" ,
+                 min = make_date(2019,11,23),
+                 max = make_date(2020,11,20),
+                 start = make_date(2019,11,23),
+                 end = make_date(2019,12,23)
+  ),
+
+
+  
+  numericRangeInput("intervalo_demanda", label = "Intervalo de notas mostrado:",
+                 value = c(6,10),
+                 separator = "a"
+              ),
+  
+    
+  numericRangeInput("pessoas_que_acomoda_demanda", label = "Pessoas que acomoda:",
+                    value = c(4,4),
+                    separator = "a"
+              ),
+
+  checkboxGroupInput(
+    inputId = "tipo_ap_demanda",
+    label = "Tipo de habitação",
+    choices = anuncios_calendario$room_type %>% unique() %>% sort(),
+    selected = "Entire home/apt"
+    
+  ) 
+)
+
+
+
+renderGirafe({
+
+
+  ocupacao <- anuncios_calendario %>%
+      filter(
+        neighbourhood_cleansed %in% input$bairro_demanda,
+        between(accommodates, input$pessoas_que_acomoda_demanda[1],input$pessoas_que_acomoda_demanda[2]),
+        between(date, input$periodo_demanda[1],input$periodo_demanda[2]),
+        room_type %in% input$tipo_ap_demanda,
+        price < input$limite_hist_demanda
+      ) %>% 
+      filter(
+        across(
+          any_of(input$tipo_demanda), 
+          ~between(.x, input$intervalo_demanda[1], input$intervalo_demanda[2])
+        )
+      )%>% 
+      group_by(
+          faixa_preco_medio ,
+          host_is_superhost,
+          neighbourhood_cleansed
+      ) %>%
+      summarise(ocupacao = sum(available)/n()) %>% 
+    ungroup()
+  
+
+  grafico <- ggplot(ocupacao,
+          aes(
+              x = faixa_preco_medio,
+              y = ocupacao,
+              color = host_is_superhost
+          )
+         ) +
+      geom_point(
+      ) +
+      geom_smooth(se = FALSE) +
+      facet_wrap(~neighbourhood_cleansed) +
+      theme_minimal() +
+      theme(
+          legend.position = "top"
+      )
+
+
+  girafe(
+    ggobj =  grafico, 
+    width_svg = 10 ,
+    options = list(opts_tooltip(use_fill = TRUE)),
+                 
+  )
+  
+  
+})
+  
+
+```
+
+
+
+
+
+
+
+
+
+
+

@@ -10,6 +10,7 @@ output: slidy_presentation
 library(tidyverse)
 library(tidymodels)
 library(lubridate)
+library(feather)
 
 ```
 
@@ -18,57 +19,62 @@ library(lubridate)
 
 ```{r}
 
-# 
-# calendario <- read_csv("airbnb/calendar.csv")
-# 
-# anuncios <- read_csv("airbnb/listings.csv")
+
+
+calendario <- read_csv("airbnb/calendar.csv")
+
+anuncios <- read_csv("airbnb/listings.csv")
 
 calendario_selecao <-  calendario %>% 
     mutate(
-        price = str_remove(price, "\\$") %>% parse_number(),
-        adjusted_price = str_remove(adjusted_price, "\\$") %>% parse_number(),
+        across(where(is.numeric), as.integer) 
+    ) %>% 
+    mutate(
+        price = str_remove(price, "\\$") %>% parse_number() %>% as.integer(),
+        adjusted_price = str_remove(adjusted_price, "\\$") %>% parse_number() %>%  as.integer(),
         listing_id = as.integer(listing_id)
-    )  %>% 
+    ) %>% 
     filter(
-        date == make_date(2019,11,30)
+        date < make_date(2020,3,1)        
     )
 
 anuncios_selecao <- anuncios %>% 
     mutate(
         id = as.integer(id),
-        neighbourhood_cleansed = as_factor(neighbourhood_cleansed)
+        neighbourhood_cleansed = as_factor(neighbourhood_cleansed),
+        room_type == as_factor(room_type)
+    ) %>% 
+    mutate(
+        across(where(is.numeric), as.integer) 
     ) %>% 
     select(
         id,
         neighbourhood_cleansed,
         host_is_superhost,
         accommodates,
-        starts_with("review_")
+        starts_with("review_"),
+        room_type
+
     ) %>% 
     filter(
-        accommodates == 4,
         !is.na(host_is_superhost)
     ) %>% 
     rowwise() %>% 
     mutate(
-        mean_review = mean(c_across(starts_with("review") & !matches("rating")    ))
-    )
-
-
+        mean_review = mean(c_across(starts_with("review") & !matches("rating")    )),
+        review_scores_rating = review_scores_rating/10
+    ) %>% 
+    ungroup()
 
 
 anuncios_calendario <- anuncios_selecao %>% 
     left_join(
         calendario_selecao,
         by = c("id" = "listing_id")
-    ) %>% 
-    filter(
-        price < 400,
-        neighbourhood_cleansed %in% c("Copacabana", "Ipanema")
-    )
+    ) 
     
 
-
+write_feather(anuncios_calendario, "airbnb/anuncios_calendario.feat")
 
 
 ```
@@ -93,6 +99,8 @@ ggplot(anuncios_calendario) +
 
 ```{r}
 
+
+
 ggplot(anuncios_calendario) +
     geom_histogram(
         aes(
@@ -112,7 +120,7 @@ ggplot(anuncios_calendario) +
 
 
 
-```{r}
+```{r demanda, echo=FALSE}
 
 
 por_preco <- tibble(
@@ -121,15 +129,12 @@ por_preco <- tibble(
     preco_medio = seq(50, to = 350, by = 10)
 )  
     
-
-
 demanda <- por_preco %>% 
     crossing(anuncios_calendario) %>% 
     filter(
         preco_min <= price,
         preco_max > price
     )
-
 
 ocupacao <- demanda %>% 
     group_by(
@@ -148,9 +153,9 @@ ggplot(ocupacao,
         )
        
        ) +
-    geom_line(
+    geom_point(
     ) +
-    geom_smooth() +
+    geom_smooth(se = FALSE) +
     facet_wrap(~neighbourhood_cleansed) +
     theme_minimal() +
     theme(
