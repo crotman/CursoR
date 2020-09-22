@@ -121,9 +121,9 @@ escreve_remissivo <- function(){
 
 Bruno Crotman (crotman@gmail.com)
 
-- Trabalha há 5 anos na Empresa de Pesquisa Energética fomentando o trabalho com dados em todas as áreas da empresa
+- Trabalha há 6 anos na Empresa de Pesquisa Energética fomentando o trabalho com dados em todas as áreas da empresa
 
-- Trabalhou por 5 anos no Banco BBM na área de Pesquisa Quantitativa
+- Trabalhou por 5 anos no Banco BBM/BBM Investimentos na área de Pesquisa Quantitativa
 
 - Doutorado (em curso): Engenharia de Software baseada em teoria dos jogos e ciência de dados, Unirio. Orientador: Prof. Márcio Barros
 
@@ -161,17 +161,21 @@ Bruno Crotman (crotman@gmail.com)
 - Rudimentos de aprendizado estatístico
   + Desmistificação
   + Processo do aprendizado estatístico (seleção do modelo, validação do modelo)
-  + Na prática: broom
-  + Na prática: caret
+  + Na prática: tidymodels
 
 - Comunicação
   + Aplicativos Web Shiny
   + Relatórios Markdown
   
-- Séries Temporais
+- Séries Temporais ?
   + tidyverts
   + Visualização
   + Modelos. ARIMA etc.
+
+- Práticas de Engenharia de Software ?
+  + Testes automáticos
+  + Criação de pacotes
+  + Boas práticas de design
 
 
 
@@ -254,6 +258,7 @@ Também amo o Excel, mas amo mais as seguintes vantagens:
 
 * Prazeroso programar (Tidyverse, Shiny, R Markdown...)
 
+* Guerra de linguagens: R x Julia x Python. O mais importante é evitar Analysis Paralisis 
 
 ## Fluxo de trabalho
 `r slide_atual = slide_atual + 1`
@@ -299,6 +304,7 @@ Após a possível execução de modelos, podemos publicar os resultados.
 
 [Ajuda pra escolher o local de um consultório de psicologia](https://crotman.shinyapps.io/psirio)
 
+[Formato de relatório. Análise mais direcionada e com conclusões do que exploratória](https://crotman.shinyapps.io/airbnb)
 
 ## Ambiente R/RStudio
 `r slide_atual = slide_atual + 1`
@@ -342,9 +348,9 @@ Veja o `[1]` no console. O R considera que tudo é um vetor. É uma linguagem mu
 
 O console serve só para testes, aprendizado de novos comandos, debug, experiências etc.
 
-Para as atividades mais comuns de análise de dados, e para que elas sejam reprodutíveis, é necessária a criação de scripts.
+Para executar adequadamente as atividades mais comuns de análise de dados, e para que elas sejam reprodutíveis, é necessária a criação de scripts.
 
-Eles são salvos em um arquivo de extensão ".r"
+Eles são salvos em um arquivo de extensão ".R"
 
 
 
@@ -367,7 +373,7 @@ Eles são salvos em um arquivo de extensão ".r"
 
 * Cheat sheets
 
-* Verificação ortográfica (versão 1.3, ainda não lançada)
+* Verificação ortográfica (ainda não existe em portguês. Em inglês funciona bem)
 
 ## Baixando o material do github
 `r slide_atual = slide_atual + 1`
@@ -402,9 +408,7 @@ Para o R, simplificando para o escopo deste curso, as variáveis "armazenam" os 
 ```
 
 ```{r list, echo=TRUE}
-
 list("oi", 1L)
-
 ```
 
 * Data Frames / Tibbles
@@ -457,9 +461,9 @@ Note que não há variáveis que armazenam dado escalar, como já vimos.
 Dentre os vetores há:
 
 
-* `r a_r("vetores atômicos")` (seus elementos são do mesmo tipo primário)
+* `r a_r("vetores atômicos")` (seus elementos são do mesmo tipo de dados primário)
 
-* `r a_r("listas")` (seus elementos, que são vetores atômicos, são de tipos primários diferentes)
+* `r a_r("listas")` (seus elementos, que são vetores atômicos, são de tipos de dados primários diferentes)
 
 ![Tipos de vetores](imagens/summary-tree.png){width=25%}
 
@@ -468,14 +472,13 @@ Fonte: [@wickham2014advanced]
 ## Tipos de valores "armazenados" por variáveis (cont.)
 `r slide_atual = slide_atual + 1`
 
-Os vetores atômicos podem ser dos seguintes tipos:
-
+Tipos de dados primários:
 
 ![Tipos primários](imagens/summary-tree-atomic.png){width=25%}
 
 Fonte: [@wickham2014advanced]
 
-## Tipos de vetores atômicos
+## Tipos de dados primários
 `r slide_atual = slide_atual + 1`
 
 * `r a_r("Logical")` é um tipo booleano, aceita TRUE ou FALSE
@@ -501,7 +504,7 @@ typeof(inteiro + 1)
 
 ```
 
-## Tipos de vetores atômicos (cont.)
+## Tipos de dados primários (cont.)
 `r slide_atual = slide_atual + 1`
 
 * `r a_r("Double")` é numérico e aceita números decimais. Equivalente ao double do C++
@@ -528,7 +531,7 @@ infinito
 
 
 
-## Cobinando vetores em vetores maiores usando c()
+## Combinando vetores em vetores maiores usando c()
 `r slide_atual = slide_atual + 1`
 
 Uma das funções mais usadas do R é `r a_r("c()")`, que cria um vetor novo vetor combinando vetores.
@@ -555,7 +558,6 @@ O operador `r a_r(":")` é usado para gerar um vetor com todos números que est�
 1.5:9.1
 
 
-
 ```
 
 A função `r a_r("seq()")` é usada para criar um vetor de várias formas. 
@@ -573,8 +575,7 @@ seq(1, 9.99, 0.1)
 ## Parâmetros nomeados
 `r slide_atual = slide_atual + 1`
 
-
-Note que chamamos a função passando os parâmetros sem especificação de quais são eles. Eles são recebidos pela função na ordem padrão definida pela função. 
+Note que chamamos a função sem especificar o nome dos parâmetros. Eles são recebidos pela função na ordem padrão definida pela função. 
 
 Mas no R também é possível passar `r a_r("parâmetros nomeados")`. 
 
@@ -606,6 +607,7 @@ Valores faltantes ou desconecidos são representados por `r a_r("NA")`
 
 a <- c(1L,NA)
 a
+
 ```
 
 O valor NA quase sempre contamina os cálculos
@@ -645,8 +647,6 @@ is.na(v)
 
 
 
-
-
 ## Programação com vetores
 `r slide_atual = slide_atual + 1`
 
@@ -679,7 +679,7 @@ Numa operação com vetores do mesmo tamanho, os elementos são pareados
 ## Programação com vetores - recycling
 `r slide_atual = slide_atual + 1`
 
-Outro conceito importante é o de `r a_r("recycling")`. 
+Um conceito importante é o de `r a_r("recycling")`. 
 
 Numa operação entre dois vetores de tamanhos diferentes, o vetor menor é repetido ciclicamente de forma a ficar com o mesmo tamanho do vetor maior. 
 
@@ -697,7 +697,7 @@ Então... o escalar mostrado no primeiro código do slide anterior é um vetor d
 ## Estruturas construídas a partir de vetores e listas
 `r slide_atual = slide_atual + 1`
 
-Existem estruturas mais complexas na linguagem construídas a partir de vetores e listas.
+Existem estruturas mais complexas construídas a partir de vetores e listas.
 
 * Data Frame
 
@@ -719,14 +719,14 @@ Data Frame é a estrutura que mais vamos usar para nossas análises de dados.
 
 `r a_r("Data Frame")`, e seu primo `r a_r("Tibble")`, são estruturas muito usadas em análises de dados feitas em R.
 
-O Data Frame consiste em um conjunto de vetores nomeados, com o mesmo número de elementos, que formam uma estrutura retangular, onde cada coluna é um vetor e cada linha n contém o n-ésimo elemento dos vetores.
+O Data Frame consiste em um conjunto de vetores/listas nomeados, com o mesmo número de elementos, que formam uma estrutura retangular, onde cada coluna é um vetor/lista e cada linha n contém o n-ésimo elemento dos vetores.
 
 É similar, em muitas características, a uma tabela de banco de dados.
 
 Essa estrutura é chave no paradigma "Tidy" que usaremos com as bibliotecas **Tidy**verse
 
-Tibble é uma adaptação do Data Frame para análise de dados. Discutir essas diferenças está fora do escopo do curso. Algumas diferenças serão citadas o longo do material e justificam o uso do Tibble.
-
+Tibble é uma adaptação do Data Frame para análise de dados. Pra maioria dos efeitos eles têm o mesmo comportamento, mas os tibbles contêm algumas atualizações para os processos de análise de dados.
+  
 
 ```{r dataframetibble, echo=TRUE}
 
@@ -750,6 +750,56 @@ tib <-
         )
     )
 ```
+
+## Tibbles (list-columns)
+`r slide_atual = slide_atual + 1`
+
+
+Vamos usar bastante as list-columns. Ou seja, vendo o tibble como uma tabela, a coluna de um tibble pode ser um vetor (tipos primários iguais) ou uma lista (tipos primários diferentes).
+
+Vamos usar list-columns por exemplo, ao aninhar conteúdos diferentes em cada linha de um tibble
+
+Tibble é mais amigável a list-columns mas é possível usar list-columns em Data Frames também.
+
+Tibble, por exemplo, aceita inicialização de uma list-column diretamente
+
+```{r}
+
+tib <- tibble(
+  a = c(1, 2),
+  b = list("a", 2)
+)
+
+str(tib)
+
+```
+
+
+Data Frame se enrola...
+
+```{r}
+
+df <- data.frame(
+  a = c(1, 2),
+  b = list("a", 2) 
+)
+
+str(df)
+
+
+```
+
+Apesar de não poder ser inicializado desta forma, o Data Frame aceita list-column
+
+
+```{r}
+
+df_from_tib <- as.data.frame(tib)
+
+str(df_from_tib)
+
+```
+
 
 ## Criando um `tibble` com `tribble()`
 `r slide_atual = slide_atual + 1`
@@ -914,7 +964,7 @@ sem_loop <- function(n){
 Abaixo as três formas de fazer a mesma conta que terão a performance avaliada
 
 
-```{r compara_loop}
+```{r compara_loop} 
 com_loop(5)
 
 sem_loop(5)
@@ -1159,7 +1209,7 @@ Vamos usar uma das funções da família `r<familia de distribuição de prob>()
 
 n_simul <- 10000
 n_questoes <- 240
-min_aprovacao <-  0.6
+min_aprovacao <-  0.2
 n_aprovado <- 240 * min_aprovacao
 prob_questao <- 0.2
 
@@ -1269,7 +1319,7 @@ mostra_chances(acertos, n_questoes)
 ## O que é `r a_r("programação funcional")`?
 `r slide_atual = slide_atual + 1`
 
-O fato de que funções são objetos de primeira classe no R, ou seja, objetos que têm propriedades iguais às de qualquer outro, possibilita a progrmação no estilo funcional.
+O fato de que funções são objetos de primeira classe no R, ou seja, objetos que têm propriedades iguais às de qualquer outro, possibilita a programação no estilo funcional.
 
 A programação funcional inclui as formas de interação entre vetores e funções a partir de uma função
 
@@ -1284,9 +1334,9 @@ Neste curso vamos nos concentrar nos Functionals, funções que recebem função
 
 A função mais fundamental é `r a_r("map()")`. 
 
-Ela recebe uma função e um vetor de $n$ elementos
+Ela recebe uma função e um vetor (ou lista) de $n$ elementos
 
-A função é chamada para cada elemento do vetor, $n$ vezes.
+A função é chamada para cada elemento do vetor (ou lista), $n$ vezes.
 
 Os resultados da aplicação destas $n$ execuções são devolvidos em uma lista de $n$ elementos
  
@@ -1533,12 +1583,12 @@ Não é por coincidência que as funções de tratamento das bibliotecas tidyver
 
 `r a_r("dplyr")` é a biblioteca mais central do conjunto `tidyverse`
 
-![](imagens/conceptual_dplyr.jpg)
+![](imagens/dplyr_concept.png)
 
 Fonte: [@dplyrrberlin]
 
 
-## CRAN: além de bibliotecas de funções, bibliotecas de dados
+## CRAN: bibliotecas de pacotes: funções e dados
 `r slide_atual = slide_atual + 1`
 
 `r a_r("CRAN")` é o repositório de bibliotecas mantido pelo R com contribuição de populares.
@@ -1627,9 +1677,9 @@ Algumas `r a_r("funções helpers da dplyr")` nos ajudam a usar a função `sele
 Pra mostrar mais funcionalidades da função `select`, vamos usar uma base com dados eleitorais brasileiros, que retorna mais colunas
 
 
-```{r  candidatos , cache=TRUE, message= FALSE, warning=FALSE }
+```{r  candidatos,  message= FALSE, warning=FALSE, cache=TRUE }
 
-candidatos <- candidate_fed(2018)
+candidatos <- candidate_fed(2018) 
 
 glimpse(candidatos)
 
@@ -1708,7 +1758,7 @@ estacao
 
 A função abaixo retorna os dados de uma estação. Veja que alguns campos têm um sufixo _n 
 
-```{r estacao_import, cache=TRUE }
+```{r estacao_import }
 dados_heathrow <- importNOAA(code = "037720-99999")
 
 
@@ -1756,6 +1806,45 @@ glimpse(dados_heathrow_select)
 
 ```
 
+
+Outra forma mais nova de fazer isso é usando a função `r a_r("relocate()")`, que facilita a ordenação das colunas de um data frame
+
+
+```{r}
+
+dados_heathrow_relocate <- dados_heathrow %>% 
+    relocate( 
+        date, 
+        air_temp
+    )
+
+
+glimpse(dados_heathrow_relocate)
+
+
+```
+
+Por padrão, ela traz as colunas para a frente, mas é possível movê-las para antes ou depois de uma outra coluna, usando o parâmetro .before OU EXCLUSIVO .after
+
+
+```{r}
+
+
+dados_heathrow_relocate <- dados_heathrow %>% 
+    relocate( 
+        date, 
+        air_temp,
+        .before = station
+    )
+
+
+glimpse(dados_heathrow_relocate)
+
+
+
+```
+
+
 ## Funções básicas de tratamento (dplyr): `rename()`
 `r slide_atual = slide_atual + 1`
 
@@ -1796,6 +1885,63 @@ dados_heathrow %>%
 
 
 ```
+
+
+## Renomeando várias colunas de uma vez (dplyr): `rename_with()`
+`r slide_atual = slide_atual + 1`
+
+A função `r a_r("rename_with()")` possibilita que renomeemos várias colunas ao mesmo tempo com o uso de uma função.
+
+Aqui fazemos uso de uma função da biblioteca `r a_r("stringr")`, que trata strings, ou seja, cadeias de caracteres. 
+
+
+
+```{r}
+str(iris)
+
+```
+
+Primeiro podemos nos incomodar com as letras maiúsculas e o "." separando as palavras em vez de "_"
+
+```{r}
+
+iris_padrao <- iris %>%
+  rename_with(
+    .fn = str_to_lower
+  ) %>% 
+  rename_with(
+    .fn = function(x){
+      str_replace(
+        string = x, 
+        pattern = "\\.", 
+        replacement = "_"
+      )}
+  ) 
+  
+str(iris_padrao)
+
+
+```
+
+
+Podemos também querer colocar um sufixo nos nomes dos campos com a unidade
+
+Vamos usar aqui o "~" criando um atalho para a função, que vai receber cada nome de coluna como .x
+
+A função `r a_r("str_glue()")` possibilita a criação de novas strings a partir de variáveis já existentes de uma forma expressiva.
+
+
+```{r}
+iris_unidade <- iris_padrao %>% 
+  rename_with(
+    .cols = -species ,
+    .fn = ~str_glue("{.x}_inches")
+  )
+
+str(iris_unidade)
+
+```
+
 
 
 ## dplyr: Modificar -> Colunas -> Valores
@@ -1848,6 +1994,9 @@ head(candidatos_com_data)
 ```
 
 
+
+
+
 ## Funções básicas de tratamento (dplyr): `mutate()`
 `r slide_atual = slide_atual + 1`
 
@@ -1874,7 +2023,7 @@ Outras funções úteis são as que fazem operações acumuladas e as operaçõe
 
 `r a_r("BETS")` é uma biblioteca criada pela FGV que dá acesso a `r a_r("séries temporais econômicas")`
 
-```{r bets, cache = TRUE, warning=FALSE, message=FALSE}
+```{r bets,  warning=FALSE, message=FALSE}
 
 series <- BETS::BETSsearch("exchange dollar")
 
@@ -1884,7 +2033,7 @@ series
 
 No código abaixo, calculamos o retorno da série, a `r a_r("volatilidade histórica")` e a volatilidade `r a_r("EWMA")`
 
-```{r bets_vol, cache = TRUE}
+```{r bets_vol}
 
 dolar <- BETS::BETSget(1) 
 
@@ -1921,7 +2070,7 @@ datatable(dolar_com_vol) %>%
 ```
 
 
-```{r dolar_vol, cache=TRUE}
+```{r dolar_vol}
 
 dolar_ajeitado <- dolar_com_vol %>% 
     pivot_longer(cols = -date, names_to = "variavel", values_to = "valor")
@@ -2318,7 +2467,7 @@ salva <- function(endereco, arquivo){
 }
 
 
-baixa_faltantes <- tibble(data_dado = seq(ymd("2017-01-01"), by = "month", ymd(today()-4) )) %>% 
+baixa_faltantes <- tibble(data_dado = seq(ymd("2019-01-01"), by = "month", ymd(today()-4) )) %>% 
     mutate(data_formato = format(data_dado, "%Y%m")) %>% 
     mutate(
         endereco = paste0(
@@ -2346,10 +2495,12 @@ Usamos `r a_r("execução em paralelo no exemplo")`, que é possibilitada ao cha
 
 plan(multiprocess)
 
+
 todos_os_fundos <- tibble(arquivo = list.files("dados/fundos")) %>%
     mutate(arquivo = paste0("dados/fundos/",arquivo)) %>%
-    mutate(data = future_map(arquivo, read_rds, .progress = TRUE)) %>% 
+    mutate(data = future_map(arquivo, read_rds , .progress = TRUE)) %>% 
     unnest()
+
 
 
 head(todos_os_fundos)
@@ -2358,7 +2509,7 @@ head(todos_os_fundos)
 
 
 
-```{r cadastro_fundos, cache=TRUE, warning=FALSE, message=FALSE}
+```{r cadastro_fundos,  warning=FALSE, message=FALSE}
 
 download.file(url = "http://dados.cvm.gov.br/dados/FIE/CAD/DADOS/cad_fie.zip", destfile = "dados/cvm/cad_fie.zip" )
 
@@ -2489,9 +2640,6 @@ Precisamos ler todas as sheets de todos os arquivos em um diretório (onde baixa
 
 A função abaixo lê as sheets de um arquivo.
 
-Aqui fazemosuso de uma função da biblioteca `r a_r("stringr")`, que trata strings, ou seja, cadeias de caracteres. 
-
-A função `r a_r("str_glue()")` possibilita a criação de novas strings a partir de variáveis já existentes de uma forma expressiva.
 
 
 ```{r le_sheets, warning=FALSE  }
