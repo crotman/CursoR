@@ -67,6 +67,8 @@ library(RColorBrewer)
 library(fpp3)
 library(gtrendsR)
 library(gganimate)
+library(gt)
+
 
 library(electionsBR)
 library(worldmet)
@@ -469,6 +471,10 @@ Dentre os vetores há:
 
 Fonte: [@wickham2014advanced]
 
+
+
+
+
 ## Tipos de valores "armazenados" por variáveis (cont.)
 `r slide_atual = slide_atual + 1`
 
@@ -693,6 +699,110 @@ Então... o escalar mostrado no primeiro código do slide anterior é um vetor d
 1:10 * 1:2
 
 ```
+
+## Vetores nomeados
+`r slide_atual = slide_atual + 1`
+
+Um `r a_r("vetor nomeado")` pode ser criado como abaixo 
+
+```{r}
+
+vetor_nomeado <- c(primeiro = 1, segundo = 2, terceiro = 3)
+
+vetor_nomeado
+
+```
+
+
+Além de acessar o elemento do vetor pelo índice numérico (COMEÇANDO DE UM, pois R é uma linguagem `r a_r("1-based")` ), é possível acessar os elementos pelos seus nomes
+
+```{r}
+vetor_nomeado[1]
+
+```
+
+
+```{r}
+vetor_nomeado["primeiro"]
+
+```
+
+
+
+```{r}
+
+vetor_nomeado[3]
+
+```
+
+
+```{r}
+vetor_nomeado["terceiro"]
+```
+
+Os nomes dos elementos podem ser acessados com a função `r a_r("names()")`
+
+```{r}
+
+names(vetor_nomeado)
+
+```
+
+
+Um vetor de nomes pode ser atribuído a names(). A mudança dos nomes é feita inline
+
+```{r}
+
+names(vetor_nomeado) <- c("a", "b", "c")
+
+vetor_nomeado
+
+```
+
+O acesso pode ser feito por um vetor, também.
+
+```{r}
+
+vetor_nomeado[c("b","c")]
+
+```
+
+
+## Listas nomeadas
+`r slide_atual = slide_atual + 1`
+
+As `r a_r("listas nomeadas")` funcionam de forma similar aos vetores nomeados.
+
+```{r}
+
+lista_nomeada <- list(primeiro = "a", segundo = 2, terceiro = c(1, 2, 3) )
+
+lista_nomeada
+
+```
+
+Os elementos das listas são acessados com duplos colchetes
+
+```{r}
+
+lista_nomeada[["terceiro"]]
+
+
+```
+
+
+
+```{r}
+
+names(lista_nomeada) <- c("um", "dois", "tres")
+
+lista_nomeada
+
+```
+
+
+
+
 
 ## Estruturas construídas a partir de vetores e listas
 `r slide_atual = slide_atual + 1`
@@ -1367,7 +1477,6 @@ map(.x = 1:10, .f = funcao)
 `r slide_atual = slide_atual + 1`
 
 
-
 ```{r}
 
 map_dbl(.x = 1:10, .f = funcao)
@@ -1605,7 +1714,7 @@ Para acessar um indicador precisamos achá-lo na base de indicadores com a funç
 
 #pattern é uma expressão regular. \\ serve para dizer que "(" é mesmo "(" 
 #e não o ( usado nas operações de expressão regular (fora do escopo do curso)
-indicadores <- wbsearch(pattern = "GINI index \\(World Bank estimate\\)")
+indicadores <- wb_search(pattern = "GINI index \\(World Bank estimate\\)")
 
 indicadores
 
@@ -1617,8 +1726,8 @@ Sabendo o ID do indicador, podemos consultá-lo com a função `wb()`
 
 ```{r banco_mundial_2}
 
-#mrv é most recent values. Pode ser usado para buscar os n valores mais recentes
-gini = wb(indicator = "SI.POV.GINI", mrv= 10, POSIXct = TRUE)
+#mrvnev é most recent non-empty values. Pode ser usado para buscar os n valores mais recentes
+gini = wb_data( indicator = "SI.POV.GINI", mrnev = 10)
 
 head(gini)
 
@@ -1649,7 +1758,7 @@ glimpse(gini)
 ```{r gini_select}
 
 gini_select <- gini %>% 
-    select(country, date, value, iso3c)
+    select(country, date, SI.POV.GINI, iso3c)
 
 head(gini_select)
 
@@ -2175,56 +2284,49 @@ gapminder %>%
 ```
 
 
-## Funções básicas de tratamento (dplyr) `top_n()`:
+## Funções básicas de tratamento (dplyr) `slice_max()`:
 `r slide_atual = slide_atual + 1`
 
-`r a_r("top_n()")` seleciona as `n` linhas maiores de acordo com uma das colunas.
+`r a_r("slice_max()")` seleciona as `n` linhas maiores de acordo com uma das colunas.
 
-![](diagramas/dplyr_top_n.png)
+![](diagramas/dplyr_slice_max.png)
 
-## Funções básicas de tratamento (dplyr) `top_n()` (cont.):
+## Funções básicas de tratamento (dplyr) `slice_max()` número de itens:
 `r slide_atual = slide_atual + 1`
 
 
-Selecionando os países mais ricos em 2007.
+Selecionando os países mais ricos em 2007 com o parâmetro n.
 
-Depois aprenderemos como ordenar essas barras
+Depois aprenderemos como ordenar essas barras no gráfico
 
 
 ```{r}
 
 gapminder %>% 
   filter(year == 2007) %>% 
-  top_n(5, gdpPercap) %>% 
+  slice_max(order_by = gdpPercap, n = 5) %>% 
   ggplot() +
     geom_col(aes(x = country, y = gdpPercap)) +
     theme_light() 
 
 ```
 
-## Funções básicas de tratamento (dplyr) `top_frac()`:
+## Funções básicas de tratamento (dplyr) `slice_max()`, proporção das linhas:
 `r slide_atual = slide_atual + 1`
 
-
-![](diagramas/dplyr_top_frac.png)
-
-
-## Funções básicas de tratamento (dplyr) `top_frac()`:
-`r slide_atual = slide_atual + 1`
-
-
+O parâmetro prop permite a seleção de uma proporção das linhas
 
 
 ```{r}
 
 ricos <- gapminder %>% 
   filter(year == 2007) %>% 
-  top_frac(.2, gdpPercap ) %>% 
+  slice_max(prop = .2, order_by = gdpPercap ) %>% 
   mutate(categoria = "Rico")
 
 pobres <-  gapminder %>% 
   filter(year == 2007) %>% 
-  top_frac(.2, desc(gdpPercap) ) %>% 
+  slice_min(prop = .2, order_by = gdpPercap) %>% 
   mutate(categoria = "Pobre")
 
 bind_rows(ricos, pobres) %>% 
@@ -2232,7 +2334,10 @@ bind_rows(ricos, pobres) %>%
   geom_point( aes(color = continent)) +
   facet_grid(. ~ categoria, scales = "free_x") +
   geom_smooth(method = "lm", se = FALSE) +
-  theme_light()
+  theme_light() +
+  theme(
+    legend.position = "top"
+  )
   
 
 
@@ -2296,7 +2401,7 @@ Ela particiona o tibble. As operações passam a ser executadas em cada partiç�
 ```{r group_by}
 
 gini_agrupado <- gini %>% 
-    select(country, date, value) %>% 
+    select(country, date, SI.POV.GINI) %>% 
     group_by(country) 
     
 gini_agrupado
@@ -2336,8 +2441,8 @@ As funções `r a_r("lag() no contexto da group_by")` e `r a_r("lead() no contex
 ```{r lag}
 
 gini_agrupado %<>% mutate(
-    value_ant = lag(value),
-    delta_value = value - value_ant
+    value_ant = lag(SI.POV.GINI),
+    delta_value = SI.POV.GINI - value_ant
     )
 
 datatable(gini_agrupado)
@@ -2380,7 +2485,7 @@ datatable(maiores_temp_dia) %>%
 
 
 
-A função `r a_r("top_n() no contexto da group_by()")` retorna os n maiores valores. Se o tibble estiver agrupado, pra cada grupo.
+A função `r a_r("slice_max() no contexto da group_by()")` retorna os n maiores valores. Se o tibble estiver agrupado, pra cada grupo.
 
 
 
@@ -2389,7 +2494,7 @@ A função `r a_r("top_n() no contexto da group_by()")` retorna os n maiores val
 
 maiores_temp_dia <- dados_heathrow %>% 
     group_by(date(date)) %>% 
-    top_n(1, air_temp) %>% 
+    slice_max(n = 1, order_by = air_temp) %>% 
     ungroup() %>% 
     mutate(
         hora = hour(date),
@@ -2411,6 +2516,156 @@ ggplot(maiores_temp_dia) +
 
 
 ```
+
+
+## Operações column-wise
+`r slide_atual = slide_atual + 1`
+
+
+A biblioteca dplyr chegou à versão 1.0.0 em junho de 2020, estabelecendo sua interface permanente e ganhando novas funcionalidades, como as `r a_r("column-wise operations")`, com a função `r a_r("across()")`.
+
+A função `across()`, quando usada em conjunto com `mutate()`, `summarise()`, `filter()`... , facilita a execução de operações iguais em diversos campos com base no nome dos campos ou no valor deles.
+
+
+## Operações column-wise com mutate
+`r slide_atual = slide_atual + 1`
+
+
+
+A função across() tem dois parâmetros.
+
+- O parâmetro `.cols` define em quais colunas serão aplicados as funções 
+- O parâmetro `.fns` define a função (ou a lista de funções) que serão aplicadas em cada coluna
+
+```{r}
+
+candidatos %>% 
+    mutate(
+        across(
+            .cols = starts_with("DATA")  ,
+            .fns = dmy
+        )
+    ) %>% 
+    relocate(starts_with("DATA") ) %>% 
+    str() 
+
+
+```
+
+## Operações column-wise com filter
+`r slide_atual = slide_atual + 1`
+
+É possível usar a função `across()` em conjunto com filter. O código abaixo seleciona apenas as linhas pras quais nenhum percentil é nulo.
+
+```{r}
+
+percentis_pisas <- wb_search(pattern = "LO\\.PISA\\.SCI\\.P.*")
+
+
+dados_pisa  <- wb_data(indicator =  percentis_pisas$indicator_id )
+
+pisas_completos <- dados_pisa %>% 
+    filter(
+        across(starts_with("LO"), ~!is.na(.x)  )
+    ) %>% 
+    left_join(
+      country_codes %>% rename(country_gapminder = country),
+      by = c("iso3c" = "iso_alpha")
+    ) %>% 
+    left_join(
+      gapminder,
+      by = c("country")
+    ) %>% 
+    relocate(
+      continent
+    ) %>% 
+    rename_with(
+      ~str_remove(.x, "LO\\.PISA\\.SCI\\.")
+    )
+
+head(pisas_completos)
+
+
+```
+
+
+## Operações column-wise com summarise
+`r slide_atual = slide_atual + 1`
+
+Podemos executar um summarise across, selecionando as colunas desejadas
+
+Neste caso, tiramos, para o último ano disponível, a mediana dos percentis para cada continente
+
+```{r}
+
+sumario <- pisas_completos %>% 
+  select(
+    c(continent, date, country) | matches("P[0-9]{2}")
+  )  %>% 
+  filter(
+    date == max(date),
+    !is.na(continent)
+  ) %>% 
+  select(
+    -date
+  ) %>% 
+  group_by(continent) %>% 
+  summarise(
+    across(
+      .cols = matches("P[0-9]{2}"),
+      .fns = median
+    )
+  ) 
+
+sumario  %>% 
+  datatable()
+
+
+```
+
+
+## Operações column-wise múltiplas funções
+`r slide_atual = slide_atual + 1`
+
+
+O parâmetro .fns aceita uma lista nomeada de funções. 
+
+É possível executar várias operações de uma só vez criando novos campos. O nome do elemento relativo à função na lista é concatenado com os campos originais gerando um novo nome pros resultados das operações
+
+
+```{r}
+
+sumario <- pisas_completos %>% 
+  select(
+    c(continent, date, country) | matches("P[0-9]{2}")
+  )  %>% 
+  filter(
+    date == max(date),
+    !is.na(continent)
+  ) %>% 
+  select(
+    -date
+  ) %>% 
+  group_by(continent) %>% 
+  summarise(
+    across(
+      .cols = matches("P[0-9]{2}"),
+      .fns = list(mediana = median, media = mean)
+    )
+  ) 
+
+sumario  %>% 
+  gt() %>% 
+  fmt_number(
+    columns = matches("P[0-9]{2}"),
+    decimals = 2
+  )
+
+
+
+```
+
+
 
 
 ## Leitura de dados de arquivos 
@@ -2437,7 +2692,7 @@ Fonte: [@cheatsheetimport]
 
 O portal da CVM é uma fonte interessante de dados
 
-O código abaixo baixa os dados que ainda não estão na nossa base.
+O código abaixo baixa os dados que ainda não estão na nossa base. E, por via das dúvidas, baixa o último arquivo de novo.
 
 Note que vamos usar `r a_r("programação funcional no exemplo")`. Sem uso de loop vamos executar uma função para cada linha do data frame/tibble.
 
@@ -2445,15 +2700,20 @@ Esta função vai salvar os dados como um objeto `r a_r("rds")`. Este formato é
 
 
 ```{r fundos, message=FALSE, warning=FALSE}
-existem <- tibble(arquivo = list.files("dados/fundos"))
+
+existem <- tibble(arquivo = list.files("dados/fundos")) %>% 
+  slice_head(n = nrow(.)-1)
 
 
 salva <- function(endereco, arquivo){
     print(endereco)
+  
     read_csv2(endereco) %>% 
-      mutate_at(
-        vars(-one_of(c("CNPJ_FUNDO", "NR_COTST", "DT_COMPTC"))),
-        as.numeric
+      mutate(
+        across(
+          -c("CNPJ_FUNDO", "NR_COTST", "DT_COMPTC"),
+          as.numeric
+        )
       ) %>% 
       mutate_at(
         vars(one_of("CNPJ_FUNDO")),
@@ -2478,45 +2738,54 @@ baixa_faltantes <- tibble(data_dado = seq(ymd("2019-01-01"), by = "month", ymd(t
     mutate(arquivo = paste0("inf_diario_fi_",data_formato,".rds")) %>% 
     anti_join(existem, by = c("arquivo" = "arquivo")) %>% 
     select(-data_formato) %>% 
-    mutate(data = pmap(.l = list(endereco, arquivo), salva))
+    mutate(data = pmap(.l = list(endereco = endereco, arquivo = arquivo), salva))
+
+
+
 ```
 
 
-## Leitura de dados de arquivos em uma pasta - Exemplo: CVM
+## Leitura de dados de arquivos em uma pasta - Exemplo: CVM. Desaninhando uma list-column
 `r slide_atual = slide_atual + 1`
 
 Após a  operação de baixar os dados dos arquivos, podemos ler todos os arquivos de uma pasta e colocá-los em um só tibble, já que eles são do mesmo formato.
 
 Usamos `r a_r("execução em paralelo no exemplo")`, que é possibilitada ao chamarmos uma função future_<map> ao invés de <map>.
 
+Após a leitura dos arquivos eles ficam armazenados de forma aninhada numa coluna chamada "conteudo". "conteudo" é uma coluna feita de tibbles, cada tibble correspondendo a uma linha do tibble principal. A coluna "conteudo" é uma `r a_r("nested list-column")`.
 
 
 ```{r fundos2, message=FALSE, warning=FALSE}
 
 plan(multiprocess)
 
-
 todos_os_fundos <- tibble(arquivo = list.files("dados/fundos")) %>%
-    mutate(arquivo = paste0("dados/fundos/",arquivo)) %>%
-    mutate(data = future_map(arquivo, read_rds , .progress = TRUE)) %>% 
-    unnest()
-
-
+    mutate(arquivo = str_glue("dados/fundos/{arquivo}")) %>%
+    mutate(conteudo = future_map(arquivo, read_rds , .progress = TRUE))
 
 head(todos_os_fundos)
 
+
+
 ```
 
+A função `r a_r("unnest")` pode ser usada 
 
 
 ```{r cadastro_fundos,  warning=FALSE, message=FALSE}
 
-download.file(url = "http://dados.cvm.gov.br/dados/FIE/CAD/DADOS/cad_fie.zip", destfile = "dados/cvm/cad_fie.zip" )
+download.file(url = "http://dados.cvm.gov.br/dados/FI/CAD/DADOS/cad_fi_hist.zip", destfile = "dados/cvm/cad_fi_hist.zip" )
 
-unzip(zipfile = "dados/cvm/cad_fie.zip", exdir =  "dados/cvm")
+unzip(zipfile = "dados/cvm/cad_fi_hist.zip", exdir =  "dados/cvm")
 
 
 cadastro_fundos <- read_csv2("dados/cvm/cad_fie.csv", locale = locale(encoding = "latin1"))
+
+maraus <- cadastro_fundos %>% 
+  filter(
+    str_detect(DENOM_SOCIAL, "MARA")
+  )
+
 
 ```
 
@@ -3040,7 +3309,8 @@ Os nomes das principais funções mudaram em setembro de 2019 (quando saiu a ver
 ## Pivoteando nosso data frame com muitas linhas
 `r slide_atual = slide_atual + 1`
 
-O nosso data frame tem cada tipo de cotação em cada linha e gostaríamos que essas linhas fossem transformadas em colunas.
+balanços
+
 
 A função que faz isso se chama `pivot_wider()`
 
@@ -3247,8 +3517,7 @@ Agora juntamos as informações do Siab com as informações dos municípios
 
 siab_familias %>% 
   inner_join(de_para_codigos, by = c("cod_municipio" = "IBGE")) %>%
-  inner_join(municipios_ajeitado, by = c("IBGE7" = "cod_municipio", "data" = "ano") ) %>%
-  View()
+  inner_join(municipios_ajeitado, by = c("IBGE7" = "cod_municipio", "data" = "ano") ) 
 
 head(siab_familias)
 
