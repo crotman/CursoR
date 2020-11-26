@@ -1,18 +1,16 @@
 ---
-output: 
-    slidy_presentation: 
-      css: w3c-blue.css
-      fig_caption: yes
-      toc: yes
-      toc_depth: 3
-      includes:
-        in_header: header.html
-        before_body: doc_prefix.html
-        after_body: doc_suffix.html
-
+output:
+  slidy_presentation:
+    css: w3c-blue.css
+    fig_caption: yes
+    toc: yes
+    toc_depth: 3
+    includes:
+      in_header: header.html
+      before_body: doc_prefix.html
+      after_body: doc_suffix.html
 bibliography: bibliography.bib
-      
----
+--- 
 
 
 
@@ -1640,7 +1638,7 @@ Note quanto código desnecessário há nestas linhas: variáveis que não precis
 Este código desnecessário causa fadiga no programador, confunde o próprio autor do código e confunde ainda mais o leitor posterior do código.
 
 
-```{r sem_pipe }
+```{r sem_pipe, message=FALSE, warning=FALSE }
 #vamos cobrir essas funções de tratamento posteriormente
 gapminder_07 <- filter(gapminder, year == 2007)
 gapminder_07_group_continente <- group_by(gapminder_07, continent)
@@ -1708,7 +1706,7 @@ Usaremos várias das bases como exemplo.
 
 A primeira é a do `r a_r("Banco Mundial")`, muito rica para quem gosta de dados socioeconômicos: `r a_r("wbstats")`
 
-Para acessar um indicador precisamos achá-lo na base de indicadores com a função `wbsearch()`
+Para acessar um indicador precisamos achá-lo na base de indicadores com a função `wb_search()`
 
 ```{r banco_mundial}
 
@@ -1721,13 +1719,16 @@ indicadores
 
 ```
 
-Sabendo o ID do indicador, podemos consultá-lo com a função `wb()`
+Sabendo o ID do indicador, podemos consultá-lo com a função `wb_data()`
 
 
 ```{r banco_mundial_2}
 
 #mrvnev é most recent non-empty values. Pode ser usado para buscar os n valores mais recentes
-gini = wb_data( indicator = "SI.POV.GINI", mrnev = 10)
+gini = wb_data(indicator = "SI.POV.GINI") %>% 
+  filter(
+    !is.na(SI.POV.GINI)
+  )
 
 head(gini)
 
@@ -1790,6 +1791,10 @@ Pra mostrar mais funcionalidades da função `select`, vamos usar uma base com d
 
 candidatos <- candidate_fed(2018) 
 
+candidatos <- candidatos %>% 
+  select(1:58)
+  
+
 glimpse(candidatos)
 
 ```
@@ -1816,7 +1821,7 @@ candidatos_select <- candidatos %>%
     select(ends_with("candidato"))
 
 datatable(head(candidatos_select))
-    
+  
 
 
 ```
@@ -1854,7 +1859,7 @@ Primeiro é necessário encontrar o código da base desejada
 
 ```{r estacao, cache=TRUE}
 
-estacao <- getMeta("heathrow", returnMap = TRUE)
+estacao <- worldmet::getMeta("heathrow", returnMap = TRUE)
 
 estacao
     
@@ -2081,6 +2086,7 @@ O jeito mais fácil de fazer isso é usando uma das funções da biblioteca `r a
 ```{r lubridate}
 
 candidatos_com_data <- candidatos %>% 
+    select(1:10) %>% 
     mutate(DATA_ELEICAO_TIPO_DATA = dmy(DATA_ELEICAO)) %>% 
     select(DATA_ELEICAO, DATA_ELEICAO_TIPO_DATA)
 
@@ -2095,6 +2101,7 @@ head(candidatos_com_data)
 ```{r mutate_mesmo}
 
 candidatos_com_data <- candidatos %>% 
+    select(1:10) %>% 
     mutate(DATA_ELEICAO = dmy(DATA_ELEICAO)) %>% 
     select(DATA_ELEICAO)
 
@@ -2110,12 +2117,15 @@ head(candidatos_com_data)
 `r slide_atual = slide_atual + 1`
 
 
-funções derivadas da `mutate` possibilitam a alteração de várias colunas ao mesmo tempo, usando os mesmos helpers que já vimos para a `select` e uma função à escolha
+funções derivadas da `mutate` possibilitam a alteração de várias colunas ao mesmo tempo, usando os mesmos helpers que já vimos para a `select` e uma função à escolha.
+
+Veremos uma forma mais nova de fazer isso, com a função `across()`, mas essa forma continua a funcionar e é usada em muitos códigos existentes.
 
 
 ```{r mutate_at}
 
 candidatos_com_data <- candidatos %>% 
+    select(1:10) %>% 
     mutate_at(vars(starts_with("DATA_")), dmy ) %>% 
     select(starts_with("DATA_"))
 
@@ -2447,6 +2457,8 @@ gini_agrupado %<>% mutate(
 
 datatable(gini_agrupado)
 
+
+
 ```
 
 
@@ -2508,6 +2520,8 @@ maiores_temp_dia <- dados_heathrow %>%
     ) %>% 
     select(hora, estacao, air_temp)
 
+
+
 ggplot(maiores_temp_dia) +
     geom_density( aes(x = hora, color = estacao )) +
     theme_light()
@@ -2529,7 +2543,6 @@ A função `across()`, quando usada em conjunto com `mutate()`, `summarise()`, `
 
 ## Operações column-wise com mutate
 `r slide_atual = slide_atual + 1`
-
 
 
 A função across() tem dois parâmetros.
@@ -2573,7 +2586,7 @@ pisas_completos <- dados_pisa %>%
       by = c("iso3c" = "iso_alpha")
     ) %>% 
     left_join(
-      gapminder,
+      gapminder %>% select(country, continent) %>% distinct(),
       by = c("country")
     ) %>% 
     relocate(
@@ -2600,7 +2613,7 @@ Neste caso, tiramos, para o último ano disponível, a mediana dos percentis par
 
 sumario <- pisas_completos %>% 
   select(
-    c(continent, date, country) | matches("P[0-9]{2}")
+    c(continent, date, country) | matches("^P[0-9]{2}$")
   )  %>% 
   filter(
     date == max(date),
@@ -2615,7 +2628,10 @@ sumario <- pisas_completos %>%
       .cols = matches("P[0-9]{2}"),
       .fns = median
     )
-  ) 
+  ) %>% 
+  view()
+
+
 
 sumario  %>% 
   datatable()
@@ -2640,19 +2656,14 @@ sumario <- pisas_completos %>%
     c(continent, date, country) | matches("P[0-9]{2}")
   )  %>% 
   filter(
-    date == max(date),
     !is.na(continent)
   ) %>% 
-  select(
-    -date
-  ) %>% 
-  group_by(continent) %>% 
   summarise(
     across(
       .cols = matches("P[0-9]{2}"),
       .fns = list(mediana = median, media = mean)
     )
-  ) 
+  )
 
 sumario  %>% 
   gt() %>% 
@@ -2665,6 +2676,138 @@ sumario  %>%
 
 ```
 
+
+## Olhando as list-columns com mais detalhes
+`r slide_atual = slide_atual + 1`
+
+Citamos anteriormente que o tibble/dataframe pode conter colunas que são listas de elementos. 
+
+É muito útil armazenar dataframes aninhados nestas list-columns, ou seja, uma coluna que contém um dataframe por linha. 
+
+Esta técnica tem inúmeros usos. Por exemplo, rodar modelos em partições dos dados originais
+
+No código seguinte, particionamos os dados do PISA por país e aninhamos em uma list-column usando a função `r a_r("nest()")`. Podemos dar group_by e depois nest ou explicitar as colunas que queremos aninhar.
+
+É uma boa prática rodar `r a_r("ungroup")` assim que não for necessário usar o tibble agrupado
+
+
+```{r}
+
+pisa_nested <- pisas_completos %>% 
+  select(country, date, P05) %>% 
+  arrange(date) %>% 
+  group_by(country) %>% 
+  mutate(
+    ultimo_P05 = last(P05)
+  ) %>% 
+  ungroup() %>% 
+  nest(pisa = -c(country, ultimo_P05)) %>% 
+  ungroup() 
+
+
+head(pisa_nested)
+
+
+```
+
+## Executando um modelo para cada um dos tibbles aninhados
+`r slide_atual = slide_atual + 1`
+
+
+Agora podemos rodar uma regressão linear, por exemplo.
+
+Vamos usar programação funcional para rodar `lm()`, a função de regressão linear, para cada país
+
+
+```{r}
+
+pisa_modelo <- pisa_nested %>% 
+  mutate(
+    modelo = map(.x = pisa, .f = ~lm(P05 ~ date, data = .x) )
+  )
+  
+
+```
+
+
+## Operações row-wise. Exemplo: extraindo coeficientes de modelos aninhados
+`r slide_atual = slide_atual + 1`
+
+Temos, agora, o resultado da execução de um modelo de regressão linear pra cada país. 
+
+Precisamos, pra cada objeto retornado, extrair os coeficientes.
+
+vamos usar a função `broom::tidy()`
+
+Essa função não está preparada para receber um vetor de objetos mas sim UM único objeto.
+
+Portanto, essa operação deve ser feita linha a linha. Para que isso aconteça é necessário rodar a função `r a_r("rowwise")`, que equivale a um `group_by()` por linha. 
+
+
+```{r}
+
+pisa_modelo_coefs <- pisa_modelo %>% 
+  rowwise() %>% 
+  mutate(
+    coeficientes = list(broom::tidy(modelo))
+  ) %>% 
+  ungroup()
+  
+
+```
+
+
+## Explodindo tibbles aninhados
+`r slide_atual = slide_atual + 1`
+
+A função `broom::tidy()` criou novos tibbles aninhados com as informações a respeito dos coeficientes estimados.
+
+Vamos, agora explodir esses tibbles, com a função `r a_r("unnest()")`, mostrando o coeficiente que nos interessa aqui, o $\beta$ relativo à variável explicativa contendo o ano.   
+
+
+
+```{r}
+
+pisa_modelo_coefs_exp <- pisa_modelo_coefs %>% 
+  unnest(coeficientes) %>%
+  filter(
+    term == "date"
+  ) %>% 
+  select(
+    country,
+    ultimo_P05,
+    estimate,
+    std.error,
+    p.value
+  ) %>% 
+  filter(
+    !is.na(estimate)
+  ) %>% 
+  arrange(
+    estimate %>% desc()
+  ) %>% 
+  mutate(
+    posicao = row_number(),
+    .before = everything()
+  ) %>% 
+  slice(
+    c(1:10,(nrow(.)-10+1):nrow(.))
+  ) 
+
+
+  gt(pisa_modelo_coefs_exp) %>% 
+  fmt_number(
+    column = "ultimo_P05",
+    decimals = 0
+  ) %>% 
+  fmt_number(
+    column = c("estimate","std.error", "p.value"),
+    decimals = 2
+  )
+    
+
+
+```
 
 
 
@@ -2711,17 +2854,9 @@ salva <- function(endereco, arquivo){
     read_csv2(endereco) %>% 
       mutate(
         across(
-          -c("CNPJ_FUNDO", "NR_COTST", "DT_COMPTC"),
+          -c("CNPJ_FUNDO", "DT_COMPTC"),
           as.numeric
         )
-      ) %>% 
-      mutate_at(
-        vars(one_of("CNPJ_FUNDO")),
-        as.character
-      ) %>% 
-      mutate_at(
-        vars(one_of("NR_COTST")),
-        as.numeric
       ) %>% 
       write_rds(paste0("dados/fundos/",arquivo), compress = "xz")
 }
@@ -2761,44 +2896,18 @@ plan(multiprocess)
 
 todos_os_fundos <- tibble(arquivo = list.files("dados/fundos")) %>%
     mutate(arquivo = str_glue("dados/fundos/{arquivo}")) %>%
-    mutate(conteudo = future_map(arquivo, read_rds , .progress = TRUE))
+    mutate(conteudo = future_map(arquivo, read_rds , .progress = TRUE)) %>% 
+    unnest(conteudo)
 
 head(todos_os_fundos)
 
 
 
-```
-
-A função `r a_r("unnest")` pode ser usada 
-
-
-```{r cadastro_fundos,  warning=FALSE, message=FALSE}
-
-download.file(url = "http://dados.cvm.gov.br/dados/FI/CAD/DADOS/cad_fi_hist.zip", destfile = "dados/cvm/cad_fi_hist.zip" )
-
-unzip(zipfile = "dados/cvm/cad_fi_hist.zip", exdir =  "dados/cvm")
-
-
-cadastro_fundos <- read_csv2("dados/cvm/cad_fie.csv", locale = locale(encoding = "latin1"))
-
-maraus <- cadastro_fundos %>% 
-  filter(
-    str_detect(DENOM_SOCIAL, "MARA")
-  )
-
 
 ```
 
+A função `r a_r("unnest")` pode ser usada, como já vimos
 
-```{r cotas_verde, cache=TRUE }
-
-cotas_verde <- todos_os_fundos %>% 
-    filter(CNPJ_FUNDO == "07.455.507/0001-89" )
-
-
-cotas_verde
-
-```
 
 ## Leitura de conteúdo de páginas web
 `r slide_atual = slide_atual + 1`
@@ -3045,14 +3154,14 @@ taxas_titulos <- sheets_lidas %>%
 
 Aí fica fácil fazer a análise que desejarmos
 
-```{r}
+```{r grafico_ntnb }
 
 ntnb_2045 <- taxas_titulos %>% 
     filter(
         titulo == "NTN-B Princ",
         vencimento == ymd("2045-05-15")
     ) %>% 
-    mutate(taxa = (taxa_compra_manha +taxa_venda_manha)/2 )
+    mutate(taxa = (taxa_compra_manha + taxa_venda_manha)/2 )
 
 
 
@@ -3078,10 +3187,10 @@ ggplot(ntnb_2045) +
 
 Neste caso, precisamos entender quando requisição é feita pela página e emular essas requisições passando os parâmetros que devem ser passados via método `r a_r("POST")`.
 
-Primeiro usamos a função `r a_r("crossing")` para criar 
+Primeiro usamos a função `r a_r("crossing")` para criar um novo tibble que combina todas as $n$ linhas do tibble com os grupos e todas as $m$ linhas do tibble de datas, resultando num tibble com $m * n$ linhas, pois queremos pegar o resultado de todos grupos para todas as datas.
 
 
-```{r, message=TRUE, warning=TRUE, cache=TRUE}
+```{r ceagesp1, message=TRUE, warning=TRUE, cache=TRUE}
 
 
 url <- "http://www.ceagesp.gov.br/entrepostos/servicos/cotacoes/#cotacao"
@@ -3128,12 +3237,12 @@ grupos <- c(
   "PESCADOS"
 )
 
-datas <- seq(from = today()-3, by = 1, to = today()-1) %>% 
+datas <- seq(from = today()-1, by = 1, to = today()-1) %>% 
   format("%d/%m/%Y") 
 
 dados_ceagesp <-  enframe(grupos, value = "grupo", name = "id_grupo") %>%
-  crossing(enframe(datas, value = "data", name = "id_data")) %>% 
-  mutate(leitura = map2(.x = grupo, .y = data, le_pagina_ceagesp_ignora_erro )) %>% 
+  crossing(enframe(datas, value = "data", name = "id_data")) %>%
+  mutate(leitura = map2(.x = grupo, .y = data, le_pagina_ceagesp_ignora_erro )) %>%
   filter(!is.na(leitura)) %>%
   unnest(cols = leitura)
 
@@ -3148,16 +3257,21 @@ head(dados_ceagesp)
 `r slide_atual = slide_atual + 1`
 
 
-Em dois casos precisamos emular um browser para obter o conteúdo html que desejamos, para então usar a `rvest`
+Principalmente em dois casos precisamos emular um browser para obter o conteúdo html que desejamos, para então usar a `rvest` se necessário:
 
 - Quando a página precisa executar um script javascript para que fique pronta
 
 - Quando a página exige muitos passos de navegação antes de chegarmos aos dados desejados;
 
+É preciso estudar cada caso para entender qual melhor estratégia. Precisamos pensar em 
+
+- Estabilidade: quão dependente a leitura é de aspectos específicos dos dados atuais ou da forma como ela foi desenvolvida
+
+- Correção: temos que nos certificar de que o resultado que obtemos é o mesmo que a página está disponibilizando ao usuário. A página muitas vezes é criada para atender um usuário humano. Uma página que é carregada sem dados ou com dados preliminares que depois são preeenchidos ou alterados por um script é adequada ara humanos mas pode não ser adequada para uma extração automática. 
+
 
 ## Usando Selenium
 `r slide_atual = slide_atual + 1`
-
 
 `r a_r("Selenium")` é um famoso automatizador de browser. Através dele, é possível enviar cliques, preencher caixas de texto etc. até se chegar aos dados desejados. Além disso, ele executa os scripts javascripts que a página exige.
 
@@ -3165,10 +3279,11 @@ A biblioteca `r a_r("RSelenium")` possibilita o uso na linguagem R
 
 Abaixo um exemplo de ativação do firefox a partir do R com RSelenium
 
-```{r, eval=FALSE }
+```{r selenium, eval=FALSE }
 
 rs <- rsDriver(
     browser = "firefox",
+    port = 4568L,
     extraCapabilities = list(
         `mox:firefoxOptions` = list(
             binary = "C:/Program Files (x86)/Mozilla Firefox/firefox.exe"
@@ -3183,7 +3298,7 @@ rs <- rsDriver(
 ## Baixando dados da ANEEL
 `r slide_atual = slide_atual + 1`
 
-```{r, eval=FALSE}
+```{r selenium_aneel, eval=FALSE}
 
 library(RSelenium)
 library(rvest)
@@ -3221,6 +3336,8 @@ rsc <- rs$client
 
 rsc$navigate("https://sigel.aneel.gov.br/Down/")
 
+Sys.sleep(3)
+
 imagem <- rsc$findElement(using = "css selector",  "#uniqName_9_1 > div:nth-child(1)" )
 
 imagem$clickElement()
@@ -3250,7 +3367,7 @@ arquivo_download <- rsc$findElement(using = "xpath", "/html/body/div[2]/div[1]/d
 
 endereco <- arquivo_download$getElementText()
 
-download.file(url = unlist(endereco), destfile = "c:\\temp\\gd.zip")
+download.file(url = unlist(endereco), destfile = "dados/aneel/gd.zip")
 
 
 ```
@@ -3267,7 +3384,7 @@ Isso porque é extremamente comum fazermos contas com mais de uma informação d
 
 ![](imagens/tidydata.png){width=70%}
 
-```{r}
+```{r dados_fake_petro}
 
 dados_long <- tribble(
   
@@ -3312,6 +3429,22 @@ Os nomes das principais funções mudaram em setembro de 2019 (quando saiu a ver
 balanços
 
 
+```{r}
+
+download.file(
+  url = "http://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/DFP/DADOS/dfp_cia_aberta_2019.zip",
+  destfile = "dados/info_empresas_cvm/info.zip"
+)
+
+
+unzip(zipfile = "dados/info_empresas_cvm/info.zip", exdir = "dados/info_empresas_cvm/unzip" )
+
+
+
+
+```
+
+
 A função que faz isso se chama `pivot_wider()`
 
 Seus parâmetros mais usados são: 
@@ -3324,13 +3457,14 @@ Seus parâmetros mais usados são:
 
 ```{r pivot_wider , warning=FALSE, message=FALSE, cache=TRUE}
 
-dados_long %>% 
+dados_wide <- dados_long %>% 
     pivot_wider(
         names_from = cotacao,
         values_from = valor
-    ) %>% 
-    str()
+    ) 
 
+
+str(dados_wide)
 
 
 ```
@@ -3525,7 +3659,9 @@ head(siab_familias)
 ```
 
 
-Seria legal saber qual o tamanho médio das famílias
+Seria legal saber qual o tamanho médio das famílias.
+
+Este procedimento pode ficar como exercício, com o uso do dado abaixo
 
 
 ```{r}
@@ -3536,9 +3672,9 @@ numero_medio_familias <- read_excel("dados/ibge/pessoas_por_familia.xlsx", skip 
     cod_municipio = 1,
     pessoas = 2,
     numero = 3
-  ) %>% 
+  ) 
   
-  View()
+numero_medio_familias
 
 
 
@@ -3681,8 +3817,8 @@ p + geom_point( color = "coral4") +
     geom_text_repel(data = subset(by_country, gdp_mean > 25000),
                     mapping = aes(label = country), 
                     size = 3,
-                    color = "coral4",
-                    family="Bookman Old Style"
+                    color = "coral4"
+                    #family="Bookman Old Style"
 
                     
                     
@@ -3703,8 +3839,9 @@ p + geom_point( color = "coral4") +
     label = "Gastos em saúde x PIB"
   ) +
   theme(
-    text=element_text(family="Bookman Old Style", color = "coral4"),
-    axis.text =  element_text(colour = "coral4"),
+    #text = element_text(family="Bookman Old Style", color = "coral4"),
+    text = element_text( color = "coral4"),
+    axis.text = element_text(colour = "coral4"),
     panel.background = element_rect(fill = "beige"),
     panel.grid.minor =   element_line(colour = "bisque1"),
     panel.grid.major =  element_line(colour = "bisque3")
@@ -3724,6 +3861,8 @@ Use `r a_r("small multiples")`: divida o gráfico em gráficos iguais menores ca
 ```{r, out.width="90%"}
 
 #("azure2", "chocolate", "steelblue4", "darkslategray", "slategray3", "slategray4")
+
+loadfonts(device = "win")
 
 p <- ggplot(data = gapminder, mapping = aes(x = year, y = gdpPercap))
 p + geom_line(color="chocolate", aes(group = country)) +
@@ -3921,12 +4060,11 @@ ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width)) +
   coord_flip() +
   theme_minimal() +
   theme(
-    text=element_text(family="Bradley Hand ITC", color = wes[1], size = 16),
+    text=element_text( color = wes[1], size = 16),
     axis.text =  element_text(colour = wes[1]),
     panel.background = element_rect(fill = "white"),
     panel.grid.minor =   element_line(colour = wes[2]),
     panel.grid.major =  element_line(colour = wes[3]),
-    strip.text = element_text(family="Bradley Hand ITC", color = wes[1]),
     panel.border = element_rect(colour = wes[4], fill = NA)
   )
 
@@ -3991,16 +4129,33 @@ real_simulado <- gols %>%
 ggplot() + 
   geom_histogram(
     data = real_simulado,
-    aes(x = gols, group = tipo, fill = tipo),
+    aes(x = gols, group = tipo, fill = tipo, color = tipo),
     binwidth = 1,
     show.legend = TRUE,
     position = "identity",
-    alpha = 0.5
+    alpha = 0.3,
+    size = 2
   ) +
   scale_x_continuous(breaks = 0:10, minor_breaks = c()) +
   geom_vline(aes(xintercept = result$estimate)) +
-  geom_text(aes(x = result$estimate, y = 7000 ),nudge_x = 0.3,   label = number(result$estimate, accuracy = 0.01 )) +
-  theme_minimal()
+  geom_text_repel(
+    aes(x = result$estimate, y = 8000 ),
+    nudge_x = 0.45,   
+    label = number(result$estimate, accuracy = 0.01, decimal.mark = "," )
+  ) +
+  scale_y_continuous(
+    labels = number_format(big.mark = ".", decimal.mark = ",")
+  ) +
+  theme_minimal() +
+  theme(
+    legend.position = "top"
+  ) +
+  labs(
+    fill = "Distribuição",
+    color = "Distribuição",
+    x = "\nGols",
+    y = "Ocorrências\n"
+  )
 
 
 ```
@@ -4016,9 +4171,18 @@ O gráfico mostrando gráfco com a `r a_r("função de probablidade acumulada em
 ```{r}
 
 ggplot(gols, aes(x = gols)) +
-  stat_ecdf(geom = "step") +
+  stat_ecdf(
+    geom = "step",
+    fill = "darkblue",
+    color = "darkblue",
+    size = 2
+  ) +
   scale_x_continuous(breaks = 0:10, minor_breaks = c()) +
-  theme_minimal()
+  theme_minimal() +
+  labs(
+    y = "Quantil\n",
+    x = "\nGols"
+  )
 
 
 
@@ -4030,26 +4194,53 @@ ggplot(gols, aes(x = gols)) +
 
 Para variáveis contínuas, faz sentido usar o gráfico de `r a_r("densidade de probabilidade")`
 
+Nesta transformação, repare o uso da `pivot_longer()`. Neste caso, o nome das colunas que estão sendo desmobilizadas e transformadas em valores contêm duas informações, separadas por "_":
+
+- o nome da coluna pra onde os valores devem ir (equivalente ao parâmetro `values_to`)
+- um valor de atributo que deve ir para uma nova coluna
+
+Além disso, uma transformação é aplicada nos nomes das colunas de forma a possibilitar o tratamento no mutate posterior. 
+
 
 ```{r, message=FALSE, warning=FALSE}
 
 ufc_pesos <- read_csv("dados/ufc/data.csv") %>% 
   filter(weight_class == "Heavyweight") %>% 
-  select(
-    R_Height_cms,
-    B_Height_cms,
-    Winner
+  pivot_longer(
+    cols = matches("[BR]_.*"), 
+    names_pattern = "(.+?)_(.*)",  
+    names_to = c("lutador", ".value"), 
+    names_transform = list( lutador = ~if_else(.x == "R", "Red", "Blue") )
   ) %>% 
-  transmute(
-    altura_vencedor = if_else(Winner == "Red", R_Height_cms, B_Height_cms  ),
-    altura_perdedor = if_else(Winner == "Red", B_Height_cms, R_Height_cms  )
-  ) %>% 
-  pivot_longer(cols = everything(), names_to = "resultado", values_to = "altura")
+  janitor::clean_names() %>% 
+  mutate(
+    resultado = if_else(lutador == winner, "Vencedor", "Perdedor")
+  ) 
+  
+  
 
 
+
+```
+
+
+
+```{r, message=FALSE, warning=FALSE}
 ggplot(ufc_pesos) + 
-  geom_density(aes(x = altura)) +
-  theme_minimal()
+  geom_density(
+    aes(x = height_cms),
+    color = "darkblue",
+    fill = "darkblue",
+    alpha = 0.4
+  ) +
+  theme_minimal() +
+  labs(
+    y = "",
+    x = "Altura (cm)"
+  ) +
+  theme(
+    axis.text.y = element_blank()
+  )
 
 
 
@@ -4068,8 +4259,20 @@ Mais uma vez a distribuição empírica nos deixa ver mais coisa: os quantis
 ```{r}
 
 ggplot(ufc_pesos) + 
-  stat_ecdf(aes(x = altura), geom = "density" ) +
-  theme_minimal()
+  stat_ecdf(
+    aes(x = height_cms), 
+    geom = "density" ,
+    fill = "darkblue",
+    color = "darkblue",
+    size = 2,
+    alpha = 0.5
+    
+  ) +
+  theme_minimal() +
+  labs(
+    x = "\nAltura (cm)",
+    y = "Quantil\n"
+  )
 
 
 ```
@@ -4083,8 +4286,24 @@ ggplot(ufc_pesos) +
 ```{r}
 
 ggplot(ufc_pesos) + 
-  geom_density(aes(x = altura, color = resultado)) +
-  theme_minimal()
+  geom_density(
+    aes(
+      x = height_cms, 
+      color = resultado
+    ),
+    size = 1.5
+  ) +
+  theme_minimal() +
+  theme(
+    legend.position = "top",
+    axis.text.y = element_blank()
+  ) +
+  labs(
+    x = "Altura (cm)",
+    color = "Resultado do lutador",
+    fill = "Resultado do lutador",
+    y = ""
+  )
 
 
 ```
@@ -4094,8 +4313,19 @@ ggplot(ufc_pesos) +
 ```{r}
 
 ggplot(ufc_pesos) + 
-  stat_ecdf(aes(x = altura, color = resultado), geom = "density" ) +
-  theme_minimal()
+  stat_ecdf(aes(x = height_cms, color = resultado), geom = "density", size = 1.5 ) +
+  theme_minimal() +
+  theme(
+    legend.position = "top"  
+  ) +
+  labs(
+    x = "Altura (cm)",
+    color = "Resultado do lutador",
+    fill = "Resultado do lutador",
+    y = "Quantil\n"
+  )
+
+  
 
 
 
@@ -4268,7 +4498,7 @@ pib_gini_homi <- taxa_homicidios %>%
 
 
 
-```{r warning=FALSE, message=FALSE, out.width="80%"  }
+```{r warning=FALSE, message=FALSE, out.width="80%", fig.height= 6, fig.width= 6  }
 
 ggplot(pib_gini_homi, aes(y = homicidios, x = indice)) +
   geom_point(alpha = 0.4) +
@@ -4289,7 +4519,7 @@ ggplot(pib_gini_homi, aes(y = homicidios, x = indice)) +
 É possível visualizar os `r a_r("eixos em log")` na base 10
 
 
-```{r, message=FALSE, warning=FALSE, out.width="80%"}
+```{r, message=FALSE, warning=FALSE, out.width="80%", fig.height= 6, fig.width= 6}
 
 
 ggplot(pib_gini_homi, aes(y = homicidios, x = indice)) +
@@ -4424,6 +4654,7 @@ O log foi usado aqui para evitar que os valores extremos dificultem a visualiza�
 ggplot(pib_gini_homi_wide) +
   geom_point(aes(color = homicidios, x = Desigualdade , y = Riqueza )) +
   scale_color_viridis_c(trans = "log10", direction = -1, option = "inferno") +
+  
   theme_minimal()
 
 
@@ -4438,13 +4669,6 @@ ggplot(pib_gini_homi_wide) +
 
 hdi <- read_csv("dados/hdi/atlas.csv") %>% 
   rename(municipio = `município` ) %>% 
-  select(
-    ano,
-    rdpc,
-    gini,
-    municipio,
-    uf
-  ) %>% 
   filter(ano == 2010)
   
 
@@ -4481,7 +4705,7 @@ ufs <- municipios_ajeitado %>%
   ) %>% 
   mutate(
     cod_uf = cod_municipio %/% 100000
-  ) %>% 
+  ) %>%   
   select(-cod_municipio) %>% 
   distinct() %>% 
   filter(!is.na(cod_uf)) 
@@ -4501,6 +4725,13 @@ hdi_violencia <- hdi %>%
       TRUE ~ NA_character_
       
     ) 
+  ) %>% 
+  mutate(
+    populacao = 
+      parse_number(
+        populacao, 
+        locale = locale(grouping_mark = ".")
+      )
   )
   
 
@@ -4513,14 +4744,52 @@ hdi_violencia <- hdi %>%
 
 
 
-```{r}
+```{r, fig.height=6, fig.width= 10}
+
+populacao <- hdi_violencia %>%  
+  mutate(
+    faixa_populacao = case_when(
+      populacao < 20000 ~ "Menos 20 mil",
+      populacao < 80000 ~ "20 mil a 80 mil",
+      populacao < 300000 ~ "80 mil e 300 mil",
+      TRUE ~ "> 300 mil"
+    )
+  )
+  
 
 
-ggplot(hdi_violencia) +
-  geom_jitter(aes(color = taxa_homicidios, x = gini , y = rdpc ), alpha = 0.2   ) +
-  scale_color_gradient(low = "blue", high = "red", trans = "log10" ) +
-  facet_wrap(~regiao) + 
-  theme_minimal()
+ggplot(populacao) +
+  geom_jitter(aes(color = taxa_homicidios, x = idhm_r , y = idhm_e ), alpha = 0.4   ) +
+  scale_color_gradientn(
+    values = c(0,0.20,0.4,0.6,0.8, 1),
+    # values = c(
+    #   1,
+    #   quantile(
+    #     probs = 0.3, 
+    #     hdi_violencia$taxa_homicidios %>% log10(), 
+    #     na.rm = TRUE
+    #   ),
+    #   quantile(
+    #     probs = 0.9, 
+    #     hdi_violencia$taxa_homicidios %>% log10(), 
+    #     na.rm = TRUE
+    #   )
+    # ),
+    colors = 
+      c("blue", "blue", "gray50", "yellow", "red", "red"),
+    na.value = "white", 
+    trans = "log10", 
+    ) +
+  facet_grid(faixa_populacao ~ regiao) + 
+  theme_minimal() +
+  theme(
+    legend.position = "top"
+  ) +
+  labs(
+    color = "Taxa de Homicídio",
+    x = "\nIDH (Renda)",
+    y = "IDH (Educação)\n"
+  )
 
 
 
@@ -4678,8 +4947,8 @@ ggplot(jogos) +
   scale_y_continuous(labels = percent) +
   theme(
     axis.text.x = element_text(angle = 90),
-    legend.position = "top",
-    text = element_text(family = "Rockwell Condensed")
+    legend.position = "top"
+    # text = element_text(family = "Rockwell Condensed")
   ) +
   labs(x = "Temporada", y = "% Vitórias", fill = "Resultado")
   
@@ -4711,8 +4980,8 @@ ggplot(jogos) +
   scale_fill_manual(values = wes_palette("Royal2")) +
   theme(
     axis.text.x = element_text(angle = 90),
-    legend.position = "top",
-    text = element_text(family = "Rockwell Condensed")
+    legend.position = "top"
+    # text = element_text(family = "Rockwell Condensed")
   ) +
   labs(x = "Temporada", y = "Gols", fill = "Time")
 
@@ -4758,7 +5027,7 @@ ggplot(gdps_tratado ) +
   theme(
     axis.text.x = element_text(angle = 90),
     legend.position = "top",
-    text = element_text(family = "CMU Classical Serif")
+    # text = element_text(family = "CMU Classical Serif")
   ) +
   labs(x = "Ano", y = "PIB PPP", fill = "País")
 
@@ -4797,7 +5066,7 @@ ggplot(gdps_tratado ) +
   theme(
     axis.text.x = element_text(angle = 90),
     legend.position = "top",
-    text = element_text(family = "CMU Serif Extra")
+    # text = element_text(family = "CMU Serif Extra")
   ) +
   labs(x = "Ano", y = "PIB PPP", fill = "País")
 
@@ -5010,6 +5279,17 @@ anim_save(filename = "imagens/bar_race.gif")
 
 
 ![](imagens/bar_race.gif)
+
+
+## Visualização Geoespacial
+`r slide_atual = slide_atual + 1`
+
+
+
+
+
+
+
 
 
 ## Visualização Geoespacial
