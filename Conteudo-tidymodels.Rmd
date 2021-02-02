@@ -1,0 +1,256 @@
+---
+output:
+  slidy_presentation:
+    css: w3c-blue.css
+    fig_caption: yes
+    toc: yes
+    toc_depth: 3
+    includes:
+      in_header: header.html
+      before_body: doc_prefix.html
+      after_body: doc_suffix.html
+bibliography: bibliography.bib
+---
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
+
+
+library(tidymodels)
+library(tidyverse)
+
+
+```
+
+```{r setup, include=FALSE}
+ 
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE )
+```
+
+```{r, echo=FALSE}
+
+remissivo <<- tibble(palavra = "####")
+
+slide_atual <<- 1
+
+a_r <- function(palavra_add){
+    remissivo <<- remissivo %>% 
+        bind_rows(tibble(palavra = palavra_add, slide = slide_atual))
+
+    str_glue("**{palavra_add}**")
+    
+}
+
+
+escreve_remissivo <- function(){
+    
+    remissivo_final <- remissivo %>% 
+        slice(2:nrow(remissivo)) %>% 
+        mutate(
+            linha = row_number(),
+            link = str_glue("[{palavra}](#({slide}))\n\n")
+        ) %>% 
+        arrange(palavra)
+        
+    str_flatten(remissivo_final$link, "\n\n")
+
+}
+
+
+
+```
+
+# CURSO DE R PARA ANÁLISE DE DADOS
+
+
+## Tidymodels
+
+`r slide_atual = slide_atual + 1`
+
+
+<div class='left' style='float:left;width:18%'>
+![](imagens/tidymodels.svg)
+</div>
+<div class='right' style='float:right;width:78%'>
+Tidymodels é um conjunto de bibliotecas que cuida de todos os passos necessários para desenvolver o workflow de seleção e avaliação de modelos de aprendizado estatístico.
+
+O desenvolvimento é financiado pela RStudio e liderado por Max Kuhn, o principal desenvolvedor de uma biblioteca similar mais antiga: caret.
+
+A tidymodels é toda tidy friendly. Essa é uma das diferenças em relação à caret. Ela também é mais completa e possui muito mais funcionalidades.
+
+É possível obter mais informações em [tidymodels.org](https://www.tidymodels.org/)
+</div>
+
+
+
+
+## Bibliotecas ortogonais
+
+`r slide_atual = slide_atual + 1`
+
+
+<div class='left' style='float:left;width:18%'>
+![](imagens/orthogonality.gif)
+</div>
+<div class='right' style='float:right;width:78%'>
+
+Tidymodels é formada por pacotes ortogonais.
+
+Este termo é emprestado da matemática. No caso de dois vetores ortogonais, podemos nos mover na direção de um deles sem que nossa projeção no outro seja alterada.
+
+Em programação ou arquitetura de software dizemos que componentes ortogonais são desacoplados: a mudança em um cmponente não afeta outros. Esta propriedade exige componentes menores e mais coesos, com responsabilidades bem definidas, e permite alterações com menos efeitos colaterais. Um bom livro para quem quer entender como usar conceitos como esse em programação se chama Pragmatic Programmer, de David Thomas e Andrew Hunt.
+
+As bibliotecas que compõem a tidymodels funcionam assim: ao configurar o workflow que vai implementar o processo de treinamento, seleção e avaliação de modelos, várias etapas ortogonais vão ser preparadas com uso de várias bibliotecas.
+
+</div>
+
+
+## Principais bibliotecas
+
+`r slide_atual = slide_atual + 1`
+
+
+<div class='left' style='float:left;width:30%'>
+![](imagens/tidymodelslibraries.png)
+</div>
+<div class='right' style='float:right;width:68%'>
+
+
+- **workflows** ajuda a montar todas as etapas do processo de trabalho;
+
+- **recipes** permite criar as etapas de pré-processamento, facilitando o processo de feature engineering e sua aplicação a dados fora da amostra;
+
+- **rsample** ajuda a dividir dados em treinamento, teste e validação e provê a infraestrutura de amostragem para realizar processos de cross-validation;
+
+- **parnsnip** contém interfaces genéricas para vários tipos de modelos de aprendizado estatístico;
+
+- **tune** ajuda a criar executar a busca pelo melhor conjunto de hiperparâmetros para um modelo;
+
+- **dials** ajuda a definir valores candidatos para os hiperparâmetros;
+
+- **yardsticks** provê as funcionalidades necessárias para medir a performance dos modelos.
+
+
+</div>
+
+
+## Estudo de caso
+
+`r slide_atual = slide_atual + 1`
+
+
+<div class='left' style='float:left;width:25%'>
+![](imagens/SPEED.jpg){width=90%}
+</div>
+<div class='right' style='float:right;width:73%'>
+
+Os dados vieram de um estudo de pesquisadores da Columbia Business School, Ray Fisman and Sheena Iyenga.
+
+Eles fizeram várias rodadas de encontros de 4 minutos entre homens e mulheres heterossexuais.
+
+Várias características foram coletadas, incluindo um veredito final determinando se cada parceiro de cnontro gostou do outro
+
+</div>
+
+`r slide_atual = slide_atual + 1`
+
+
+## Estudo de caso
+
+`r slide_atual = slide_atual + 1`
+
+
+Os dados foram coletados no site Kaggle
+
+Eles não estão redondos...
+
+
+```{r, cache=TRUE}
+
+dados_speed_date <- read_csv("dados/speed/Speed Dating Data.csv")
+
+
+glimpse(dados_speed_date)
+
+
+```
+
+## Renomeando coluna por coluna
+
+`r slide_atual = slide_atual + 1`
+
+
+
+```{r}
+
+dados_speed_date_renomeado <- dados_speed_date %>% 
+  rename(
+    unique_id_number = iid,
+    id_within_wave = id,
+    male = gender,
+    subject_within_gender = idg,
+    choice = condtn,
+    n_people_met_in_wave = round,
+    position_meeting = position,
+    position_started = positin1,
+    order_meeting = order,
+    partnet_id_within_wave = partner,
+    partner_unique_id_number =pid ,
+    interests_correlation = int_corr,
+    same_race = samerace,
+    my_age = age,
+    partner_age = age_o,
+    partner_race = race_o,
+    partner_stated_pref_time0_attractive = pf_o_att,
+    partner_stated_pref_time0_sincere = pf_o_sin,
+    partner_stated_pref_time0_intelligent = pf_o_int,
+    partner_stated_pref_time0_fun = pf_o_fun,
+    partner_stated_pref_time0_ambitious = pf_o_amb,
+    partner_stated_pref_time0_shared_interests = pf_o_sha,
+    cod_field = field_cd,
+    importance_same_race = imprace,
+    importance_same_religion = imprelig,
+    place_from = from,
+    zipcode = zipcode,
+    income_zipcode = income,
+    frequency_date = date,
+    frequency_go_out = go_out,
+    career_macro = career_c,
+    happy_expec = exphappy,
+    n_expect_like_you = expnum,
+    i_liked_partner = dec,
+    partner_liked_me = dec_o,
+    i_found_partner__attractive = attr,
+    i_found_partner__sincere = sinc,
+    i_found_partner__intelligent = intel,
+    i_found_partner__fun = fun,
+    i_found_partner__ambitious = amb,
+    i_found_partner__interests = shar,
+    degree_i_liked_partner = like,
+    partner_found_me__attractive = attr_o,
+    partner_found_me__sincere = sinc_o,
+    partner_found_me__intelligent = intel_o,
+    partner_found_me__fun = fun_o,
+    partner_found_me__ambitious = amb_o,
+    partner_found_me__interests = shar_o,
+    probability_i_find_partner_liked_me = prob,
+    met_before = met,
+    n_matches_you_think = match_es,
+    satisfaction_with_partners = satis_2,
+    opinion_duration_of_date = length,
+    opinion_num_dates = numdat_2,
+    num_matches_you_called = you_call,
+    num_matches_called_you = them_cal,
+    have_you_dated = date_3
+    
+  )
+
+glimpse(dados_speed_date_renomeado)
+
+
+```
+
+
+
+## Índice remissivo
+
+

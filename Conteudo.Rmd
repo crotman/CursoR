@@ -10,11 +10,7 @@ output:
       before_body: doc_prefix.html
       after_body: doc_suffix.html
 bibliography: bibliography.bib
---- 
-
-
-
-
+---
 
 ```{r, warning=FALSE, message=FALSE, echo=FALSE}
 
@@ -74,12 +70,10 @@ library(gapminder)
 
 ```
 
-
 ```{r setup, include=FALSE}
  
 knitr::opts_chunk$set(echo = TRUE)
 ```
-
 
 ```{r, echo=FALSE}
 
@@ -117,83 +111,91 @@ escreve_remissivo <- function(){
 # CURSO DE R PARA ANÁLISE DE DADOS
 
 ## Instrutor
+
 `r slide_atual = slide_atual + 1`
 
-Bruno Crotman (crotman@gmail.com)
+Bruno Crotman ([crotman\@gmail.com](mailto:crotman@gmail.com){.email})
 
-- Trabalha há 6 anos na Empresa de Pesquisa Energética fomentando o trabalho com dados em todas as áreas da empresa
+-   Trabalha há 6 anos na Empresa de Pesquisa Energética fomentando o trabalho com dados em todas as áreas da empresa
 
-- Trabalhou por 5 anos no Banco BBM/BBM Investimentos na área de Pesquisa Quantitativa
+-   Trabalhou por 5 anos no Banco BBM/BBM Investimentos na área de Pesquisa Quantitativa
 
-- Doutorado (em curso): Engenharia de Software baseada em teoria dos jogos e ciência de dados, Unirio. Orientador: Prof. Márcio Barros
+-   Doutorado (em curso): Engenharia de Software baseada em teoria dos jogos e ciência de dados, Unirio. Orientador: Prof. Márcio Barros
 
-- Mestrado: Engenharia de Software baseada em otimização, Unirio. Orientador: Prof. Márcio Barros
+-   Mestrado: Engenharia de Software baseada em otimização, Unirio. Orientador: Prof. Márcio Barros
 
-- Graduação: Ciência da Computação, UFRJ
+-   Graduação: Ciência da Computação, UFRJ
 
 ## Conteúdo
+
 `r slide_atual = slide_atual + 1`
 
+-   Introdução
 
-- Introdução
-  + Motivação
-  + R e RStudio
+    -   Motivação
+    -   R e RStudio
 
-- Fundamentos da Linguagem
-  + Tipos de dados, Data Frame
-  + Vetorização
+-   Fundamentos da Linguagem
 
-- Introdução à Programação Funcional
-  + biblioteca purrr
-  + paralelização
+    -   Tipos de dados, Data Frame
+    -   Vetorização
 
-- Obtenção e Organização dos dados
-  + Obtenção de dados de arquivos
-  + Obtenção de dados da WEB
-  + Organização e manipulação dos dados para análise
+-   Introdução à Programação Funcional
 
-- Visualização de dados
-  + Boas Práticas
-  + Melhores gráficos
-  + ggplot
-  + Dados espaciais
-  
-- Rudimentos de aprendizado estatístico
-  + Desmistificação
-  + Processo do aprendizado estatístico (seleção do modelo, validação do modelo)
-  + Na prática: tidymodels
+    -   biblioteca purrr
+    -   paralelização
 
-- Comunicação
-  + Aplicativos Web Shiny
-  + Relatórios Markdown
-  
-- Séries Temporais ?
-  + tidyverts
-  + Visualização
-  + Modelos. ARIMA etc.
+-   Obtenção e Organização dos dados
 
-- Práticas de Engenharia de Software ?
-  + Testes automáticos
-  + Criação de pacotes
-  + Boas práticas de design
+    -   Obtenção de dados de arquivos
+    -   Obtenção de dados da WEB
+    -   Organização e manipulação dos dados para análise
 
+-   Visualização de dados
 
+    -   Boas Práticas
+    -   Melhores gráficos
+    -   ggplot
+    -   Dados espaciais
+
+-   Rudimentos de aprendizado estatístico
+
+    -   Desmistificação
+    -   Processo do aprendizado estatístico (seleção do modelo, validação do modelo)
+    -   Na prática: tidymodels
+
+-   Comunicação
+
+    -   Aplicativos Web Shiny
+    -   Relatórios Markdown
+
+-   Séries Temporais ?
+
+    -   tidyverts
+    -   Visualização
+    -   Modelos. ARIMA etc.
+
+-   Práticas de Engenharia de Software ?
+
+    -   Testes automáticos
+    -   Criação de pacotes
+    -   Boas práticas de design
 
 # INTRODUÇÃO
+
 `r slide_atual = slide_atual + 1`
 
 ## A máquina de escrever do meu avô
+
 `r slide_atual = slide_atual + 1`
 
-![](imagens/olivetti.jpg){width=50%} 
+![](imagens/olivetti.jpg){width="50%"}
 
+## Nem um Nobel escapa...
 
-## Nem um Nobel escapa... 
 `r slide_atual = slide_atual + 1`
-
 
 ...da maldição do erro operacional
-
 
 ![](imagens/erroexcel1.jpg)
 
@@ -201,19 +203,18 @@ Fonte: [@error_rogoff]
 
 PS.: ele não é Nobel...
 
-
 ## Homem foi a Lua há 50 anos
+
 `r slide_atual = slide_atual + 1`
 
 ...e ainda...
-
 
 ![](imagens/erroexcel2.jpg)
 
 Fonte: [@genetic]
 
-
 ## Objetivos do curso
+
 `r slide_atual = slide_atual + 1`
 
 Meta final: que vários dos processos de análise de dados da empresa passem a ser feitos dentro do fluxo de trabalho do R.
@@ -225,54 +226,55 @@ Fonte:[@tidyversebig]
 Ao fim do curso o objetivo é que todos os fios da meada sejam puxados para que o aluno consiga continuar por si só usando a vasta documentação disponível.
 
 ## Por que programar?
-`r slide_atual = slide_atual + 1`
 
+`r slide_atual = slide_atual + 1`
 
 Também amo o Excel, mas amo mais as seguintes vantagens:
 
-* **Reprodutibilidade**. Muito mais fácil refazer uma análise com código do que point and click
+-   **Reprodutibilidade**. Muito mais fácil refazer uma análise com código do que point and click
 
-* **Menor risco operacional**. A automatização é maior, a chance de erro na execução de um passo manual é nula
+-   **Menor risco operacional**. A automatização é maior, a chance de erro na execução de um passo manual é nula
 
-* **Menor risco de continuidade** caso haja imprevistos com a equipe. 
+-   **Menor risco de continuidade** caso haja imprevistos com a equipe.
 
-* **Maior flexibilidade**. Virtualmente tudo é possível
+-   **Maior flexibilidade**. Virtualmente tudo é possível
 
-* **Manutenção** mais fácil
+-   **Manutenção** mais fácil
 
-* **Controle de versão** de forma profissional
+-   **Controle de versão** de forma profissional
 
-* **Mais fácil do que parece**
-
+-   **Mais fácil do que parece**
 
 ## Por que programar em R?
+
 `r slide_atual = slide_atual + 1`
 
-* Ela é feita para lidar com dados
+-   Ela é feita para lidar com dados
 
-* Comunidade de usuários gigante e cooperativa
+-   Comunidade de usuários gigante e cooperativa
 
-* Ferramentas poderosas para comunicação dos resultados, em documentos ou aplicações
+-   Ferramentas poderosas para comunicação dos resultados, em documentos ou aplicações
 
-* Muitos pesquisadores em métodos quantitativos que estão no estado-da-arte publicam seus métodos em bibliotecas escritas em R
+-   Muitos pesquisadores em métodos quantitativos que estão no estado-da-arte publicam seus métodos em bibliotecas escritas em R
 
-* Prazeroso programar (Tidyverse, Shiny, R Markdown...)
+-   Prazeroso programar (Tidyverse, Shiny, R Markdown...)
 
-* Guerra de linguagens: R x Julia x Python. O mais importante é evitar Analysis Paralisis 
+-   Guerra de linguagens: R x Julia x Python. O mais importante é evitar Analysis Paralisis
 
 ## Fluxo de trabalho
+
 `r slide_atual = slide_atual + 1`
 
-![](imagens/tidyverse_simplificado.png){width=50%} 
+![](imagens/tidyverse_simplificado.png){width="50%"}
 
 Fonte:[@wickham2016r]
 
-
-![](imagens/tidyverse.png){width=50%}
+![](imagens/tidyverse.png){width="50%"}
 
 Fonte: [@tidyversebig]
 
 ## O processo de "Data Science"
+
 `r slide_atual = slide_atual + 1`
 
 ![](diagramas/cadu.png)
@@ -280,9 +282,10 @@ Fonte: [@tidyversebig]
 [@cadu]
 
 ## Exemplos de onde vamos chegar
+
 `r slide_atual = slide_atual + 1`
 
-É muito comum possuirmos dados gerados em planilhas ou em algum suporte de formato estruturado ou semi-estruturado. 
+É muito comum possuirmos dados gerados em planilhas ou em algum suporte de formato estruturado ou semi-estruturado.
 
 Estes dados podem ser organizados de forma "tidy" para análise
 
@@ -307,18 +310,19 @@ Após a possível execução de modelos, podemos publicar os resultados.
 [Formato de relatório. Análise mais direcionada e com conclusões do que exploratória](https://crotman.shinyapps.io/airbnb)
 
 ## Ambiente R/RStudio
+
 `r slide_atual = slide_atual + 1`
 
 R é uma linguagem que é interpretada por um [engine](https://cran.r-project.org/) gratuito.
 
 `r a_r("RStudio")` é o melhor ambiente de programação da linguagem R. A versão mais simples, que é totalmente funcional, é gratuita.
 
-![](imagens/RStudio.png){width=50%}
+![](imagens/RStudio.png){width="50%"}
 
 Na visualização padrão, ele oferece um console para execução de comandos e uma janela com a visualização dos *environments*, ou seja, das variáveis que ele guarda na sessão atual.
 
-
 ## RStudio como console
+
 `r slide_atual = slide_atual + 1`
 
 No console é possível executar comandos, como o que atribui valor a uma variável
@@ -331,7 +335,7 @@ x <- 1
 
 Note que a atribuição é feita com `<-` e não com `=` como na maioria das linguagens.
 
->Dica: o atalho **alt** + **-** gera o sinal de atribuição
+> Dica: o atalho **alt** + **-** gera o sinal de atribuição
 
 Os comandos que não atribuem valor a uma variável são ecoados na tela
 
@@ -344,6 +348,7 @@ x + 2
 Veja o `[1]` no console. O R considera que tudo é um vetor. É uma linguagem muito baseada em operações vetoriais. Isso facilita muito as coisas quando se lida com dados.
 
 ## RStudio como IDE para um script
+
 `r slide_atual = slide_atual + 1`
 
 O console serve só para testes, aprendizado de novos comandos, debug, experiências etc.
@@ -352,30 +357,30 @@ Para executar adequadamente as atividades mais comuns de análise de dados, e pa
 
 Eles são salvos em um arquivo de extensão ".R"
 
-
-
 ## Funcionalidades interessantes do RStudio
+
 `r slide_atual = slide_atual + 1`
 
-* Atalhos de teclado: **ctrl**+**enter** (rodar linhas selecionadas), **ctrl**+**shift**+**enter** (rodar script),  **ctrl**+**1** (foco no script), **ctrl**+**2** (foco no console), **ctrl**+**shift**+**F10** (reiniciar R), **ctrl**+**shift**+**C** (comentar/descomentar bloco)  ...
+-   Atalhos de teclado: **ctrl**+**enter** (rodar linhas selecionadas), **ctrl**+**shift**+**enter** (rodar script), **ctrl**+**1** (foco no script), **ctrl**+**2** (foco no console), **ctrl**+**shift**+**F10** (reiniciar R), **ctrl**+**shift**+**C** (comentar/descomentar bloco) ...
 
-* Refactoring
+-   Refactoring
 
-* Document outline
+-   Document outline
 
-* Pane: Files/Plots/Packages/Help/Viewer
+-   Pane: Files/Plots/Packages/Help/Viewer
 
-* Pane: Environment/History/Connections/Git
+-   Pane: Environment/History/Connections/Git
 
-* Jobs
+-   Jobs
 
-* Controle de versão integrado com o Github
+-   Controle de versão integrado com o Github
 
-* Cheat sheets
+-   Cheat sheets
 
-* Verificação ortográfica (ainda não existe em portguês. Em inglês funciona bem)
+-   Verificação ortográfica (ainda não existe em portguês. Em inglês funciona bem)
 
 ## Baixando o material do github
+
 `r slide_atual = slide_atual + 1`
 
 Todo o material do curso está hospedado no Github, inclusive esta apresentação, escrita em RMarkdown.
@@ -384,24 +389,23 @@ Os exemplos de código, as imagens e os dados mostrados nesta apresentação est
 
 O repositório fica em [github/crotman/cursoR](https://github.com/crotman/CursoR).
 
-Para baixar este repositório no RStudio, crie um projeto em File/New Project, do tipo Github e use o endereço do repositório: https://github.com/crotman/CursoR.git.
+Para baixar este repositório no RStudio, crie um projeto em File/New Project, do tipo Github e use o endereço do repositório: <https://github.com/crotman/CursoR.git>.
 
-O projeto tanbém está disponível no RStudio Cloud: [Projeto Curso R](https://rstudio.cloud/project/575191). A vantagem é que as bibliotecas já estão todas instaladas. 
+O projeto tanbém está disponível no RStudio Cloud: [Projeto Curso R](https://rstudio.cloud/project/575191). A vantagem é que as bibliotecas já estão todas instaladas.
 
 Todo material é disponibilizado sob a licença [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 
-
-
 # FUNDAMENTOS DA LINGUAGEM
+
 `r slide_atual = slide_atual + 1`
-    
 
 ## Tipos de valores "armazenados" por variáveis
+
 `r slide_atual = slide_atual + 1`
 
 Para o R, simplificando para o escopo deste curso, as variáveis "armazenam" os seguintes tipos:
 
-* Vetores (vetores atômicos e listas)
+-   Vetores (vetores atômicos e listas)
 
 ```{r seq_int, echo=TRUE}
 1L:10L
@@ -411,17 +415,17 @@ Para o R, simplificando para o escopo deste curso, as variáveis "armazenam" os 
 list("oi", 1L)
 ```
 
-* Data Frames / Tibbles
-
+-   Data Frames / Tibbles
 
 ```{r dataframe, echo=TRUE}
 tibble(col1 = 1:10, col2 = 11:20 )
 ```
 
 ## Tipos de valores "armazenados" por variáveis (cont.)
+
 `r slide_atual = slide_atual + 1`
 
-* Funções (sim... uma variável pode "armazenar" uma função)
+-   Funções (sim... uma variável pode "armazenar" uma função)
 
 ```{r funcoes, echo=TRUE}
 
@@ -435,7 +439,7 @@ g(1L, 2L)
 
 ```
 
-* Environments 
+-   Environments
 
 ```{r env, echo=TRUE}
 
@@ -451,8 +455,8 @@ get("b", e1)
 ```
 
 ## Tipos de valores "armazenados" por variáveis (cont.)
-`r slide_atual = slide_atual + 1`
 
+`r slide_atual = slide_atual + 1`
 
 Existe orientação a objetos no R, mas não está no escopo deste curso
 
@@ -460,32 +464,29 @@ Note que não há variáveis que armazenam dado escalar, como já vimos.
 
 Dentre os vetores há:
 
+-   `r a_r("vetores atômicos")` (seus elementos são do mesmo tipo de dados primário)
 
-* `r a_r("vetores atômicos")` (seus elementos são do mesmo tipo de dados primário)
+-   `r a_r("listas")` (seus elementos, que são vetores atômicos, são de tipos de dados primários diferentes)
 
-* `r a_r("listas")` (seus elementos, que são vetores atômicos, são de tipos de dados primários diferentes)
-
-![Tipos de vetores](imagens/summary-tree.png){width=25%}
+![Tipos de vetores](imagens/summary-tree.png){width="25%"}
 
 Fonte: [@wickham2014advanced]
 
-
-
-
-
 ## Tipos de valores "armazenados" por variáveis (cont.)
+
 `r slide_atual = slide_atual + 1`
 
 Tipos de dados primários:
 
-![Tipos primários](imagens/summary-tree-atomic.png){width=25%}
+![Tipos primários](imagens/summary-tree-atomic.png){width="25%"}
 
 Fonte: [@wickham2014advanced]
 
 ## Tipos de dados primários
+
 `r slide_atual = slide_atual + 1`
 
-* `r a_r("Logical")` é um tipo booleano, aceita TRUE ou FALSE
+-   `r a_r("Logical")` é um tipo booleano, aceita TRUE ou FALSE
 
 ```{r bool, echo=TRUE}
 
@@ -495,7 +496,7 @@ booleano
 
 ```
 
-* `r a_r("Integer")` é numérico e inteiro. Equivalente ao long do C++ (por isso o `r a_r("L")` na declaração)
+-   `r a_r("Integer")` é numérico e inteiro. Equivalente ao long do C++ (por isso o `r a_r("L")` na declaração)
 
 ```{r integer, echo=TRUE}
 
@@ -509,9 +510,10 @@ typeof(inteiro + 1)
 ```
 
 ## Tipos de dados primários (cont.)
+
 `r slide_atual = slide_atual + 1`
 
-* `r a_r("Double")` é numérico e aceita números decimais. Equivalente ao double do C++
+-   `r a_r("Double")` é numérico e aceita números decimais. Equivalente ao double do C++
 
 ```{r double, echo=TRUE}
 
@@ -521,7 +523,6 @@ double_cientifico <- 1.5e3
 
 infinito <- Inf 
 ```
-
 
 ```{r, double_valor, echo=TRUE}
 
@@ -533,9 +534,8 @@ infinito
 
 ```
 
-
-
 ## Combinando vetores em vetores maiores usando c()
+
 `r slide_atual = slide_atual + 1`
 
 Uma das funções mais usadas do R é `r a_r("c()")`, que cria um vetor novo vetor combinando vetores.
@@ -551,6 +551,7 @@ c(1, 2, 3, c(4, 5, 6))
 ```
 
 ## Outras formas de gerar um vetor
+
 `r slide_atual = slide_atual + 1`
 
 O operador `r a_r(":")` é usado para gerar um vetor com todos números que estão entre os operandos e são formados somando números inteiros ao primeiro operando.
@@ -564,10 +565,9 @@ O operador `r a_r(":")` é usado para gerar um vetor com todos números que est�
 
 ```
 
-A função `r a_r("seq()")` é usada para criar um vetor de várias formas. 
+A função `r a_r("seq()")` é usada para criar um vetor de várias formas.
 
-Numa das formas especifica-se o valor inicial, o valor final e o incremento entre elementos do vetor. 
-
+Numa das formas especifica-se o valor inicial, o valor final e o incremento entre elementos do vetor.
 
 ```{r seq, echo=TRUE}
 
@@ -577,11 +577,12 @@ seq(1, 9.99, 0.1)
 ```
 
 ## Parâmetros nomeados
+
 `r slide_atual = slide_atual + 1`
 
-Note que chamamos a função sem especificar o nome dos parâmetros. Eles são recebidos pela função na ordem padrão definida pela função. 
+Note que chamamos a função sem especificar o nome dos parâmetros. Eles são recebidos pela função na ordem padrão definida pela função.
 
-Mas no R também é possível passar `r a_r("parâmetros nomeados")`. 
+Mas no R também é possível passar `r a_r("parâmetros nomeados")`.
 
 Clique em `F1` enquanto tem o cursor em cima da função e veja a ordem dos parâmetros. Veja que outros parâmetros que não utilizamos. Podemos usar `length.out` ao invés de `by`:
 
@@ -594,7 +595,7 @@ seq(1L, 10L, length.out = 5L)
 
 ```
 
-Outro parâmetro, `along.with`, deixa que criemos um vetor num intervalo determinado e o mesmo número de elementos do vetor passado por este parâmetro. 
+Outro parâmetro, `along.with`, deixa que criemos um vetor num intervalo determinado e o mesmo número de elementos do vetor passado por este parâmetro.
 
 ```{r along, echo=TRUE}
 
@@ -603,6 +604,7 @@ seq(20, 100, along.with = 1:10)
 ```
 
 ## Valores faltantes NA
+
 `r slide_atual = slide_atual + 1`
 
 Valores faltantes ou desconecidos são representados por `r a_r("NA")`
@@ -621,14 +623,12 @@ media <- mean(a)
 media
 ```
 
-
 mas...
 
 ```{r narm, echo=TRUE}
 media <- mean(a, na.rm = TRUE)
 media
 ```
-
 
 A exceção são expressões que dão sempre o mesmo resultado independentemente do valor da variável
 
@@ -637,7 +637,6 @@ NA ^ 0
 NA | TRUE
 NA & FALSE
 ```
-
 
 A melhor forma de testar se existe um valor `NA` é `is.na`
 
@@ -649,13 +648,11 @@ is.na(v)
 
 ```
 
-
-
 ## Programação com vetores
+
 `r slide_atual = slide_atual + 1`
 
 As operações do R são vetoriais. Numa operação entre um vetor e um escalar, a operação com o escalar é aplicada a cada elemento do vetor
-
 
 ```{r vetor, echo=TRUE}
 
@@ -663,16 +660,13 @@ As operações do R são vetoriais. Numa operação entre um vetor e um escalar,
 
 ```
 
-
 ```{r  vetor2, echo=TRUE}
 
 1:10 / 10
 
 ```
 
-
 Numa operação com vetores do mesmo tamanho, os elementos são pareados
-
 
 ```{r vetor_pareado, echo=TRUE}
 
@@ -681,16 +675,16 @@ Numa operação com vetores do mesmo tamanho, os elementos são pareados
 ```
 
 ## Programação com vetores - recycling
+
 `r slide_atual = slide_atual + 1`
 
-Um conceito importante é o de `r a_r("recycling")`. 
+Um conceito importante é o de `r a_r("recycling")`.
 
-Numa operação entre dois vetores de tamanhos diferentes, o vetor menor é repetido ciclicamente de forma a ficar com o mesmo tamanho do vetor maior. 
+Numa operação entre dois vetores de tamanhos diferentes, o vetor menor é repetido ciclicamente de forma a ficar com o mesmo tamanho do vetor maior.
 
-Lembra que toda variável no R é um vetor? 
+Lembra que toda variável no R é um vetor?
 
 Então... o escalar mostrado no primeiro código do slide anterior é um vetor de 1 elemento que sofre *recycling*
-
 
 ```{r recycling, echo=TRUE}
 
@@ -699,9 +693,10 @@ Então... o escalar mostrado no primeiro código do slide anterior é um vetor d
 ```
 
 ## Vetores nomeados
+
 `r slide_atual = slide_atual + 1`
 
-Um `r a_r("vetor nomeado")` pode ser criado como abaixo 
+Um `r a_r("vetor nomeado")` pode ser criado como abaixo
 
 ```{r}
 
@@ -711,7 +706,6 @@ vetor_nomeado
 
 ```
 
-
 Além de acessar o elemento do vetor pelo índice numérico (COMEÇANDO DE UM, pois R é uma linguagem `r a_r("1-based")` ), é possível acessar os elementos pelos seus nomes
 
 ```{r}
@@ -719,20 +713,16 @@ vetor_nomeado[1]
 
 ```
 
-
 ```{r}
 vetor_nomeado["primeiro"]
 
 ```
-
-
 
 ```{r}
 
 vetor_nomeado[3]
 
 ```
-
 
 ```{r}
 vetor_nomeado["terceiro"]
@@ -745,7 +735,6 @@ Os nomes dos elementos podem ser acessados com a função `r a_r("names()")`
 names(vetor_nomeado)
 
 ```
-
 
 Um vetor de nomes pode ser atribuído a names(). A mudança dos nomes é feita inline
 
@@ -765,8 +754,8 @@ vetor_nomeado[c("b","c")]
 
 ```
 
-
 ## Listas nomeadas
+
 `r slide_atual = slide_atual + 1`
 
 As `r a_r("listas nomeadas")` funcionam de forma similar aos vetores nomeados.
@@ -788,8 +777,6 @@ lista_nomeada[["terceiro"]]
 
 ```
 
-
-
 ```{r}
 
 names(lista_nomeada) <- c("um", "dois", "tres")
@@ -798,31 +785,28 @@ lista_nomeada
 
 ```
 
-
-
-
-
 ## Estruturas construídas a partir de vetores e listas
+
 `r slide_atual = slide_atual + 1`
 
 Existem estruturas mais complexas construídas a partir de vetores e listas.
 
-* Data Frame
+-   Data Frame
 
-* Matrix
+-   Matrix
 
-* Array
+-   Array
 
-* Factor
+-   Factor
 
-* Estruturas que representam datas
+-   Estruturas que representam datas
 
-* Objetos (no paradigma de orientação a objetos)
+-   Objetos (no paradigma de orientação a objetos)
 
 Data Frame é a estrutura que mais vamos usar para nossas análises de dados.
 
-
 ## Data Frames
+
 `r slide_atual = slide_atual + 1`
 
 `r a_r("Data Frame")`, e seu primo `r a_r("Tibble")`, são estruturas muito usadas em análises de dados feitas em R.
@@ -834,7 +818,6 @@ O Data Frame consiste em um conjunto de vetores/listas nomeados, com o mesmo nú
 Essa estrutura é chave no paradigma "Tidy" que usaremos com as bibliotecas **Tidy**verse
 
 Tibble é uma adaptação do Data Frame para análise de dados. Pra maioria dos efeitos eles têm o mesmo comportamento, mas os tibbles contêm algumas atualizações para os processos de análise de dados.
-  
 
 ```{r dataframetibble, echo=TRUE}
 
@@ -860,8 +843,8 @@ tib <-
 ```
 
 ## Tibbles (list-columns)
-`r slide_atual = slide_atual + 1`
 
+`r slide_atual = slide_atual + 1`
 
 Vamos usar bastante as list-columns. Ou seja, vendo o tibble como uma tabela, a coluna de um tibble pode ser um vetor (tipos primários iguais) ou uma lista (tipos primários diferentes).
 
@@ -882,7 +865,6 @@ str(tib)
 
 ```
 
-
 Data Frame se enrola...
 
 ```{r}
@@ -899,7 +881,6 @@ str(df)
 
 Apesar de não poder ser inicializado desta forma, o Data Frame aceita list-column
 
-
 ```{r}
 
 df_from_tib <- as.data.frame(tib)
@@ -908,14 +889,13 @@ str(df_from_tib)
 
 ```
 
-
 ## Criando um `tibble` com `tribble()`
+
 `r slide_atual = slide_atual + 1`
 
 É possível criar um Tibble a partir de um código que parece uma tabela, ou seja, criar por linhas e não por colunas.
 
 Isso é feito com a função `r a_r("tribble()")`
-
 
 ```{r}
 
@@ -931,22 +911,22 @@ tribble(
 ```
 
 ## Controle de fluxo
+
 `r slide_atual = slide_atual + 1`
 
 A linguagem oferece comandos de `r a_r("controle de fluxo")` similares aos de outras linguagens.
 
 Podemos dividir os comandos de controle de fluxo em dois tipos:
 
-* `r a_r("choices")`: execução alternativa de comandos
+-   `r a_r("choices")`: execução alternativa de comandos
 
-* `r a_r("loops")`: execução repetida de comandos
-
+-   `r a_r("loops")`: execução repetida de comandos
 
 ## Choices: `if`, `ifelse`
+
 `r slide_atual = slide_atual + 1`
 
 O comando `r a_r("if")` funciona para um valor lógico escalar
-
 
 ```{r if}
 if (2 + 2 == 4) {
@@ -955,8 +935,6 @@ if (2 + 2 == 4) {
     "2 mais 2 não são 4"
 }
 ```
-
-
 
 Note o operador de comparação `==` e não `=`
 
@@ -971,10 +949,10 @@ jogo_do_pim_silvio_santos <- if_else(
 jogo_do_pim_silvio_santos
 ```
 
-Note o operador `%%` e a função de coerção de tipo `as.character` 
-
+Note o operador `%%` e a função de coerção de tipo `as.character`
 
 ## Choices: `switch` e `case_when`
+
 `r slide_atual = slide_atual + 1`
 
 A cláusula `r a_r("switch")` e a função `r a_r("dplyr::case_when")` evitam que o programador tenha que criar muitos `if else` aninhados
@@ -1003,8 +981,8 @@ case_when(
 )
 ```
 
-
 ## Loops
+
 `r slide_atual = slide_atual + 1`
 
 A cláusula de `r a_r("loop")` mais usada e mais versátil é `r a_r("for")`
@@ -1027,7 +1005,6 @@ for(i in 1:5){
 }
 ```
 
-
 ```{r break}
 #next sai do loop
 for(i in 1:5){
@@ -1038,8 +1015,8 @@ for(i in 1:5){
 }
 ```
 
-
 ## Loops: coisa do passado
+
 `r slide_atual = slide_atual + 1`
 
 Vamos ver que quase sempre é desnecessário usar loop para as tarefas que vamos executar.
@@ -1048,8 +1025,7 @@ O caráter vetorial da linguagem, aliado a funcionalidades das bibliotecas, faz 
 
 O código fica mais limpo e expressivo e mais rápido. Às vezes MUITO mais rápido. Isso ocorre por motivos além do escopo do curso (alocação de memória, código interpretado x código compilado em C++ etc.)
 
-O código abaixo usa loop e programação funcional, respectivamente. Programação funcional será abordada posteriormente no material. 
-
+O código abaixo usa loop e programação funcional, respectivamente. Programação funcional será abordada posteriormente no material.
 
 ```{r com_loop, warning=FALSE}
 com_loop <- function(n){
@@ -1071,8 +1047,7 @@ sem_loop <- function(n){
 
 Abaixo as três formas de fazer a mesma conta que terão a performance avaliada
 
-
-```{r compara_loop} 
+```{r compara_loop}
 com_loop(5)
 
 sem_loop(5)
@@ -1082,11 +1057,10 @@ sem_loop(5)
 ```
 
 ## Loops: coisa do passado (cont.)
+
 `r slide_atual = slide_atual + 1`
 
-
 A biblioteca `r a_r("bench")` oferece funções ótimas para avaliar a performance de pedaços pequenos de código.
-
 
 ```{r bench_loop, warning=FALSE, cache=TRUE}
 
@@ -1105,14 +1079,14 @@ plot(resultados_perf)
 
 ```
 
-
 ## Revisão: tipos de vetores
+
 `r slide_atual = slide_atual + 1`
 
 ![](diagramas/vetores.png)
 
-
 ## Revisão: operações vetoriais
+
 `r slide_atual = slide_atual + 1`
 
 Qual o valor de v1 ?
@@ -1123,13 +1097,20 @@ v1 <- c(1, 2, 3, 4, 5, 6) * 2
 
 ```
 
+-   
 
-* a) (1, 2, 3, 4, 5, 6, 1, 2, 3, 4, 5, 6)
-* b) (2, 4, 6, 8, 10, 12)
-* c) (2, 2, 3, 4, 5, 6)
+    a)  (1, 2, 3, 4, 5, 6, 1, 2, 3, 4, 5, 6)
 
+-   
+
+    b)  (2, 4, 6, 8, 10, 12)
+
+-   
+
+    c)  (2, 2, 3, 4, 5, 6)
 
 ## Revisão: operações vetoriais
+
 `r slide_atual = slide_atual + 1`
 
 Qual o valor de v2
@@ -1140,30 +1121,35 @@ v2 <-  c(1, 2, 3, 4) + c(0, 1)
 
 ```
 
-* a) (1, 3, 3, 5)
-* b) (1, 3, 3, 4)
-* c) (1, 2, 3, 4, 0, 1)
+-   
 
+    a)  (1, 3, 3, 5)
+
+-   
+
+    b)  (1, 3, 3, 4)
+
+-   
+
+    c)  (1, 2, 3, 4, 0, 1)
 
 ## Revisão: data frames
-`r slide_atual = slide_atual + 1`
 
+`r slide_atual = slide_atual + 1`
 
 ![](diagramas/dataframes.png)
 
-
-
 ## Revisão: controle de fluxo
+
 `r slide_atual = slide_atual + 1`
 
-![](diagramas/controlefluxo.png){width=90%}
+![](diagramas/controlefluxo.png){width="90%"}
 
 ## Revisão: if
+
 `r slide_atual = slide_atual + 1`
 
-
 Complete a lacuna:
-
 
 ```{r, eval=FALSE}
 
@@ -1180,12 +1166,11 @@ else{
 
 ```
 
-
 ## Revisão: if_else
+
 `r slide_atual = slide_atual + 1`
 
 Complete a lacuna:
-
 
 ```{r, eval= FALSE}
 x <- 1:10
@@ -1200,12 +1185,11 @@ if_else(
 
 ```
 
-
 ## Revisão: if_else
+
 `r slide_atual = slide_atual + 1`
 
 Qual o valor de x ?
-
 
 ```{r}
 
@@ -1220,12 +1204,11 @@ x <- case_when(
 
 ```
 
-
 ## Revisão: for
+
 `r slide_atual = slide_atual + 1`
 
 Complete a lacuna para imprimir os quadrados dos números de 1 a 10
-
 
 ```{r, eval=FALSE}
 for ____{
@@ -1234,36 +1217,33 @@ for ____{
 
 ```
 
-
-
-
-
 ## Exemplo de simulação: Monty Hall
+
 `r slide_atual = slide_atual + 1`
 
 `r a_r("Monty Hall")` era uma espécie de Sílvio Santos juvenil (sub 80) americano.
 
-![](imagens/montyhall.png){width=20%}
+![](imagens/montyhall.png){width="20%"}
 
 Um dos seus jogos consistia em mostrar três portas ao otár... (ops) convidado. Atrás de uma delas sempre tem um carro. Atrás das outras, alguma brincadeira
 
 Após a escolha inicial, o apresentador revelava uma das portas e perguntava se o convidado queria trocar a porta escolhida originalmente.
 
-![](imagens/montyhall2.jpg){width=20%}
+![](imagens/montyhall2.jpg){width="20%"}
 
 O que vocês acham? Melhor trocar, manter a escolha original ou tanto faz?
 
-
 ## Simulando o Monty Hall
+
 `r slide_atual = slide_atual + 1`
 
 Note o que há de interessante no código (comentado):
 
-- A função `r a_r("sample()")`
+-   A função `r a_r("sample()")`
 
-- A `r a_r("seleção negativa de elementos com -")`
+-   A `r a_r("seleção negativa de elementos com -")`
 
-- A função `r a_r("replicate()")`
+-   A função `r a_r("replicate()")`
 
 ```{r monty_hall}
 set.seed(88)
@@ -1302,16 +1282,14 @@ sum(fica)/n
 ```
 
 ## Outra simulação: dá pra passar no CFA sem saber nada?
+
 `r slide_atual = slide_atual + 1`
 
-
-![](imagens/macacocomputador.jpg){width=20%}
-
+![](imagens/macacocomputador.jpg){width="20%"}
 
 Vamos ver... mas dá pra simular sem saber quase nada.
 
 Vamos usar uma das funções da família `r<familia de distribuição de prob>()`. Neste caso, a `r a_r("rbinom")`, que simula a distribução binomial, aquela que equivale a jogar n moedas para cima e ver quantas deram cara, ou seja, quantos desfechos chamados de "sucessos" são obtidos em n eventos com desfecho binário. Nestes eventos há uma probabilidade fixa para um desfecho considerado "sucesso".
-
 
 ```{r cfa}
 
@@ -1330,7 +1308,6 @@ sum(acertos >= n_aprovado)/n_simul
 A chance é praticamente nula.
 
 Na verdade, a grande massa da distribuição fica muito distante.
-
 
 ```{r mostra_cfa}
 
@@ -1353,9 +1330,8 @@ mostra_chances(acertos, n_questoes)
 
 ```
 
-
-
 ## Outra simulação: dá pra passar no CFA sabendo a um grau x ?
+
 `r slide_atual = slide_atual + 1`
 
 O exemplo anterior era muito simplista: ninguém chuta tudo.
@@ -1365,8 +1341,6 @@ Imagine que sabemos qual a chance de aparecer uma pergunta onde podemos descarta
 Na função `rbinom()`, a cada simulação, sorteamos uma de dois tipos de desfecho para cada um dos n eventos. A `r a_r("rmultinom()")` sorteia um de k tipos de desfecho para cada um dos n eventos. Um vetor de k elementos indica a probabilidade de cada tipo de desfecho.
 
 A `rmultinom()` nos ajuda a compor provas de acordo com a proficiência de quem vai fazer a prova.
-
-
 
 ```{r cfa_mais}
 #definindo a chance podermos eliminar 0, 1, 2, ... 4 alternativas
@@ -1382,19 +1356,16 @@ acertos_concatenados <-
     )
 ```
 
-
 ```{r cfa_1}
 n_questoes_cada_elimina[1:4,]
 
 ```
-
 
 ```{r cfa_2}
 acertos_concatenados[1:20]
 ```
 
 Como geramos os acertos concatenados em um vetor, o ideal é transformá-los numa matriz onde cada linha corresponde a uma simulação e cada coluna corresponde aos acertos conseguidos em cada tipo de questão. Usamos a função A `matrix()`, informando que estamos passando a matriz linha a linha e informando a quantidade de linhas.
-
 
 ```{r cfa_3}
 matriz_acertos <- matrix(acertos_concatenados, byrow = TRUE, nrow = n_simul )
@@ -1404,7 +1375,6 @@ matriz_acertos[1:5,]
 
 A `rowSums()` nos ajuda a ter a quantidade de acertos em cada simulação de prova.
 
-
 ```{r cfa_4}
 acertos <- rowSums(matriz_acertos)
 sum(acertos > n_aprovado)/n_simul
@@ -1412,51 +1382,47 @@ sum(acertos > n_aprovado)/n_simul
 
 ```
 
-
 ```{r cfa_5}
 mostra_chances(acertos, n_questoes)
 ```
 
-
-
-
 # INTRODUÇÃO À PROGRAMAÇÃO FUNCIONAL COM PURRR
+
 `r slide_atual = slide_atual + 1`
 
-
 ## O que é `r a_r("programação funcional")`?
+
 `r slide_atual = slide_atual + 1`
 
 O fato de que funções são objetos de primeira classe no R, ou seja, objetos que têm propriedades iguais às de qualquer outro, possibilita a programação no estilo funcional.
 
 A programação funcional inclui as formas de interação entre vetores e funções a partir de uma função
 
-
 ![](imagens/fp.png)
 
 Neste curso vamos nos concentrar nos Functionals, funções que recebem função como argumento e devolvem um vetor ou uma lista
 
-
 ## Função map
+
 `r slide_atual = slide_atual + 1`
 
-A função mais fundamental é `r a_r("map()")`. 
+A função mais fundamental é `r a_r("map()")`.
 
 Ela recebe uma função e um vetor (ou lista) de $n$ elementos
 
 A função é chamada para cada elemento do vetor (ou lista), $n$ vezes.
 
 Os resultados da aplicação destas $n$ execuções são devolvidos em uma lista de $n$ elementos
- 
+
 ![](imagens/map.png)
 
-
 ## Exemplo da função map
+
 `r slide_atual = slide_atual + 1`
 
 Uma função é um objeto como outro qualquer e pode ser colocado em uma variável
 
-````{r}
+```{r}
 
 funcao <- function(x) x^2
 
@@ -1464,16 +1430,15 @@ funcao <- function(x) x^2
 
 `map` devolve uma lista com o resultado da execução de `map` em cada elemento
 
-````{r}
+```{r}
 
 map(.x = 1:10, .f = funcao)
 
 ```
 
-
 ## `map` pode retornar outros tipos de objeto
-`r slide_atual = slide_atual + 1`
 
+`r slide_atual = slide_atual + 1`
 
 ```{r}
 
@@ -1485,8 +1450,8 @@ map_df(.x = tibble(x = 1:10), .f = funcao)
 
 ```
 
-
 ## Shortcuts pra funções
+
 `r slide_atual = slide_atual + 1`
 
 Funções podem ser declaradas inline.
@@ -1497,9 +1462,7 @@ map(.x = 1:5, .f = function(x){rnorm(n = 4, mean = x, sd = .01)} )
 
 ```
 
-
 Ou então `r a_r("shortcuts para funções")` podem ser usados
-
 
 ```{r}
 
@@ -1516,14 +1479,13 @@ map(.x = 1:5, .f = rnorm, n = 4, sd = .01 )
 
 ```
 
-
 ## Versões da `map()` para dois argumentos
+
 `r slide_atual = slide_atual + 1`
 
 A função `map()`possui versões para mais de um argumento.
 
 `r a_r("map2")` e suas modificações para retornos em outros tipos, como `map2_dbl()`, são preparadas para funções de dois argumentos.
-
 
 ```{r}
 
@@ -1546,10 +1508,9 @@ map2(
 
 ```
 
-
 ## Versões da `map()` para mais de dois argumentos
-`r slide_atual = slide_atual + 1`
 
+`r slide_atual = slide_atual + 1`
 
 `r a_r("pmap")` e suas modificações para retornos em outros tipos, como `pmap_dbl()`, são preparadas um número ilimitado de argumentos.
 
@@ -1557,8 +1518,7 @@ Uma lista de vetores nomeados deve ser passada para a `pmap()`. Esses são os ar
 
 Lembre que um Data Frame/Tibble é exatamente isso: uma lista de vetores nomeados.
 
-O detalhe é que os nomes dos vetores deve bater com o nome dos parâmetros da função 
-
+O detalhe é que os nomes dos vetores deve bater com o nome dos parâmetros da função
 
 ```{r}
 
@@ -1581,10 +1541,9 @@ pmap(.l = tib_n_arg, .f = rnorm)
 
 ```
 
-
 ## Vantagens da programação funcional
-`r slide_atual = slide_atual + 1`
 
+`r slide_atual = slide_atual + 1`
 
 A programação funcional deixa o código mais expressivo e maioria das vezes mais performático
 
@@ -1592,23 +1551,22 @@ Existem algumas características avançadas da programação funcional que facil
 
 A principal delas é a facilidade com que podemos converter um código que roda em série para um código que roda em paralelo com a biblioteca `furrr`, que veremos adiante.
 
-
-
-
 # TIDY DATA (obtenção e organização dos dados)
+
 `r slide_atual = slide_atual + 1`
 
 ## Um habilidade subestimada
+
 `r slide_atual = slide_atual + 1`
 
-Dentro de todo o hype envolvendo Data Science, surgem as buzz words mais mirabolantes: machine learning, AI, Deep Learning... 
+Dentro de todo o hype envolvendo Data Science, surgem as buzz words mais mirabolantes: machine learning, AI, Deep Learning...
 
 Tudo isso é legal, mas a habilidade de preparar os dados para os modelos, preparar os hiperparâmetros e especificações alternativas ainda melhora muito a análise. Anote mais uma buzz word: **FEATURE ENGINEERING**
 
-A agilidade de se tentar abordagens alterativas com os dados cresce muito quando dominamos a arte de manipular os data frames. Por isso o peso grande dado neste curso. 
-
+A agilidade de se tentar abordagens alterativas com os dados cresce muito quando dominamos a arte de manipular os data frames. Por isso o peso grande dado neste curso.
 
 ## Organizando os dados de forma tidy
+
 `r slide_atual = slide_atual + 1`
 
 Arrumar os dados de forma que as linhas sejam eventos e as colunas sejam atributos do evento ajuda muito a rodar modelos e construir visualizações eficientemente. Esta forma de organização foi chamada de `r a_r("Tidy data")` por Hadley Wickham, o criador do conjunto de bibliotecas `Tidyverse`
@@ -1618,12 +1576,12 @@ O que é o evento e o que é o atributo pode variar até para diferentes usos do
 ![](imagens/tidydata.png)
 
 ## Tratamento de dados em passos: operador Pipe (`%>%`)
+
 `r slide_atual = slide_atual + 1`
 
 O operador `r a_r("pipe")`, representado por `r a_r("%>% ")` é extremamente útil para análise de dados no R com uso das bibliotecas `Tidyverse`
 
 Normalmente os tratamentos de dados são feitos em múltiplos passos encadeados:
-
 
 ```{r gapminder}
 #dados de exemplo
@@ -1636,7 +1594,6 @@ Vamos imaginar que queremos a média de PIB per capita por continente em 2007.
 Note quanto código desnecessário há nestas linhas: variáveis que não precisavam ser nomeadas nem passadas explicitamente como parâmetro.
 
 Este código desnecessário causa fadiga no programador, confunde o próprio autor do código e confunde ainda mais o leitor posterior do código.
-
 
 ```{r sem_pipe, message=FALSE, warning=FALSE }
 #vamos cobrir essas funções de tratamento posteriormente
@@ -1652,11 +1609,12 @@ resultado
 ```
 
 ## Tratamento de dados em passos: operador Pipe (`%>%`) (cont.)
+
 `r slide_atual = slide_atual + 1`
 
 O operador pipe `%>%` faz o seguinte:
 
-x %>% y(z) = y(x,z)
+x %\>% y(z) = y(x,z)
 
 Ou seja, o primeiro operando é enfiado como primeiro parâmetro da função que está no segundo operando.
 
@@ -1677,15 +1635,14 @@ resultado
 
 ```
 
-
-Note que agora podemos interpretar o código facilmente como uma série de comandos de tratamento em cima dos dados. 
+Note que agora podemos interpretar o código facilmente como uma série de comandos de tratamento em cima dos dados.
 
 Não é por coincidência que as funções de tratamento das bibliotecas tidyverse que veremos adiante são verbos e recebem os dados como primeiro parâmetro.
 
-**Agora o mais importante de tudo: O ATALHO PARA O ` %>% ` É CTRL + SHIFT + M**
-
+**Agora o mais importante de tudo: O ATALHO PARA O `%>%` É CTRL + SHIFT + M**
 
 ## Um mapa conceitual da bibioteca de transformação de dados `dplyr`
+
 `r slide_atual = slide_atual + 1`
 
 `r a_r("dplyr")` é a biblioteca mais central do conjunto `tidyverse`
@@ -1694,8 +1651,8 @@ Não é por coincidência que as funções de tratamento das bibliotecas tidyver
 
 Fonte: [@dplyrrberlin]
 
-
 ## CRAN: bibliotecas de pacotes: funções e dados
+
 `r slide_atual = slide_atual + 1`
 
 `r a_r("CRAN")` é o repositório de bibliotecas mantido pelo R com contribuição de populares.
@@ -1721,7 +1678,6 @@ indicadores
 
 Sabendo o ID do indicador, podemos consultá-lo com a função `wb_data()`
 
-
 ```{r banco_mundial_2}
 
 #mrvnev é most recent non-empty values. Pode ser usado para buscar os n valores mais recentes
@@ -1735,20 +1691,17 @@ head(gini)
 
 ```
 
+## dplyr: Modificar -\> Colunas -\> Nomes e posições
 
-## dplyr: Modificar -> Colunas -> Nomes e posições
 `r slide_atual = slide_atual + 1`
 
 ![](diagramas/dplyr_select.png)
 
-
-
 ## Funções básicas de tratamento (dplyr): `r a_r("select()")`
+
 `r slide_atual = slide_atual + 1`
 
-
 A função `select()` é usada para selecionar colunas do data frame/tibble
-
 
 ```{r gini}
 
@@ -1776,16 +1729,13 @@ head(gini_select2)
 
 ```
 
-
-
 ## Funções básicas de tratamento (dplyr): select() (cont.)
-`r slide_atual = slide_atual + 1`
 
+`r slide_atual = slide_atual + 1`
 
 Algumas `r a_r("funções helpers da dplyr")` nos ajudam a usar a função `select` e são muito úteis para tratamentos mais elaborados.
 
 Pra mostrar mais funcionalidades da função `select`, vamos usar uma base com dados eleitorais brasileiros, que retorna mais colunas
-
 
 ```{r  candidatos,  message= FALSE, warning=FALSE, cache=TRUE }
 
@@ -1800,8 +1750,8 @@ glimpse(candidatos)
 ```
 
 ## Funções básicas de tratamento (dplyr): select() - helpers
-`r slide_atual = slide_atual + 1`
 
+`r slide_atual = slide_atual + 1`
 
 ```{r candidatos_select}
 
@@ -1813,7 +1763,6 @@ datatable(head(candidatos_select))
 
 
 ```
-
 
 ```{r candidatos_select_ends }
 
@@ -1846,14 +1795,13 @@ datatable(head(candidatos_select))
 
 ```
 
-
 ## Funções básicas de tratamento (dplyr): select() - helpers (cont.)
-`r slide_atual = slide_atual + 1`
 
+`r slide_atual = slide_atual + 1`
 
 A função *helper* `r a_r("num_range")` ajuda a encontrar colunas do tipo `prefixo_n`. Isso é muito comum em bases de dados
 
-A biblioteca `r a_r("worldmet")` retorna dados de `r a_r("estações meteorológicas")` espalhadas pelo planeta 
+A biblioteca `r a_r("worldmet")` retorna dados de `r a_r("estações meteorológicas")` espalhadas pelo planeta
 
 Primeiro é necessário encontrar o código da base desejada
 
@@ -1866,11 +1814,11 @@ estacao
 
 ```
 
-
 ## Funções básicas de tratamento (dplyr): select() - helpers (cont.)
+
 `r slide_atual = slide_atual + 1`
 
-A função abaixo retorna os dados de uma estação. Veja que alguns campos têm um sufixo _n 
+A função abaixo retorna os dados de uma estação. Veja que alguns campos têm um sufixo \_n
 
 ```{r estacao_import }
 dados_heathrow <- importNOAA(code = "037720-99999")
@@ -1881,10 +1829,7 @@ glimpse(dados_heathrow)
 
 ```
 
-
-A função *helper* `num_range` ajuda a selecionar essas colunas com prefixo comum e um sufixo numérico 
-
-
+A função *helper* `num_range` ajuda a selecionar essas colunas com prefixo comum e um sufixo numérico
 
 ```{r num_range}
 
@@ -1901,7 +1846,6 @@ head(dados_heathrow_select)
 ```
 
 Outra função útil é a `r a_r("everything()")`, que ajuda, por exemplo, a passar algumas colunas para o início do `tibble`.
-
 
 ```{r everything}
 
@@ -1920,9 +1864,7 @@ glimpse(dados_heathrow_select)
 
 ```
 
-
 Outra forma mais nova de fazer isso é usando a função `r a_r("relocate()")`, que facilita a ordenação das colunas de um data frame
-
 
 ```{r}
 
@@ -1939,7 +1881,6 @@ glimpse(dados_heathrow_relocate)
 ```
 
 Por padrão, ela traz as colunas para a frente, mas é possível movê-las para antes ou depois de uma outra coluna, usando o parâmetro .before OU EXCLUSIVO .after
-
 
 ```{r}
 
@@ -1958,8 +1899,8 @@ glimpse(dados_heathrow_relocate)
 
 ```
 
-
 ## Funções básicas de tratamento (dplyr): `rename()`
+
 `r slide_atual = slide_atual + 1`
 
 `r a_r("rename()")` é usada para modificar os nomes das colunas. Ela renomeia as colunas indicadas e mantném as outras.
@@ -1967,6 +1908,7 @@ glimpse(dados_heathrow_relocate)
 ![](diagramas/dplyr_rename.png)
 
 ## Funções básicas de tratamento (dplyr): `rename()`
+
 `r slide_atual = slide_atual + 1`
 
 ```{r}
@@ -1982,8 +1924,8 @@ dados_heathrow %>%
 ```
 
 ## Funções básicas de tratamento (dplyr): `rename()` x `select()`
-`r slide_atual = slide_atual + 1`
 
+`r slide_atual = slide_atual + 1`
 
 `select()` também pode ser usado para renomear colunas, mas mantém apenas as colunas citadas
 
@@ -2000,22 +1942,20 @@ dados_heathrow %>%
 
 ```
 
-
 ## Renomeando várias colunas de uma vez (dplyr): `rename_with()`
+
 `r slide_atual = slide_atual + 1`
 
 A função `r a_r("rename_with()")` possibilita que renomeemos várias colunas ao mesmo tempo com o uso de uma função.
 
-Aqui fazemos uso de uma função da biblioteca `r a_r("stringr")`, que trata strings, ou seja, cadeias de caracteres. 
-
-
+Aqui fazemos uso de uma função da biblioteca `r a_r("stringr")`, que trata strings, ou seja, cadeias de caracteres.
 
 ```{r}
 str(iris)
 
 ```
 
-Primeiro podemos nos incomodar com as letras maiúsculas e o "." separando as palavras em vez de "_"
+Primeiro podemos nos incomodar com as letras maiúsculas e o "." separando as palavras em vez de "\_"
 
 ```{r}
 
@@ -2037,13 +1977,11 @@ str(iris_padrao)
 
 ```
 
-
 Podemos também querer colocar um sufixo nos nomes dos campos com a unidade
 
-Vamos usar aqui o "~" criando um atalho para a função, que vai receber cada nome de coluna como .x
+Vamos usar aqui o "\~" criando um atalho para a função, que vai receber cada nome de coluna como .x
 
 A função `r a_r("str_glue()")` possibilita a criação de novas strings a partir de variáveis já existentes de uma forma expressiva.
-
 
 ```{r}
 iris_unidade <- iris_padrao %>% 
@@ -2056,19 +1994,15 @@ str(iris_unidade)
 
 ```
 
+## dplyr: Modificar -\> Colunas -\> Valores
 
-
-## dplyr: Modificar -> Colunas -> Valores
 `r slide_atual = slide_atual + 1`
 
-
-A função `r a_r("mutate()")` é usada para criar novas colunas no tibble, mantendo as outras.
-![](diagramas/dplyr_mutate.png)
-
+A função `r a_r("mutate()")` é usada para criar novas colunas no tibble, mantendo as outras. ![](diagramas/dplyr_mutate.png)
 
 ## Funções básicas de tratamento (dplyr): `mutate()`
-`r slide_atual = slide_atual + 1`
 
+`r slide_atual = slide_atual + 1`
 
 Notando que a coluna DATA_ELEICAO é um caracter, vamos criar uma coluna de tipo data.
 
@@ -2079,9 +2013,7 @@ typeof(candidatos$DATA_ELEICAO)
 
 ```
 
-
 O jeito mais fácil de fazer isso é usando uma das funções da biblioteca `r a_r("lubridate")`
-
 
 ```{r lubridate}
 
@@ -2094,9 +2026,7 @@ head(candidatos_com_data)
 
 ```
 
-
 É possível substituir um campo existente
-
 
 ```{r mutate_mesmo}
 
@@ -2109,18 +2039,13 @@ head(candidatos_com_data)
 
 ```
 
-
-
-
-
 ## Funções básicas de tratamento (dplyr): `mutate()`
-`r slide_atual = slide_atual + 1`
 
+`r slide_atual = slide_atual + 1`
 
 funções derivadas da `mutate` possibilitam a alteração de várias colunas ao mesmo tempo, usando os mesmos helpers que já vimos para a `select` e uma função à escolha.
 
 Veremos uma forma mais nova de fazer isso, com a função `across()`, mas essa forma continua a funcionar e é usada em muitos códigos existentes.
-
 
 ```{r mutate_at}
 
@@ -2136,6 +2061,7 @@ head(candidatos_com_data)
 ```
 
 ## Funções básicas de tratamento (dplyr) `mutate()` (cont.):
+
 `r slide_atual = slide_atual + 1`
 
 Outras funções úteis são as que fazem operações acumuladas e as operações de `r a_r("lag()")` e `r a_r("lead()")`.
@@ -2188,7 +2114,6 @@ datatable(dolar_com_vol) %>%
 
 ```
 
-
 ```{r dolar_vol}
 
 dolar_ajeitado <- dolar_com_vol %>% 
@@ -2205,15 +2130,13 @@ dolar_ajeitado %>%
 
 ```
 
-
 ## Funções básicas de tratamento (dplyr) `transmute()`:
+
 `r slide_atual = slide_atual + 1`
 
 `r a_r("transmute()")` cria colunas e mantém apenas as colunas citadas
 
-
 ![](diagramas/dplyr_transmute.png)
-
 
 ```{r}
 
@@ -2229,19 +2152,17 @@ gapminder %>%
 
 ```
 
-## dplyr: Modificar -> Linhas -> Posição
-`r slide_atual = slide_atual + 1`
+## dplyr: Modificar -\> Linhas -\> Posição
 
+`r slide_atual = slide_atual + 1`
 
 A função `r a_r("arrange")` serve para ordenar as linhas do tibble.
 
 ![](diagramas/dplyr_arrange.png)
 
-
 ## Funções básicas de tratamento (dplyr) `arrange()`:
+
 `r slide_atual = slide_atual + 1`
-
-
 
 ```{r arrange}
 
@@ -2254,7 +2175,6 @@ head(dados_ordenados)
 
 A função `r a_r("desc()")` permite a ordenação decrescente
 
-
 ```{r desc}
 
 dados_ordenados <- dados_heathrow %>% 
@@ -2266,8 +2186,8 @@ head(dados_ordenados)
 
 ```
 
-
 ## Funções básicas de tratamento (dplyr) `filter()`:
+
 `r slide_atual = slide_atual + 1`
 
 `r a_r("filter()")` seleciona colunas de acordo com os seus valores
@@ -2275,11 +2195,10 @@ head(dados_ordenados)
 ![](diagramas/dplyr_filter.png)
 
 ## Funções básicas de tratamento (dplyr) `filter()` (cont.):
+
 `r slide_atual = slide_atual + 1`
 
-
 Filtrando países (note o operador `r a_r("%in% ")`)
-
 
 ```{r}
 
@@ -2293,8 +2212,8 @@ gapminder %>%
 
 ```
 
-
 ## Funções básicas de tratamento (dplyr) `slice_max()`:
+
 `r slide_atual = slide_atual + 1`
 
 `r a_r("slice_max()")` seleciona as `n` linhas maiores de acordo com uma das colunas.
@@ -2302,13 +2221,12 @@ gapminder %>%
 ![](diagramas/dplyr_slice_max.png)
 
 ## Funções básicas de tratamento (dplyr) `slice_max()` número de itens:
-`r slide_atual = slide_atual + 1`
 
+`r slide_atual = slide_atual + 1`
 
 Selecionando os países mais ricos em 2007 com o parâmetro n.
 
 Depois aprenderemos como ordenar essas barras no gráfico
-
 
 ```{r}
 
@@ -2322,10 +2240,10 @@ gapminder %>%
 ```
 
 ## Funções básicas de tratamento (dplyr) `slice_max()`, proporção das linhas:
+
 `r slide_atual = slide_atual + 1`
 
 O parâmetro prop permite a seleção de uma proporção das linhas
-
 
 ```{r}
 
@@ -2355,18 +2273,17 @@ bind_rows(ricos, pobres) %>%
 
 ```
 
-
 ## Funções básicas de tratamento (dplyr) `slice()`:
+
 `r slide_atual = slide_atual + 1`
 
 `r a_r("slice()")` seleciona "linhas" de um data frame/tibble
 
 ![](diagramas/dplyr_slice.png)
 
-
 ## Funções básicas de tratamento (dplyr) `slice()`:
-`r slide_atual = slide_atual + 1`
 
+`r slide_atual = slide_atual + 1`
 
 ```{r, cache=TRUE}
 
@@ -2387,26 +2304,23 @@ limbo
 
 ```
 
-
 ## Funções básicas de tratamento (dplyr) `group_by()`:
-`r slide_atual = slide_atual + 1`
 
+`r slide_atual = slide_atual + 1`
 
 ![](diagramas/dplyr_group_by.png)
 
-
 ## Funções básicas de tratamento (dplyr) `group_by()`:
-`r slide_atual = slide_atual + 1`
 
+`r slide_atual = slide_atual + 1`
 
 A função `r a_r("group_by()")` será bastante usada.
 
 Quem conhece SQL pode estranhar um pouco o comportamento desta função, pois ela não agrupa os dados diminuindo o número de linhas imediatamente.
- 
+
 Mas veja que ela indica que há agrupamento
 
 Ela particiona o tibble. As operações passam a ser executadas em cada partição.
-
 
 ```{r group_by}
 
@@ -2419,8 +2333,8 @@ gini_agrupado
 
 ```
 
-
 ## Funções básicas de tratamento (dplyr) `group_by()` (cont.):
+
 `r slide_atual = slide_atual + 1`
 
 Para várias operações, o agrupamento faz com que o comportamento seja diferente.
@@ -2440,11 +2354,9 @@ datatable(gini_agrupado)
 
 ```
 
-
-
 ## Funções básicas de tratamento (dplyr) `group_by()` (cont.):
-`r slide_atual = slide_atual + 1`
 
+`r slide_atual = slide_atual + 1`
 
 As funções `r a_r("lag() no contexto da group_by")` e `r a_r("lead() no contexto da group_by")` funcionam dentro de cada grupo (o primeiro value de um grupo não acessa o valor do outro grupo com `lag()` .
 
@@ -2461,22 +2373,19 @@ datatable(gini_agrupado)
 
 ```
 
-
 ## Funções básicas de tratamento (dplyr) `summarise()` (cont.):
-`r slide_atual = slide_atual + 1`
 
+`r slide_atual = slide_atual + 1`
 
 ![](diagramas/dplyr_summarise.png)
 
-
 ## Funções básicas de tratamento (dplyr) `group_by()` (cont.):
-`r slide_atual = slide_atual + 1`
 
+`r slide_atual = slide_atual + 1`
 
 A função `group_by` só leva a uma sumarização, ou seja, só transforma o tibble em um tibble com o número de linhas igual ao número de grupos, quando executamos a função `r a_r("summarise()")`
 
 Se executarmos `summarise()` sem particionar o tibble, a operação resulta em uma linha.
-
 
 ```{r summarise}
 
@@ -2495,11 +2404,7 @@ datatable(maiores_temp_dia) %>%
 
 ```
 
-
-
 A função `r a_r("slice_max() no contexto da group_by()")` retorna os n maiores valores. Se o tibble estiver agrupado, pra cada grupo.
-
-
 
 ```{r top_n}
 
@@ -2531,24 +2436,22 @@ ggplot(maiores_temp_dia) +
 
 ```
 
-
 ## Operações column-wise
-`r slide_atual = slide_atual + 1`
 
+`r slide_atual = slide_atual + 1`
 
 A biblioteca dplyr chegou à versão 1.0.0 em junho de 2020, estabelecendo sua interface permanente e ganhando novas funcionalidades, como as `r a_r("column-wise operations")`, com a função `r a_r("across()")`.
 
 A função `across()`, quando usada em conjunto com `mutate()`, `summarise()`, `filter()`... , facilita a execução de operações iguais em diversos campos com base no nome dos campos ou no valor deles.
 
-
 ## Operações column-wise com mutate
-`r slide_atual = slide_atual + 1`
 
+`r slide_atual = slide_atual + 1`
 
 A função across() tem dois parâmetros.
 
-- O parâmetro `.cols` define em quais colunas serão aplicados as funções 
-- O parâmetro `.fns` define a função (ou a lista de funções) que serão aplicadas em cada coluna
+-   O parâmetro `.cols` define em quais colunas serão aplicados as funções
+-   O parâmetro `.fns` define a função (ou a lista de funções) que serão aplicadas em cada coluna
 
 ```{r}
 
@@ -2566,6 +2469,7 @@ candidatos %>%
 ```
 
 ## Operações column-wise com filter
+
 `r slide_atual = slide_atual + 1`
 
 É possível usar a função `across()` em conjunto com filter. O código abaixo seleciona apenas as linhas pras quais nenhum percentil é nulo.
@@ -2601,8 +2505,8 @@ head(pisas_completos)
 
 ```
 
-
 ## Operações column-wise com summarise
+
 `r slide_atual = slide_atual + 1`
 
 Podemos executar um summarise across, selecionando as colunas desejadas
@@ -2639,15 +2543,13 @@ sumario  %>%
 
 ```
 
-
 ## Operações column-wise múltiplas funções
+
 `r slide_atual = slide_atual + 1`
 
-
-O parâmetro .fns aceita uma lista nomeada de funções. 
+O parâmetro .fns aceita uma lista nomeada de funções.
 
 É possível executar várias operações de uma só vez criando novos campos. O nome do elemento relativo à função na lista é concatenado com os campos originais gerando um novo nome pros resultados das operações
-
 
 ```{r}
 
@@ -2676,20 +2578,19 @@ sumario  %>%
 
 ```
 
-
 ## Olhando as list-columns com mais detalhes
+
 `r slide_atual = slide_atual + 1`
 
-Citamos anteriormente que o tibble/dataframe pode conter colunas que são listas de elementos. 
+Citamos anteriormente que o tibble/dataframe pode conter colunas que são listas de elementos.
 
-É muito útil armazenar dataframes aninhados nestas list-columns, ou seja, uma coluna que contém um dataframe por linha. 
+É muito útil armazenar dataframes aninhados nestas list-columns, ou seja, uma coluna que contém um dataframe por linha.
 
 Esta técnica tem inúmeros usos. Por exemplo, rodar modelos em partições dos dados originais
 
 No código seguinte, particionamos os dados do PISA por país e aninhamos em uma list-column usando a função `r a_r("nest()")`. Podemos dar group_by e depois nest ou explicitar as colunas que queremos aninhar.
 
 É uma boa prática rodar `r a_r("ungroup")` assim que não for necessário usar o tibble agrupado
-
 
 ```{r}
 
@@ -2711,13 +2612,12 @@ head(pisa_nested)
 ```
 
 ## Executando um modelo para cada um dos tibbles aninhados
-`r slide_atual = slide_atual + 1`
 
+`r slide_atual = slide_atual + 1`
 
 Agora podemos rodar uma regressão linear, por exemplo.
 
 Vamos usar programação funcional para rodar `lm()`, a função de regressão linear, para cada país
-
 
 ```{r}
 
@@ -2729,11 +2629,11 @@ pisa_modelo <- pisa_nested %>%
 
 ```
 
-
 ## Operações row-wise. Exemplo: extraindo coeficientes de modelos aninhados
+
 `r slide_atual = slide_atual + 1`
 
-Temos, agora, o resultado da execução de um modelo de regressão linear pra cada país. 
+Temos, agora, o resultado da execução de um modelo de regressão linear pra cada país.
 
 Precisamos, pra cada objeto retornado, extrair os coeficientes.
 
@@ -2741,8 +2641,7 @@ vamos usar a função `broom::tidy()`
 
 Essa função não está preparada para receber um vetor de objetos mas sim UM único objeto.
 
-Portanto, essa operação deve ser feita linha a linha. Para que isso aconteça é necessário rodar a função `r a_r("rowwise")`, que equivale a um `group_by()` por linha. 
-
+Portanto, essa operação deve ser feita linha a linha. Para que isso aconteça é necessário rodar a função `r a_r("rowwise")`, que equivale a um `group_by()` por linha.
 
 ```{r}
 
@@ -2756,15 +2655,13 @@ pisa_modelo_coefs <- pisa_modelo %>%
 
 ```
 
-
 ## Explodindo tibbles aninhados
+
 `r slide_atual = slide_atual + 1`
 
 A função `broom::tidy()` criou novos tibbles aninhados com as informações a respeito dos coeficientes estimados.
 
-Vamos, agora explodir esses tibbles, com a função `r a_r("unnest()")`, mostrando o coeficiente que nos interessa aqui, o $\beta$ relativo à variável explicativa contendo o ano.   
-
-
+Vamos, agora explodir esses tibbles, com a função `r a_r("unnest()")`, mostrando o coeficiente que nos interessa aqui, o $\beta$ relativo à variável explicativa contendo o ano.
 
 ```{r}
 
@@ -2809,16 +2706,16 @@ pisa_modelo_coefs_exp <- pisa_modelo_coefs %>%
 
 ```
 
+## Leitura de dados de arquivos
 
-
-## Leitura de dados de arquivos 
 `r slide_atual = slide_atual + 1`
 
 Até agora acessamos dados que estavam disponíveis em bibliotecas, mas muitas vezes encontramos dados em arquivos.
 
-De modo geral, as funções da biblioteca `r a_r("readr")` são mais rápidas do que as da biblioteca base, e além disso mostram barra de progresso no console. É possível reconhecê-las pelo `_` ao invés de `.` 
+De modo geral, as funções da biblioteca `r a_r("readr")` são mais rápidas do que as da biblioteca base, e além disso mostram barra de progresso no console. É possível reconhecê-las pelo `_` ao invés de `.`
 
-## Leitura de dados de arquivos 
+## Leitura de dados de arquivos
+
 `r slide_atual = slide_atual + 1`
 
 O caso mais comum é ler dados em formato de tabela para um tibble
@@ -2827,11 +2724,9 @@ O caso mais comum é ler dados em formato de tabela para um tibble
 
 Fonte: [@cheatsheetimport]
 
-
-
 ## Baixando arquivos em lote - Exemplo: CVM
-`r slide_atual = slide_atual + 1`
 
+`r slide_atual = slide_atual + 1`
 
 O portal da CVM é uma fonte interessante de dados
 
@@ -2839,8 +2734,7 @@ O código abaixo baixa os dados que ainda não estão na nossa base. E, por via 
 
 Note que vamos usar `r a_r("programação funcional no exemplo")`. Sem uso de loop vamos executar uma função para cada linha do data frame/tibble.
 
-Esta função vai salvar os dados como um objeto `r a_r("rds")`. Este formato é binário, diferentemente do formato csv (textual). Podemos compactar estes dados ou não. Se usarmos compactação, a leitura e escrita são mais lentas, mas os arquivos ocupam menos espaço.  
-
+Esta função vai salvar os dados como um objeto `r a_r("rds")`. Este formato é binário, diferentemente do formato csv (textual). Podemos compactar estes dados ou não. Se usarmos compactação, a leitura e escrita são mais lentas, mas os arquivos ocupam menos espaço.
 
 ```{r fundos, message=FALSE, warning=FALSE}
 
@@ -2879,16 +2773,15 @@ baixa_faltantes <- tibble(data_dado = seq(ymd("2019-01-01"), by = "month", ymd(t
 
 ```
 
-
 ## Leitura de dados de arquivos em uma pasta - Exemplo: CVM. Desaninhando uma list-column
+
 `r slide_atual = slide_atual + 1`
 
-Após a  operação de baixar os dados dos arquivos, podemos ler todos os arquivos de uma pasta e colocá-los em um só tibble, já que eles são do mesmo formato.
+Após a operação de baixar os dados dos arquivos, podemos ler todos os arquivos de uma pasta e colocá-los em um só tibble, já que eles são do mesmo formato.
 
-Usamos `r a_r("execução em paralelo no exemplo")`, que é possibilitada ao chamarmos uma função future_<map> ao invés de <map>.
+Usamos `r a_r("execução em paralelo no exemplo")`, que é possibilitada ao chamarmos uma função future\_<map> ao invés de <map>.
 
 Após a leitura dos arquivos eles ficam armazenados de forma aninhada numa coluna chamada "conteudo". "conteudo" é uma coluna feita de tibbles, cada tibble correspondendo a uma linha do tibble principal. A coluna "conteudo" é uma `r a_r("nested list-column")`.
-
 
 ```{r fundos2, message=FALSE, warning=FALSE}
 
@@ -2908,19 +2801,20 @@ head(todos_os_fundos)
 
 A função `r a_r("unnest")` pode ser usada, como já vimos
 
-
 ## Leitura de conteúdo de páginas web
+
 `r slide_atual = slide_atual + 1`
 
 Existem duas dois tipos de atividades envolvidas na leitura de páginas web:
 
-* Extração do conteúdo que interessa a partir da página já obtida
+-   Extração do conteúdo que interessa a partir da página já obtida
 
-* Automatização da navegação com uso de emuladores de browser
+-   Automatização da navegação com uso de emuladores de browser
 
 Vamos ver primeiro como ler o conteúdo de uma página e depois como usar um emulador para navegar em um portal e obter o que desejamos
 
-## Leitura de conteúdo de páginas web 
+## Leitura de conteúdo de páginas web
+
 `r slide_atual = slide_atual + 1`
 
 Para efetuar a `r a_r("leitura de páginas WEB")`, é necessário conhecer como é a estrutura de uma página web.
@@ -2933,8 +2827,8 @@ Podem existir objetos de vários tipos em uma página: links, inputs de dados, t
 
 ![](imagens/dom.gif)
 
-
 ## Leitura de conteúdo de páginas WEB (cont.)
+
 `r slide_atual = slide_atual + 1`
 
 Para retirar da página web o conteúdo de que precisamos, temos que analisar como é esta árvore de objetos e que nós desta árvore nos interessam.
@@ -2943,10 +2837,10 @@ Imagine que queremos buscar dados na página de [histórico de preços e taxas d
 
 A tecla F12 do Chrome nos permite ver a árvore DOM da página em que estamos navegando.
 
-![](imagens/f12.png){width=70%}
-
+![](imagens/f12.png){width="70%"}
 
 ## Leitura de conteúdo de páginas WEB (cont.)
+
 `r slide_atual = slide_atual + 1`
 
 É possível clicar com o botão direito e inspecionar um elemento específico de forma a saber onde ele está na árvore e que tipo de elemento ele é (mesmo que você saiba pouco de `r a_r("html")`).
@@ -2957,21 +2851,17 @@ O mais importante é saber que uma `r a_r("tag html")` que define um elemento te
 
 Mesmo sem saber hmtl, fica claro que queremos esse tal de atributo `href` dos tais elementos `a` seja lá o que diabos isso seja (`a` é um link e `href` é o destino do link).
 
-
-
-![](imagens/f12_2.png){width=70%}
-
+![](imagens/f12_2.png){width="70%"}
 
 ## Leitura de conteúdo de páginas WEB (cont.)
-`r slide_atual = slide_atual + 1`
 
+`r slide_atual = slide_atual + 1`
 
 A biblioteca `r a_r("rvest")` possibilita a extração destes elementos.
 
-É possível caminhar pela árvore DOM até os nós desejados e atributos que queremos usando `r a_r("html_nodes()")` e `r a_r("html_attr()")`. 
+É possível caminhar pela árvore DOM até os nós desejados e atributos que queremos usando `r a_r("html_nodes()")` e `r a_r("html_attr()")`.
 
 Munidos de uma função que faz download e salva um arquivo, podemos caminhar pelas planilhas e salvá-las
-
 
 ```{r rvest , warning=FALSE, message=FALSE }
 
@@ -3004,8 +2894,8 @@ links <- read_html("https://sisweb.tesouro.gov.br/apex/f?p=2031:2:0::::") %>%
 
 ```
 
-
 ## Leitura de conteúdo de planilhas Excel
+
 `r slide_atual = slide_atual + 1`
 
 vamos aproveitar as planilhas que baixamos para ver como podemos efetuar a `r a_r("leitura de planilhas Excel")`.
@@ -3018,8 +2908,6 @@ Precisamos ler todas as sheets de todos os arquivos em um diretório (onde baixa
 
 A função abaixo lê as sheets de um arquivo.
 
-
-
 ```{r le_sheets, warning=FALSE  }
 le_sheets <- function(arquivo){
     
@@ -3028,9 +2916,7 @@ le_sheets <- function(arquivo){
 }
 ```
 
-
 A função abaixo lê o conteúdo de cada sheet
-
 
 ```{r le_conteudo_sheets, warning=FALSE }
 le_conteudo_sheet <- function(arquivo, sheet){
@@ -3047,8 +2933,8 @@ le_conteudo_sheet <- function(arquivo, sheet){
 ```
 
 ## Leitura de conteúdo de planilhas Excel (cont.)
-`r slide_atual = slide_atual + 1`
 
+`r slide_atual = slide_atual + 1`
 
 Munidos destas duas funções, podemos guardar tudo em um só data frame.
 
@@ -3076,7 +2962,6 @@ Antes de rodar a future_map, determinamos a forma de paralelização. No nosso c
 
 É legal notar a forma como usamos `r a_r("expressão regular")` aqui
 
-
 ```{r arruma_titulos_1, warning=FALSE, cache=TRUE, message=FALSE }
 
 plan(multiprocess)
@@ -3096,11 +2981,10 @@ sheets_lidas <- sheets_pra_ler %>%
 ```
 
 ## Leitura de conteúdo de planilhas Excel (cont.)
+
 `r slide_atual = slide_atual + 1`
 
-
 Uma última arrumada
-
 
 ```{r arruma_titulos_2, warning=FALSE, cache=TRUE}
 taxas_titulos <- sheets_lidas %>% 
@@ -3149,8 +3033,8 @@ taxas_titulos <- sheets_lidas %>%
 ```
 
 ## Leitura de conteúdo de planilhas Excel (cont.)
-`r slide_atual = slide_atual + 1`
 
+`r slide_atual = slide_atual + 1`
 
 Aí fica fácil fazer a análise que desejarmos
 
@@ -3181,14 +3065,13 @@ ggplot(ntnb_2045) +
 
 ```
 
-
 ## Outro exemplo de leitura de página
+
 `r slide_atual = slide_atual + 1`
 
 Neste caso, precisamos entender quando requisição é feita pela página e emular essas requisições passando os parâmetros que devem ser passados via método `r a_r("POST")`.
 
 Primeiro usamos a função `r a_r("crossing")` para criar um novo tibble que combina todas as $n$ linhas do tibble com os grupos e todas as $m$ linhas do tibble de datas, resultando num tibble com $m * n$ linhas, pois queremos pegar o resultado de todos grupos para todas as datas.
-
 
 ```{r ceagesp1, message=TRUE, warning=TRUE, cache=TRUE}
 
@@ -3252,25 +3135,24 @@ head(dados_ceagesp)
 
 ```
 
-
 ## Leitura de página como um robô
-`r slide_atual = slide_atual + 1`
 
+`r slide_atual = slide_atual + 1`
 
 Principalmente em dois casos precisamos emular um browser para obter o conteúdo html que desejamos, para então usar a `rvest` se necessário:
 
-- Quando a página precisa executar um script javascript para que fique pronta
+-   Quando a página precisa executar um script javascript para que fique pronta
 
-- Quando a página exige muitos passos de navegação antes de chegarmos aos dados desejados;
+-   Quando a página exige muitos passos de navegação antes de chegarmos aos dados desejados;
 
-É preciso estudar cada caso para entender qual melhor estratégia. Precisamos pensar em 
+É preciso estudar cada caso para entender qual melhor estratégia. Precisamos pensar em
 
-- Estabilidade: quão dependente a leitura é de aspectos específicos dos dados atuais ou da forma como ela foi desenvolvida
+-   Estabilidade: quão dependente a leitura é de aspectos específicos dos dados atuais ou da forma como ela foi desenvolvida
 
-- Correção: temos que nos certificar de que o resultado que obtemos é o mesmo que a página está disponibilizando ao usuário. A página muitas vezes é criada para atender um usuário humano. Uma página que é carregada sem dados ou com dados preliminares que depois são preeenchidos ou alterados por um script é adequada ara humanos mas pode não ser adequada para uma extração automática. 
-
+-   Correção: temos que nos certificar de que o resultado que obtemos é o mesmo que a página está disponibilizando ao usuário. A página muitas vezes é criada para atender um usuário humano. Uma página que é carregada sem dados ou com dados preliminares que depois são preeenchidos ou alterados por um script é adequada ara humanos mas pode não ser adequada para uma extração automática.
 
 ## Usando Selenium
+
 `r slide_atual = slide_atual + 1`
 
 `r a_r("Selenium")` é um famoso automatizador de browser. Através dele, é possível enviar cliques, preencher caixas de texto etc. até se chegar aos dados desejados. Além disso, ele executa os scripts javascripts que a página exige.
@@ -3294,8 +3176,8 @@ rs <- rsDriver(
 
 ```
 
-
 ## Baixando dados da ANEEL
+
 `r slide_atual = slide_atual + 1`
 
 ```{r selenium_aneel, eval=FALSE}
@@ -3372,17 +3254,17 @@ download.file(url = unlist(endereco), destfile = "dados/aneel/gd.zip")
 
 ```
 
-
 ## Pivoteando
+
 `r slide_atual = slide_atual + 1`
 
-O data frame mostrad neste slide  não está "Tidy", ou seja não está de forma que **cada linha represente um evento** e **cada coluna represente um atributo do evento**.
+O data frame mostrad neste slide não está "Tidy", ou seja não está de forma que **cada linha represente um evento** e **cada coluna represente um atributo do evento**.
 
 Para nós, neste caso, um evento é formado por **todas** as informações de um ativo em um dia e não **uma só** das informações de um ativo em um dia.
 
 Isso porque é extremamente comum fazermos contas com mais de uma informação do ativo em um dia (máxima - mínima, por exemplo)
 
-![](imagens/tidydata.png){width=70%}
+![](imagens/tidydata.png){width="70%"}
 
 ```{r dados_fake_petro}
 
@@ -3403,31 +3285,27 @@ dados_long <- tribble(
 
 ```
 
-
-
-
 ## Tidyr
+
 `r slide_atual = slide_atual + 1`
 
 O pacote `r a_r("Tidyr")` ajuda a arrumar os data frames dessas formas. O hex sticker dele é bem explicativo.
 
-
-![](imagens/tidyr.png){width=40%}
+![](imagens/tidyr.png){width="40%"}
 
 ## Tidyr - `pivot_longer()` e `pivot_wider()`
+
 `r slide_atual = slide_atual + 1`
 
 Os nomes das principais funções mudaram em setembro de 2019 (quando saiu a versão 1.0.0). Antes se chamavam `r a_r("gather()")` e `r a_r("spread()")` e agora se chamam `r a_r("pivot_wider()")` e `r a_r("pivot_longer()")`, o que é mais intuitivo.
 
 ![](diagramas/tidyr.png)
 
-
-
 ## Pivoteando nosso data frame com muitas linhas
+
 `r slide_atual = slide_atual + 1`
 
 balanços
-
 
 ```{r}
 
@@ -3444,16 +3322,15 @@ unzip(zipfile = "dados/info_empresas_cvm/info.zip", exdir = "dados/info_empresas
 
 ```
 
-
 A função que faz isso se chama `pivot_wider()`
 
-Seus parâmetros mais usados são: 
+Seus parâmetros mais usados são:
 
-* `data`, que é o data frame a ser tratado
+-   `data`, que é o data frame a ser tratado
 
-* `names_from`, que é o atributo de onde vêm os nomes para os novos atributos
+-   `names_from`, que é o atributo de onde vêm os nomes para os novos atributos
 
-* `values_from`, o atributo de onde vêm os valores dos novos atributos
+-   `values_from`, o atributo de onde vêm os valores dos novos atributos
 
 ```{r pivot_wider , warning=FALSE, message=FALSE, cache=TRUE}
 
@@ -3469,14 +3346,13 @@ str(dados_wide)
 
 ```
 
-
 ## Pivoteando nosso data frame com muitas colunas
+
 `r slide_atual = slide_atual + 1`
 
 É muito comum recebermos os dados com colunas que deviam ser valores de um atributo, e não um atributo em si.
 
 O exemplo clássico é a colocação de datas nas colunas do dado, como nos dados retirados do site `Datasus`
-
 
 ```{r exemplo_datasus, cache=TRUE, warning=FALSE, message = FALSE}
 
@@ -3491,22 +3367,21 @@ read_csv2(
 
 ```
 
-
 ## Pivoteando nosso data frame com muitas colunas (cont.)
+
 `r slide_atual = slide_atual + 1`
 
 Acontece que "2009" não é um atributo, mas sim o valor de um atributo que deveria ser data
 
 A função `pivot_longer()` faz a operação de que precisamos.
 
-* `data`, que é o data frame a ser tratado
+-   `data`, que é o data frame a ser tratado
 
-* `names_from`, que é o atributo de onde vêm os nomes para os novos atributos
+-   `names_from`, que é o atributo de onde vêm os nomes para os novos atributos
 
-* `values_from`, o atributo de onde vêm os valores dos novos atributos
+-   `values_from`, o atributo de onde vêm os valores dos novos atributos
 
-Note também a função `r a_r("separate()")`, que divide colunas de acordo com caracteres separadores. 
-
+Note também a função `r a_r("separate()")`, que divide colunas de acordo com caracteres separadores.
 
 ```{r pivot_longer, warning=FALSE, message=FALSE }
 
@@ -3541,12 +3416,11 @@ head(siab_familias)
 
 ```
 
-
 ## Pivoteando nosso data frame com muitas colunas (cont.)
+
 `r slide_atual = slide_atual + 1`
 
-Para pegar mais informações dos municipios, vamos ler um arquivo baixado do IBGE 
-
+Para pegar mais informações dos municipios, vamos ler um arquivo baixado do IBGE
 
 ```{r le_municipios, message=FALSE, warning=FALSE, cache=TRUE}
 
@@ -3563,7 +3437,6 @@ Ops... `r a_r("células mescladas")`
 Não deixe o ódio tomar você...
 
 A função `r a_r("fill()")` pode te ajudar
-
 
 ```{r, message=FALSE, warning=FALSE  }
 
@@ -3587,8 +3460,8 @@ head(municipios_ajeitado)
 
 ```
 
-
 ## Combinando tibbles (dplyr)
+
 `r slide_atual = slide_atual + 1`
 
 Para juntar as informações de dois tibbles em um só, podemos fazer isso de três formas
@@ -3596,8 +3469,8 @@ Para juntar as informações de dois tibbles em um só, podemos fazer isso de tr
 ![](diagramas/combinando.png)
 
 ## Combinando tibbles (tidyr): funções de join
-`r slide_atual = slide_atual + 1`
 
+`r slide_atual = slide_atual + 1`
 
 Eis as funções de `r a_r("join de data frames")`
 
@@ -3605,8 +3478,8 @@ Eis as funções de `r a_r("join de data frames")`
 
 Fonte: [@cheatsheettransform]
 
-
 ## Combinando tibbles (tidyr): exemplo funções de join:
+
 `r slide_atual = slide_atual + 1`
 
 Anteriormente, pegamos informações do cadastro de famílias...
@@ -3619,7 +3492,6 @@ head(siab_familias)
 
 E de municípios
 
-
 ```{r}
 
 head(municipios_ajeitado)
@@ -3627,7 +3499,7 @@ head(municipios_ajeitado)
 
 ```
 
-Os códigos são diferentes, mas 
+Os códigos são diferentes, mas
 
 ```{r, warning=FALSE, message=FALSE, cache=TRUE }
 
@@ -3642,9 +3514,7 @@ head(de_para_codigos)
 
 ```
 
-
-Agora juntamos as informações do Siab com as informações dos municípios 
-
+Agora juntamos as informações do Siab com as informações dos municípios
 
 ```{r}
 
@@ -3658,11 +3528,9 @@ head(siab_familias)
 
 ```
 
-
 Seria legal saber qual o tamanho médio das famílias.
 
 Este procedimento pode ficar como exercício, com o uso do dado abaixo
-
 
 ```{r}
 
@@ -3680,98 +3548,86 @@ numero_medio_familias
 
 ```
 
+# VISUALIZAÇÃO DE DADOS
 
-
-# VISUALIZAÇÃO DE DADOS 
 `r slide_atual = slide_atual + 1`
 
-
 ## NÃO!!! Distorções
+
 `r slide_atual = slide_atual + 1`
 
 Nos próximos slides vemos `r a_r("antipadrões de visualização e dados")`.
 
-
 ![](imagens/doria.png)
-
 
 Fonte: [@doria]
 
-
 ## NÃO!!! Distorções II
+
 `r slide_atual = slide_atual + 1`
 
 Às vezes mesmo sem querer (será?)
 
 PS. gráfico de 2014
 
-
 ![](imagens/gnews.jpg)
-
 
 Fonte: [@gnews]
 
 ## NÃO!!! Estilos que atrapalham
+
 `r slide_atual = slide_atual + 1`
 
 Gráfico com sombra, 3D, estilos que dificultam a interpretação
 
-
 ![](imagens/graficoruim.png)
-
 
 Fonte: [@healy2018data]
 
-
-
 ## NÃO!!! 3D indiscriminado
+
 `r slide_atual = slide_atual + 1`
 
 O pessoal que usa Excel muitas vezes ama 3D, mas...
-
 
 ![](imagens/excel.png)
 
 [@healy2018data]
 
-
 ![](imagens/excel2.png)
-
 
 ![](imagens/excel3.png)
 
-
-
 ## NÃO!!! Pizza maior que 100%
+
 `r slide_atual = slide_atual + 1`
 
-![](imagens/tortamaisque100.jpg )
-
+![](imagens/tortamaisque100.jpg)
 
 Fonte: [@mais100]
 
 ## MELHOR AINDA: Pizza só meio a meio
+
 `r slide_atual = slide_atual + 1`
 
 Assim como os restaurantes devemos servir pizzas de dois sabores no máximo
 
 Tentem descobrir qual a menor e a menor categoria em cada caso
 
-
 ![](imagens/torta.png)
 
 Fonte: [@pie]
 
-
 ## NÃO!!! Pizza só meio a meio (cont.)
+
 `r slide_atual = slide_atual + 1`
 
 ![](imagens/barranaopizza.png)
 
-
 Fonte: [@pie]
 
 ## Com muita parcimônia: gráficos de linhas com dois eixos
+
 `r slide_atual = slide_atual + 1`
 
 Gráficos de dois eixos podem mostrar relações espúrias muito facilmente. E elas dependem da escolha da escala e dos limites dos eixos.
@@ -3784,22 +3640,19 @@ O mesmo dado pode levar aos seguintes gráficos (e suas soluções)
 
 ![](imagens/2eixos-2.png)
 
-
-
 ## Dicas para uma boa visualização
+
 `r slide_atual = slide_atual + 1`
 
 Algumas `r a_r("dicas para boa visualização de dados")`:
 
-* Enfatize o dado relevante
+-   Enfatize o dado relevante
 
-* Integre texto e gráfico
+-   Integre texto e gráfico
 
-* Use fontes e cores diferentes do padrão 
+-   Use fontes e cores diferentes do padrão
 
-* Principalmente em colunas e barras, faça o eixo começar de ZERO
-
-
+-   Principalmente em colunas e barras, faça o eixo começar de ZERO
 
 ```{r enfatize, warning=FALSE, message=FALSE, out.width="70%"}
 
@@ -3852,11 +3705,9 @@ p + geom_point( color = "coral4") +
 
 ```
 
-
 ## Dicas para uma boa visualização
-`r slide_atual = slide_atual + 1`
-Use `r a_r("small multiples")`: divida o gráfico em gráficos iguais menores cada um com parte dos dados, seguindo uma regra categórica
 
+`r slide_atual = slide_atual + 1` Use `r a_r("small multiples")`: divida o gráfico em gráficos iguais menores cada um com parte dos dados, seguindo uma regra categórica
 
 ```{r, out.width="90%"}
 
@@ -3886,10 +3737,9 @@ p + geom_line(color="chocolate", aes(group = country)) +
 
 ```
 
-
 ## GGPLOT2
-`r slide_atual = slide_atual + 1`
 
+`r slide_atual = slide_atual + 1`
 
 `r a_r("ggplot2")` é a biblioteca de visualização de dados moderna mais usada no R.
 
@@ -3897,20 +3747,19 @@ Muitos dos problemas listados anteriormente são tratados por ela. É até difí
 
 Por outro lado, a biblioteca facilita muito a criação de small multiples, a criação de gráficos personalizados e complexos
 
-
 ## Filosofia
-`r slide_atual = slide_atual + 1`
 
+`r slide_atual = slide_atual + 1`
 
 GGPLOT é baseada na filosofia de Tufte [@tufte1973visual] e Wilkinson [@wilkinsongrammar], em que os gráficos são construídos a partir de dois princípios:
 
-* Um gráfico é uma construção em camadas
+-   Um gráfico é uma construção em camadas
 
-* Os dados ganham sentido a partir de mapeamentos a escalas, que são mapeadas a geometrias
+-   Os dados ganham sentido a partir de mapeamentos a escalas, que são mapeadas a geometrias
 
 ## Camadas da GGPLOT2
-`r slide_atual = slide_atual + 1`
 
+`r slide_atual = slide_atual + 1`
 
 A GGPLOT2 parece mais complicada de usar do que funções como a `plot()` da biblioteca base do R.
 
@@ -3920,39 +3769,38 @@ As camadas da ggplot
 
 ![](imagens/camadas_ggplot.png)
 
-
 Fonte: [@datacampggplot2]
 
 ## Descrição das camadas
-`r slide_atual = slide_atual + 1`
 
+`r slide_atual = slide_atual + 1`
 
 As `r a_r("camadas da ggplot")` são as seguintes:
 
-- **Dados (data)**
+-   **Dados (data)**
 
-- `r a_r("Aesthetics (aes())")`: mapeamento das colunas dos dados a escalas
+-   `r a_r("Aesthetics (aes())")`: mapeamento das colunas dos dados a escalas
 
-- `r a_r("Geometries geoms_()")`: elementos visuais que mostram os dados nas escalas
+-   `r a_r("Geometries geoms_()")`: elementos visuais que mostram os dados nas escalas
 
-- `r a_r("Facets")`: small multiples
+-   `r a_r("Facets")`: small multiples
 
-- **Statistics**: representações do dados transformadas por operações matemáticas
+-   **Statistics**: representações do dados transformadas por operações matemáticas
 
-- **Coordinates**
+-   **Coordinates**
 
-- **Themes**: "non-data ink", ou seja, os elementos que não são diretamente plotados pela existência de dados 
+-   **Themes**: "non-data ink", ou seja, os elementos que não são diretamente plotados pela existência de dados
 
 ## Elementos das camadas
-`r slide_atual = slide_atual + 1`
 
+`r slide_atual = slide_atual + 1`
 
 ![](imagens/elementos_ggplot.png)
 
 Fonte: [@datacampggplot2]
 
-
 ## Montando o gráfico
+
 `r slide_atual = slide_atual + 1`
 
 Usando as camadas, vamos montando o gráfico
@@ -3966,10 +3814,10 @@ glimpse(iris)
 ```
 
 ## Montando o gráfico: data, aes, geom
+
 `r slide_atual = slide_atual + 1`
 
 ![](imagens/geom_aes_data.png)
-
 
 ```{r}
 
@@ -3990,11 +3838,10 @@ ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width)) +
 ```
 
 ## Montando o gráfico: data, aes, geom, facet
+
 `r slide_atual = slide_atual + 1`
 
-
 ![](imagens/geom_aes_data_facet.png)
-
 
 ```{r}
 
@@ -4006,12 +3853,10 @@ ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width)) +
 ```
 
 ## Montando o gráfico: data, aes, geom, facet, statistics
+
 `r slide_atual = slide_atual + 1`
 
-
 ![](imagens/geom_aes_data_facet_stat.png)
-
-
 
 ```{r}
 
@@ -4022,13 +3867,11 @@ ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width)) +
 
 ```
 
-
 ## Montando o gráfico: data, aes, geom, facet, statistics, coord
+
 `r slide_atual = slide_atual + 1`
 
 ![](imagens/geom_aes_data_facet_stat_coord.png)
-
-
 
 ```{r}
 
@@ -4041,13 +3884,11 @@ ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width)) +
 
 ```
 
-
 ## Montando o gráfico: data, aes, geom, facet, statistics, coord, theme
+
 `r slide_atual = slide_atual + 1`
 
-
 ![](imagens/geom_aes_data_facet_stat_coord_theme.png)
-
 
 ```{r}
 
@@ -4071,21 +3912,16 @@ ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width)) +
 ```
 
 ## Escolhendo o melhor gráfico
+
 `r slide_atual = slide_atual + 1`
 
-
-
-
 ![](diagramas/graficos.png)
-
-
 
 ## Escolhendo o melhor gráfico: distribuição (variável discreta)
+
 `r slide_atual = slide_atual + 1`
 
-
 ![](diagramas/graficos.png)
-
 
 ```{r, message= FALSE, warning= FALSE  }
 
@@ -4108,8 +3944,6 @@ ggplot(gols) +
 
 
 ```
-
-
 
 ```{r}
 
@@ -4160,13 +3994,11 @@ ggplot() +
 
 ```
 
-
 ## Escolhendo o melhor gráfico: acumulada empírica
+
 `r slide_atual = slide_atual + 1`
 
-
 O gráfico mostrando gráfco com a `r a_r("função de probablidade acumulada empírica")` mostra propriedades que o histograma não mostra
-
 
 ```{r}
 
@@ -4189,18 +4021,17 @@ ggplot(gols, aes(x = gols)) +
 ```
 
 ## Escolhendo o melhor gráfico: distribuição de variável contínua
-`r slide_atual = slide_atual + 1`
 
+`r slide_atual = slide_atual + 1`
 
 Para variáveis contínuas, faz sentido usar o gráfico de `r a_r("densidade de probabilidade")`
 
-Nesta transformação, repare o uso da `pivot_longer()`. Neste caso, o nome das colunas que estão sendo desmobilizadas e transformadas em valores contêm duas informações, separadas por "_":
+Nesta transformação, repare o uso da `pivot_longer()`. Neste caso, o nome das colunas que estão sendo desmobilizadas e transformadas em valores contêm duas informações, separadas por "\_":
 
-- o nome da coluna pra onde os valores devem ir (equivalente ao parâmetro `values_to`)
-- um valor de atributo que deve ir para uma nova coluna
+-   o nome da coluna pra onde os valores devem ir (equivalente ao parâmetro `values_to`)
+-   um valor de atributo que deve ir para uma nova coluna
 
-Além disso, uma transformação é aplicada nos nomes das colunas de forma a possibilitar o tratamento no mutate posterior. 
-
+Além disso, uma transformação é aplicada nos nomes das colunas de forma a possibilitar o tratamento no mutate posterior.
 
 ```{r, message=FALSE, warning=FALSE}
 
@@ -4222,8 +4053,6 @@ ufc_pesos <- read_csv("dados/ufc/data.csv") %>%
 
 
 ```
-
-
 
 ```{r, message=FALSE, warning=FALSE}
 ggplot(ufc_pesos) + 
@@ -4250,11 +4079,10 @@ ggplot(ufc_pesos) +
 ```
 
 ## Escolhendo o melhor gráfico: distribuição de variável contínua. ECF
+
 `r slide_atual = slide_atual + 1`
 
-
 Mais uma vez a distribuição empírica nos deixa ver mais coisa: os quantis
-
 
 ```{r}
 
@@ -4277,11 +4105,9 @@ ggplot(ufc_pesos) +
 
 ```
 
-
 ## Escolhendo o melhor gráfico: comparando distribuições
+
 `r slide_atual = slide_atual + 1`
-
-
 
 ```{r}
 
@@ -4308,8 +4134,6 @@ ggplot(ufc_pesos) +
 
 ```
 
-
-
 ```{r}
 
 ggplot(ufc_pesos) + 
@@ -4331,13 +4155,11 @@ ggplot(ufc_pesos) +
 
 ```
 
-
 ## Escolhendo o melhor gráfico: comparando muitas distribuições
+
 `r slide_atual = slide_atual + 1`
 
-
 O tipo de gráfico gerado por `r a_r("geom_desity_ridges()")` ajuda a comparar várias distribuições.
-
 
 ```{r, message=FALSE, warning=FALSE }
 
@@ -4365,16 +4187,13 @@ ggplot(ufc_pesos) +
 
 ```
 
-
-Legal a ideia, mas não queremos comparar mulheres também 
-
+Legal a ideia, mas não queremos comparar mulheres também
 
 ## Introduzindo stringr
+
 `r slide_atual = slide_atual + 1`
 
-
 A biblioteca `r a_r("stringr")` facilita muito lidar com strings. Por exemplo detectar um pedaço de string em outra.
-
 
 ```{r, message=FALSE, warning= FALSE }
 
@@ -4405,8 +4224,8 @@ ggplot(ufc_pesos) +
 
 Melhorou, mas ainda á estranho. Melhor seria se as classes de peso estivessem em ordem
 
-
 ## Introduzindo forcats
+
 `r slide_atual = slide_atual + 1`
 
 No R, as variáveis categóricas são chamadas de `r a_r("fator")`. Cada valor possível de um fator é representadas internamente com um identificador numérico, e não com a própria string.
@@ -4418,7 +4237,6 @@ Podemos manipular essas representações facilmente com a `r a_r("forcats")`.
 No caso, queremos ordenar nosso fator com a ordem as classes de peso no UFC
 
 A função `r a_r("fct_relevel")` possibilita a ordenação manual de uma variável `r a_r("factor")`
-
 
 ```{r, message=FALSE, warning= FALSE}
 
@@ -4451,14 +4269,12 @@ ggplot(ufc_pesos_ordem) +
 ```
 
 ## Relação entre variáveis: scatter plot
-`r slide_atual = slide_atual + 1`
 
+`r slide_atual = slide_atual + 1`
 
 Os gráficos do tipo `r a_r("scatter plot")` possibilitam a visualização de relações entre as variáveis
 
-
 Vamos brincar um pouco com os dados do Banco Mundial
-
 
 ```{r, message=FALSE, warning=FALSE, cache=TRUE  }
 
@@ -4495,9 +4311,6 @@ pib_gini_homi <- taxa_homicidios %>%
 
 ```
 
-
-
-
 ```{r warning=FALSE, message=FALSE, out.width="80%", fig.height= 6, fig.width= 6  }
 
 ggplot(pib_gini_homi, aes(y = homicidios, x = indice)) +
@@ -4513,11 +4326,10 @@ ggplot(pib_gini_homi, aes(y = homicidios, x = indice)) +
 ```
 
 ## Relação entre variáveis: scatter plot (cont.)
+
 `r slide_atual = slide_atual + 1`
 
-
 É possível visualizar os `r a_r("eixos em log")` na base 10
-
 
 ```{r, message=FALSE, warning=FALSE, out.width="80%", fig.height= 6, fig.width= 6}
 
@@ -4536,13 +4348,11 @@ ggplot(pib_gini_homi, aes(y = homicidios, x = indice)) +
 
 ```
 
-
 ## Relação entre variáveis: scatter plot (cont.)
+
 `r slide_atual = slide_atual + 1`
 
 É possível também usar as cores para olhar uma terceira característica
-
-
 
 ```{r, message=FALSE, warning=FALSE, out.width="80%"}
 
@@ -4559,10 +4369,7 @@ ggplot(pib_gini_homi, aes(y = homicidios, x = indice)) +
 
 ```
 
-
 A linha de regressão também pode ser estimada para cada grupo. Neste caso vamos usar o método de regressão linear, pois o LOESS original nao funciona nada bem com muito poucos dados (nem a linear, mas...)
-
-
 
 ```{r, message=FALSE, warning=FALSE, out.width="80%"}
 
@@ -4578,9 +4385,6 @@ ggplot(pib_gini_homi, aes(y = homicidios, x = indice, color = continent)) +
 
 
 ```
-
-
-
 
 ```{r, message=FALSE, warning=FALSE, out.width="80%"}
 
@@ -4622,8 +4426,8 @@ ggplot(analise_desigualdade, aes(y = homicidios, x = indice, color = continent))
 ```
 
 ## Relação entre variáveis: Três variáveis contínuas
-`r slide_atual = slide_atual + 1`
 
+`r slide_atual = slide_atual + 1`
 
 Podemos avaliar três variáveis contínuas usando um gráfico
 
@@ -4640,13 +4444,9 @@ head(pib_gini_homi_wide)
 
 ```
 
-
 A escala de cor usada abaixo, `r a_r("Viridis")`, oferece a mesma sensação para colorido e preto e branco e é feita para ajudar `r a_r("daltônicos")`.
 
-
 O log foi usado aqui para evitar que os valores extremos dificultem a visualização da escala de cores.
-
-
 
 ```{r}
 
@@ -4660,10 +4460,9 @@ ggplot(pib_gini_homi_wide) +
 
 ```
 
+## Relação entre variáveis: Três variáveis contínuas
 
-## Relação entre variáveis:  Três variáveis contínuas
 `r slide_atual = slide_atual + 1`
-
 
 ```{r, cache=TRUE, warning=FALSE, message=FALSE }
 
@@ -4740,10 +4539,6 @@ hdi_violencia <- hdi %>%
 
 ```
 
-
-
-
-
 ```{r, fig.height=6, fig.width= 10}
 
 populacao <- hdi_violencia %>%  
@@ -4795,11 +4590,9 @@ ggplot(populacao) +
 
 ```
 
-
 ## Relação entre variáveis: Duas discretas e uma contínua
+
 `r slide_atual = slide_atual + 1`
-
-
 
 ```{r, message=FALSE, warning=FALSE }
 
@@ -4851,9 +4644,7 @@ ufc_tudo <- bind_cols(ufc_data, ufc_raw_data) %>%
 
 ```
 
-
 O gráfico gerado por `r a_r("geom_tile()")` ajuda a visualizar duas variáveis discretas ordinais e uma contínua.
-
 
 ```{r}
 
@@ -4868,12 +4659,9 @@ ggplot(ufc_tudo, aes(x = last_round, y = weight_class)) +
 
 ```
 
+## Relação entre variáveis: Várias variáveis
 
-
-## Relação entre variáveis:  Várias variáveis
 `r slide_atual = slide_atual + 1`
-
-
 
 ```{r, message=FALSE, warning=FALSE, cache=TRUE, out.width="90%" }
 
@@ -4908,10 +4696,9 @@ ggpairs(hdi_tudo)  +
 
 ```
 
-
 ## Composição: no tempo, poucos períodos, valores relativos
-`r slide_atual = slide_atual + 1`
 
+`r slide_atual = slide_atual + 1`
 
 A função `r a_r("geom_col()")` é melhor para poucos períodos
 
@@ -4921,8 +4708,7 @@ Para sanar esse conflito, usamos o `r a_r("position - parâmetro da geom_col()")
 
 Pata o caso em que queremos comparar valores relativamente a cada período, devemos empilhar as categorias de forma que a coluna tenha o mesmo tamanho a cada período.
 
-Para isso, usamos o valor *fill* para o parâmetro *position*    
-
+Para isso, usamos o valor *fill* para o parâmetro *position*
 
 ```{r, message=FALSE, warning=FALSE}
 
@@ -4957,11 +4743,10 @@ ggplot(jogos) +
 ```
 
 ## Composição: no tempo, poucos períodos, valores absolutos
+
 `r slide_atual = slide_atual + 1`
 
 Para compararmos de forma que o total de cada período apareça, em valores absolutos, devemos usar o valor *stack*
-
-
 
 ```{r, message=FALSE, warning=FALSE}
 
@@ -4990,17 +4775,15 @@ ggplot(jogos) +
 
 ```
 
-
 ## Composição: no tempo, muitos períodos, valores relativos
-`r slide_atual = slide_atual + 1`
 
+`r slide_atual = slide_atual + 1`
 
 Para muito períodos o ideal é usar áreas empilhadas, com a função `r a_r("geom_area()")`
 
 Repare que há muitos países, ou seja, muitas categorias.
 
 Usando a biblioteca `r a_r("forcats")` e sua função `r a_r("fct_lump()")` conseguimos criar uma categoria de "Outros"
-
 
 ```{r, cache=TRUE, warning=FALSE, message=FALSE   }
 
@@ -5037,11 +4820,9 @@ ggplot(gdps_tratado ) +
 
 ```
 
-## Composição: no tempo, muitos períodos, valores absolutos 
+## Composição: no tempo, muitos períodos, valores absolutos
+
 `r slide_atual = slide_atual + 1`
-
-
-
 
 ```{r}
 
@@ -5076,12 +4857,12 @@ ggplot(gdps_tratado ) +
 ```
 
 ## Composição: estática, valores relativos
+
 `r slide_atual = slide_atual + 1`
 
 Aqui cabe uma torta se houver poucas categorias
 
-Para gerar um `r a_r("gráfico de torta")` é preciso gerar um gráfico de barras e tornar a coordenada polar com uso de `r a_r("coord_polar")` 
-
+Para gerar um `r a_r("gráfico de torta")` é preciso gerar um gráfico de barras e tornar a coordenada polar com uso de `r a_r("coord_polar")`
 
 ```{r}
 
@@ -5103,8 +4884,8 @@ ggplot(gdps_tratado, aes(x = "", y = PIB, fill = country)) +
 ```
 
 ## Composição: estática, valores relativos, muitos
-`r slide_atual = slide_atual + 1`
 
+`r slide_atual = slide_atual + 1`
 
 ```{r}
 
@@ -5128,8 +4909,8 @@ ggplot(gdps_tratado, aes( fill = country, area = PIB, label = country)) +
 
 ```
 
-
 ## Gráficos animados
+
 `r slide_atual = slide_atual + 1`
 
 Gráficos animados devem ser usados com moderação.
@@ -5138,9 +4919,7 @@ A `r a_r("gganimate")` ajuda a faxer animações depois que você tiver pensado 
 
 Ela é uma camada adicionada a um gráfico ggplot que define um particionamento do tibble referenciado pelo gráfico de forma a gerar múltiplos frames.
 
-A função `r a_r("transition_time()")` define o campo que particiona o gráfico. 
-
-
+A função `r a_r("transition_time()")` define o campo que particiona o gráfico.
 
 ```{r, eval=FALSE}
 
@@ -5165,11 +4944,10 @@ anim_save(filename = "imagens/animate_1.gif")
 
 ```
 
-
 ![](imagens/animate_1.gif)
 
-
 ## Na onda da bar race
+
 `r slide_atual = slide_atual + 1`
 
 Vocês provavelmente já se depararam com a famigerada ")`bar race`r a_r(".
@@ -5277,37 +5055,23 @@ anim_save(filename = "imagens/bar_race.gif")
 
 ```
 
-
 ![](imagens/bar_race.gif)
 
-
 ## Visualização Geoespacial
+
 `r slide_atual = slide_atual + 1`
 
-
-
-
-
-
-
-
-
 ## Visualização Geoespacial
+
 `r slide_atual = slide_atual + 1`
 
-
-
-
-
-
 ## Visualização Geoespacial
+
 `r slide_atual = slide_atual + 1`
 
 A biblioteca `r a_r("sf")` tem várias funções para lidar com dados geoespaciais.
 
 A função `r a_r("st_read")` lê vários formatos de dados geoespaciais para um objeto da classe `sf`, ou `simple features`.
-
-
 
 ```{r }
 
@@ -5316,8 +5080,8 @@ gd <- read_sf("dados/gd/Geração_Distribuída.shp")
 
 ```
 
-
 ## Classe sf
+
 `r slide_atual = slide_atual + 1`
 
 `r a_r("sf")` é uma classe que extende a classe data.frame contendo uma coluna de dados geoespaciais.
@@ -5331,11 +5095,9 @@ str(gd)
 
 ```
 
-
-
 ## Operações espaciais com sf
-`r slide_atual = slide_atual + 1`
 
+`r slide_atual = slide_atual + 1`
 
 ```{r}
 
@@ -5383,12 +5145,8 @@ enderecos_combinados <- comb_1 %>%
 
 ```
 
-
-
-
-
-
 ## Biblioteca ggmap
+
 `r slide_atual = slide_atual + 1`
 
 A biblioteca `r a_r("ggmap")` deixa que usemos um background em um plot de mapa.
@@ -5413,13 +5171,11 @@ ggmap(map) +
 
 ```
 
-
 ## Plotando objetos no mapa
+
 `r slide_atual = slide_atual + 1`
 
-
 Podemos plotar os objetos como pontos no mapa, por exemplo, usando geom_point()
-
 
 ```{r}
 
@@ -5440,15 +5196,11 @@ ggmap(map) +
 
 ```
 
-
-
-
 ## Plotando a densidade de objetos no mapa
+
 `r slide_atual = slide_atual + 1`
 
-
 Usando `r a_r("stat_density_2d")`, podemos plotar
-
 
 ```{r}
 
@@ -5475,84 +5227,106 @@ ggmap(ggmap = map) +
 
 ```
 
-
-
 # MODELOS DE APRENDIZADO ESTATÍSTICO
+
 `r slide_atual = slide_atual + 1`
 
 ## Rudimentos de Aprendizado Estatístico
+
 `r slide_atual = slide_atual + 1`
 
 Aqui apresentaremos RUDIMENTOS de Aprendizado Estatístico com o objetivo de desmistificar alguns conceitos e apresentar algumas considerações que nos ajudarão a iniciar um processo deste tipo.
 
-
-
 ## Desmistificando Aprendizado Estatístico (ou Machine Learning)
-`r slide_atual = slide_atual + 1`
 
+`r slide_atual = slide_atual + 1`
 
 Pesquisando imagens no Google vemos as percepções a respeito de "Machine Learning" e "Statistical Learning"
 
 ![](diagramas/machine-statistical.png)
 
 ## O processo de "Data Science"
+
 `r slide_atual = slide_atual + 1`
 
 ![](diagramas/cadu.png)
 
 [@cadu]
 
-
 ## Mecânico ou Piloto ?
+
 `r slide_atual = slide_atual + 1`
 
 ![](imagens/mecanico_piloto.png)
 
-
 ## O processo de Aprendizado Estatístico
+
 `r slide_atual = slide_atual + 1`
 
-Temos acesso a um pedaço dos dados existentes, que usamos para nos ajudar a especificar e treinar o nosso modelo.
+Temos acesso a um pedaço dos dados existentes na realidade.
 
-Podemos adotar como premissa que existe uma função que traduz como o universo funciona. Esta função determina qual valor $y$ da variável dependente acontece quando as variáveis independentes assumem valores $x$, onde $x$ é um vetor de tamanho $p$. $p$ é o número de variáveis dependentes usadas. Esta função não determina perfeitamente $y$, então temos sempre um $\epsilon$, um ruído que pode ser devido a variáveis dependentes desconhecidas ou efeitos que não podem ser mensurados.
+É o material que temos para nos ajudar a especificar e treinar o nosso modelo.
+
+Podemos adotar como premissa que existe uma função que traduz como o universo funciona. Esta função determina uma estimativa para o valor $y$ da variável dependente (ou variável de saída) dado que variáveis independentes (ou variáveis de entrada) assumem valores $x$.
+
+$x$ é um vetor de tamanho $p$. $p$ é o número de variáveis dependentes que afetam a saída. Esta função não determina perfeitamente $y$, então temos sempre um $\epsilon$, um ruído que pode ser devido a efeitos que não podem ser mensurados ou não estão disponíveis para uso.
 
 $$y = f(x) + \epsilon$$
 
-Onde: 
+Onde:
 
-$f(x)$ é uma função desconhecida e $E(\epsilon) = 0$, 
+$f(x)$ é uma função desconhecida e $E(\epsilon) = 0$,
 
-$\epsilon$ é independente de $x$ e $Var(\epsilon) = \sigma^2$ é constante em relação a $x$. 
+$\epsilon$ é independente de $x$ e $Var(\epsilon) = \sigma^2$ é constante em relação a $x$.
 
-Nós não temos acesso a esta $f()$ que representa a VERDADE, mas tentamos estimar uma $\hat{f}()$
+Nós não temos acesso a esta $f()$ que representa a VERDADE, mas tentamos estimar uma $\hat{f}()$.
 
+![](diagramas/realidade.png)
 
-![](diagramas/realidade.png)  
+## Modelo de aprendizado estatistico: Fábrica de função que aproxima a realidade
 
-
-## Fábrica de função que aproxima a realidade
 `r slide_atual = slide_atual + 1`
 
 Nosso modelo de Aprendizado Estatístico é uma fábrica de $\hat{f}()$ que tenta aproximar a $f()$ verdadeira.
 
-Existem fábricas para todos os gostos. Desde fábricas que produzem funções simples e inteligíveis até funções do tipo caixa preta. 
+Existem fábricas para todos os gostos. Desde fábricas que produzem funções simples e inteligíveis, que dependem de poucos parâmetros até funções sem uma forma bem conhecida.
 
 Esta fábrica de $\hat{f}()$ recebe como insumo variáveis retiradas do ambiente. Essas variáveis podem ser tratadas de forma a deixar as coisas mais fáceis para o modelo, de modo a deixá-lo na cara do gol como Gérson fazia na copa de 70. Esta etapa de preparar as entradas se chama Feature Engineering. Para fazer isso, usamos tudo que aprendemos sobre manipulação de dados.
 
 ![](diagramas/fabrica_de_f.png)
 
-## Modelo treinado
+
+## Modelos paramétricos e não-paramétricos
+
 `r slide_atual = slide_atual + 1`
 
+Modelos paramétricos têm uma forma funcional pré-definida. Partindo dessa forma funcional, escolhe-se um valor para os parâmetros de forma a minimizar alguma função de penalização dentro do conjunto que está sendo usado para treinamento.
+
+Um exemplo é a regressão linear.
+
+$$income = \beta_0 + \beta_{education} education + \beta_{seniority} seniority $$
+
+Neste exemplo assumimos que a relação entre a entrada e os dados de saída é linear, ou seja, observa-se um aumento constante na variável de saída a cada unidade de aumento da variável de entrada ao longo de todo todo o intervalo da variável de entrada.
+
+Já os modelos não-paramétricos não consideram nenhuma premissa a respeito da função $f()$ a ser estimada.
+
+![](diagramas/parametro_sem_parametro.png)
+
+
+Os modelos não-paramétricos se adaptam muito melhor aos dados. Mas às vezes se adaptam bem DEMAIS...
+
+
+## Modelo treinado
+
+`r slide_atual = slide_atual + 1`
 
 Com o(s) modelo(s) treinado(s), faremos `r a_r("predições")` a respeito de outros dados futuros ou cuja variável dependente ainda desconhecemos.
 
 Podemos também fazer `r a_r("inferências")` a respeito de como as variáveis independentes afetam a variáveis dependente.
 
-
 ## Inferência x Predição
-`r slide_atual = slide_atual + 1`
 
+`r slide_atual = slide_atual + 1`
 
 A **predição** é o ato de descobrir $y$ a partir de $x$.
 
@@ -5561,6 +5335,7 @@ A **inferência** é o entendimento de como valores diferentes de **x** afetam *
 ![](diagramas/predicao_inferencia.png)
 
 ## Predição
+
 `r slide_atual = slide_atual + 1`
 
 Podemos dividir o erro de previsão em redutível e irredutível.
@@ -5581,9 +5356,22 @@ e
 
 $Var(\epsilon)$ é um `r a_r("erro irredutível")`: não importa quão bem estimemos $\hat{f}()$ o resíduo $\epsilon$ está lá
 
+
+
+![](diagramas/erro_redutivel_irredutivel.png)
+
+
 [@friedman2001elements]
 
+
 ## Viés e Variância
+
+`r slide_atual = slide_atual + 1`
+
+
+
+## Viés e Variância
+
 `r slide_atual = slide_atual + 1`
 
 Podemos dividir o erro redutível em viés e variância.
@@ -5592,34 +5380,32 @@ Se rodarmos $\hat{f}(x_0)$ treinando o modelo com vários conjuntos de treinamen
 
 $$E[y_o - \hat{f}(x_0)] = Var(\hat{f}(x_0)) + [Bias(\hat{f}(x_0))]^2 + Var(\epsilon)$$
 
-
 $Var(\hat{f}(x_0)$ é a `r a_r("variância do modelo")`: o quanto ele muda quando treinamos ele com outro conjunto de treinamento
 
 $[Bias(\hat{f}(x_0))]^2$ é o erro introduzido por tentarmos aproximar um problema complexo da vida real com uso de um modelo simplificado, também chamado de `r a_r("viés do modelo")`.
 
-
 ![](diagramas/vies_variancia.png)
 
+## Trade-off interpretabilidade x acurácia e viés x variância
 
-## Trade-off viés x variância
 `r slide_atual = slide_atual + 1`
 
 Os modelos variam muito com relação a "transparência da caixa" e essa relação tem correlação com viés e variância.
 
 Existe um `r a_r("trade-off entre viés e variância")`, que são medidas que a gente não observa diretamente.
 
-Há uma relação inversamente proporcional (grosso modo) entre: 
+Há uma relação inversamente proporcional (grosso modo) entre:
 
-- Flexibilidade do modelo, ou poder de se adaptar a uma relação complexa entre entrada e saída. Modelos com maior flexibilidade tendem a ter viés menor e variância maior.
+-   Flexibilidade do modelo, ou poder de se adaptar a uma relação complexa entre entrada e saída. Modelos com maior flexibilidade tendem a ter viés menor e variância maior.
 
-- Interpretabilidade, ou facilidade de o usuário do modelo (piloto) inferir as relações entre as variáveis independentes e as variáveis dependentes. Modelos mais fáceis de interpretar tendem a ser menos poderosos portanto tem viés maior. Mas também variam menos.
+-   Interpretabilidade, ou facilidade de o usuário do modelo (piloto) inferir as relações entre as variáveis independentes e as variáveis dependentes. Modelos mais fáceis de interpretar tendem a ser menos poderosos portanto tem viés maior. Mas também variam menos.
 
 ![](diagramas/flex_interpret.png)
 
 [@james2013introduction]
 
+#### Viés x variância e Ponto ótimo no aprendizado e overfitting
 
-## Ponto ótimo no aprendizado e overfitting
 `r slide_atual = slide_atual + 1`
 
 Além da falta de interpretabilidade, outra questão pode contar contra os modelos mais complexos, com mais poder de aprender nuances sobre os dados: eles podem aprender características específicas da amostra de treinamento que não podem ser generalizados para o resto dos dados.
@@ -5633,18 +5419,19 @@ Além desse ponto ótimo, onde o erro no conjunto de teste é mínimo, o erro no
 [@friedman2001elements]
 
 ## Treino, Validação e Teste
+
 `r slide_atual = slide_atual + 1`
 
 O procedimento mais usado para preparar um modelo para a vida real envolve dividir a nossa base em três pedaços:
 
-- `r a_r("Dados de treinamento")`: que serão usados para treinar o modelo e não servem para avaliar seu desempenho
+-   `r a_r("Dados de treinamento")`: que serão usados para treinar o modelo e não servem para avaliar seu desempenho
 
-- `r a_r("Dados de validação")`: servem para comparar modelos de forma que nos possibilite escolher UM MODELO COM UMA ESPECIFICAÇÃO DE HIPERPARÂMETROS (número de nós da rede neural, )
+-   `r a_r("Dados de validação")`: servem para comparar modelos de forma que nos possibilite escolher UM modelo com UMA especificação de hiperparâmetros (número de nós da rede neural, sensibilidade da penalização pelo tamanho e número dos coeficientes nas regressões lasso e ridge etc. )
 
-- `r a_r("Dados de teste")`: são separados logo no início do processo, e só são usados numa avaliação final do único modelo escolhido. 
-
+-   `r a_r("Dados de teste")`: são separados logo no início do processo, e só são usados numa avaliação final do ÚNICO modelo escolhido.
 
 ## Model Selection e Model Assesment
+
 `r slide_atual = slide_atual + 1`
 
 `r a_r("Model Selection")`: estimação da performance de vários modelos a fim de escolher o melhor
@@ -5653,11 +5440,11 @@ O procedimento mais usado para preparar um modelo para a vida real envolve divid
 
 ![](imagens/model_selection_assesment.png)
 
-
 ## K-Fold Cross validation
+
 `r slide_atual = slide_atual + 1`
 
-Uma forma de usar todos os dados (EXCETO OS DADOS DE TESTE) tanto para treinar quando para validar é revezando que partes dos dados estão sendo usados para treinamento e para validação. 
+Uma forma de usar todos os dados (EXCETO OS DADOS DE TESTE) tanto para treinar quando para validar é revezando que partes dos dados estão sendo usados para treinamento e para validação.
 
 Este esquema é chamado de `r a_r("k-fold cross validation")`
 
@@ -5665,18 +5452,15 @@ Podemos dividir os dados em $k$ partes. Cada vez uma parte é escolhida para ser
 
 ![](imagens/k-fold-cross.png)
 
-
 [@datarobot]
 
-
 ## Execução de modelos com broom - explorando os dados
+
 `r slide_atual = slide_atual + 1`
 
 Primeiro podemos fazer nossa exploração preliminar.
 
 Como exemplo, podemos executar um pequeno tratamento das features usando a função `pivot_longer()` de um jeito diferente, só possível na última versão da biblioteca `tidyr`.
-
-
 
 ```{r, message=FALSE, warning=FALSE, cache=TRUE }
 
@@ -5747,13 +5531,12 @@ ufc_aprend <- bind_cols(ufc_data, ufc_raw_data) %>%
 ```
 
 ## Estudando algumas features para nosso exemplo
-`r slide_atual = slide_atual + 1`
 
+`r slide_atual = slide_atual + 1`
 
 Como exemplo, podemos observar a relação entre a diferença de idade dos lutadores e o vencedor da luta.
 
 Normalmente o lutador vermelho é o favorito. mas podemos ver que quando o lutador vermelho é velho e mais velho que o azul, ele costuma perder.
-
 
 ```{r, message=FALSE, warning=FALSE, cache=TRUE}
 
@@ -5767,16 +5550,14 @@ ggplot(ufc_aprend ) +
 ```
 
 ## Estudando algumas features para nossso exemplo
-`r slide_atual = slide_atual + 1`
 
+`r slide_atual = slide_atual + 1`
 
 Podemos tentar uma `r a_r("regressão linear")` para avaliar isso:
 
 $$ zebra = \alpha + \beta_{idade} idade\_vermelho + \beta_{dif} dif\_vermelho\_mais\_velho + \epsilon   $$
 
 Podemos perceber que os betas são significativos.
-
-
 
 ```{r, message=FALSE, warning=FALSE, cache=TRUE}
 
@@ -5789,14 +5570,11 @@ summary(modelo_lm)
 
 ```
 
-
 ## Facilitando a análise de um modelo com `broom`
+
 `r slide_atual = slide_atual + 1`
 
-
 A biblioteca `r a_r("broom")` ajuda a extrair informações de vários tipos de modelo com as mesmas funções.
-
-
 
 ```{r, message=FALSE, warning=FALSE, cache=TRUE}
 modelo_tidy <- tidy(modelo_lm)
@@ -5805,7 +5583,6 @@ modelo_aumentado <- augment(modelo_lm)
 
 ```
 
-
 ```{r}
 
 modelo_tidy
@@ -5813,21 +5590,19 @@ modelo_tidy
 
 ```
 
-
 ```{r, message=FALSE, warning=FALSE, cache=TRUE}
 
 head(modelo_aumentado)
 
 ```
 
-
 ## Matriz de confusão com a `caret`
+
 `r slide_atual = slide_atual + 1`
 
 A biblioteca `caret` também ajuda muito.
 
 A função `r a_r("confusionMatrix")` monta uma matriz de confusão, que mostra estão acontecendo os falsos positivos, falsos negativos, verdadeiros positivos e verdadeiros negativos.
-
 
 ```{r, message=FALSE, warning=FALSE, cache=TRUE}
 
@@ -5843,10 +5618,10 @@ confusionMatrix(modelo_aumentado_factor$previsao_zebra_blue, modelo_aumentado_fa
 ```
 
 ## Rodando o modelo e plotando um grid de predições usando a biblioteca `purr`
+
 `r slide_atual = slide_atual + 1`
 
 Preparando um grid das variáveis independentes
-
 
 ```{r, message=FALSE, warning=FALSE, cache=TRUE,  out.width="90%"}
 red_mais_velho <-  seq(
@@ -5883,6 +5658,7 @@ ggplot(grid_previsao %>% filter(weight_class == "Heavyweight")) +
 ```
 
 ## Rodando o modelo e plotando um grid de predições usando a biblioteca `purr`
+
 `r slide_atual = slide_atual + 1`
 
 Rodando o modelo com o grid
@@ -5918,15 +5694,14 @@ ggplot(ufc_aprend ) +
 ```
 
 ## Rodando várias especificações de uma vez com `purrr`
-`r slide_atual = slide_atual + 1`
 
+`r slide_atual = slide_atual + 1`
 
 Podemos treinar o modelo para cada classe usando `r a_r("group_by + nest() + map()")`.
 
 Estes comandos criam um tibble com uma coluna de tibbles aninhados já separados por classe de peso. A função `map()` pode, então rodar o modelo para cada classe.
 
-
-```{r varias_espec_purr, message=FALSE, warning=FALSE, cache=TRUE, out.width="90%"}  
+```{r varias_espec_purr, message=FALSE, warning=FALSE, cache=TRUE, out.width="90%"}
 
 
 
@@ -5960,9 +5735,8 @@ confusionMatrix(ufc_por_classe_treinamento$previsao_zebra_blue, ufc_por_classe_t
 ```
 
 ## Plotando as várias especificações de regressões lineares
+
 `r slide_atual = slide_atual + 1`
-
-
 
 ```{r, message=FALSE, warning=FALSE, cache=TRUE, out.width="90%"}
 
@@ -6001,8 +5775,8 @@ ggplot(ufc_aprend ) +
 ```
 
 ## Separando dados de treinamento e validação
-`r slide_atual = slide_atual + 1`
 
+`r slide_atual = slide_atual + 1`
 
 ```{r, message=FALSE, warning=FALSE, cache=TRUE, out.width="90%"}
 
@@ -6094,10 +5868,9 @@ confusionMatrix(resultados_teste_lm$predicted, resultados_teste_lm$actual  )
 
 ```
 
+## Rodando um modelo mais complexo: Generalized Additive Model
 
-## Rodando um modelo mais complexo: Generalized Additive Model 
 `r slide_atual = slide_atual + 1`
-
 
 ```{r, message=FALSE, warning=FALSE, cache=TRUE}
 
@@ -6148,20 +5921,15 @@ confusionMatrix(resultados_teste_gam$predicted, resultados_teste_gam$actual  )
 
 ```
 
-Plotando as regiões deste modelo mais complexo
-`r slide_atual = slide_atual + 1`
+Plotando as regiões deste modelo mais complexo `r slide_atual = slide_atual + 1`
 
-
-É possível observar que este modelo se adapta com muito mais potência às especificidades dos dados. Ou seja, consegue um viés baixo no conjunto de treinamento. 
+É possível observar que este modelo se adapta com muito mais potência às especificidades dos dados. Ou seja, consegue um viés baixo no conjunto de treinamento.
 
 Ele se adapta tão bem ao conjunto que se apresentarmos um conjunto um pouco diferente, a $\hat{f}()$ será diferente certamente.
 
 O modelo parece se adaptar demais aos dados, gerando `overfitting`. Será que ele é melhor do que um modelo simples?
 
 Precisamos de um mecanismo para avaliar o poder de generalização do modelo.
-
-
-
 
 ```{r, message=FALSE, warning=FALSE, cache=TRUE}
 
@@ -6204,11 +5972,9 @@ ggplot( bind_rows(ufc_aprend_classes_selec) ) +
 
 ```
 
-
 ## Execução de modelos com caret
+
 `r slide_atual = slide_atual + 1`
-
-
 
 Vamos mostrar a biblioteca `r a_r("caret")`, que facilita o processo de aprendizado de vários modelos com várias especificações de hiperparâmetros, executando o processo de cross-validation.
 
@@ -6254,8 +6020,8 @@ teste <- dados[(split + 1):nrow(dados), ]
 ```
 
 ## Preparando 4-fold cross validation
-`r slide_atual = slide_atual + 1`
 
+`r slide_atual = slide_atual + 1`
 
 A função `r a_r("trainControl()")` estabelece os conjuntos para cross validation.
 
@@ -6285,17 +6051,15 @@ controle_cv <- trainControl(
 
 ```
 
+## Treinando um modelo de classificação. Exemplo: Regressão logística
 
-## Treinando um modelo de classificação. Exemplo: Regressão logística 
 `r slide_atual = slide_atual + 1`
 
-A função `r a_r("train()")` permite o estabelecimento de uma métrica para a escolha do melhor valor para os hiperparâmetros (no caso, não existem), e execuções de funções de pré-processamento. 
+A função `r a_r("train()")` permite o estabelecimento de uma métrica para a escolha do melhor valor para os hiperparâmetros (no caso, não existem), e execuções de funções de pré-processamento.
 
 A função retorna um objeto com todas as informações relativas ao treinamento e a melhor especificação do modelo treinada com todos os dados passados.
 
 A saída padrão impressa em problemas de classificação mostra o resultado do melhor modelo nos seus dados de validação dele.
-
-
 
 ```{r, message=FALSE, warning=FALSE, cache=TRUE  }
 
@@ -6318,6 +6082,7 @@ model_logistic
 ```
 
 ## Avaliando a curva ROC
+
 `r slide_atual = slide_atual + 1`
 
 A curva `r a_r("ROC")` (Receiver Operating Characteristics) foi inventada na época da Segunda Guerra Mundial para avaliar se os operadores de radar americanos estavam detectando confiavelmente aeronaves japonesas a partir de sinais de radar.
@@ -6325,9 +6090,6 @@ A curva `r a_r("ROC")` (Receiver Operating Characteristics) foi inventada na ép
 A curva mostra, para vários thresholds, qual a fração de verdadeiros positivos (ou sensibilidade) e a fração de falsos positivos (fall-out, ou $1 - especificidade$ ).
 
 Uma métrica numérica que traduz o quão bom um modelo de classificação é consiste na área embaixo desta curva (`r a_r("AUC, Area Under the Curve)")`. Note que quanto mais perto de um essa área, menor a taxa de falsos positivos e maior a sensibilidade
-
-
-
 
 ```{r, cache = TRUE, message=FALSE, warning=FALSE }
 ggplot(model_logistic$pred, aes(m = M, d = obs, color = Resample )) +
@@ -6340,12 +6102,11 @@ ggplot(model_logistic$pred, aes(m = M, d = obs, color = Resample )) +
 
 ```
 
-
 ## Desempenho dos diversos modelos
+
 `r slide_atual = slide_atual + 1`
 
 Podemos avaliar a ROC de cada treinamento feito.
-
 
 ```{r, cache = TRUE }
 
@@ -6365,8 +6126,8 @@ result_model_logistic %>%
 ```
 
 ## Desempenho e estimativa da variância do modelo
-`r slide_atual = slide_atual + 1`
 
+`r slide_atual = slide_atual + 1`
 
 ```{r , cache = TRUE }
 
@@ -6380,8 +6141,8 @@ result_model_logistic %>%
 ```
 
 ## Gerando um latex bonitinho do modelo
-`r slide_atual = slide_atual + 1`
 
+`r slide_atual = slide_atual + 1`
 
 ```{r, message=FALSE, warning=FALSE, cache=TRUE}
 
@@ -6391,15 +6152,15 @@ texreg(model_logistic$finalModel, custom.model.names = c("Regressão logística 
 
 ```
 
-
 ## Treinando outro modelo: lasso-ridge
+
 `r slide_atual = slide_atual + 1`
 
-Uma outra forma de evitar que muitas variáveis sejam usadas no modelo é aplicar uma penalidade diminuir a variância do modelo. É isso que as regressões do tipo `r a_r("Ridge")` e `r a_r("Lasso")` fazem. 
+Uma outra forma de evitar que muitas variáveis sejam usadas no modelo é aplicar uma penalidade diminuir a variância do modelo. É isso que as regressões do tipo `r a_r("Ridge")` e `r a_r("Lasso")` fazem.
 
 O modelo mostrado nessa seção é rodado com várias parametrizações. Este modelo, chamado `r a_r("Elastic Net")`, conjuga a penalização do tipo Ridge com a penalização do tipo Lasso modificando a função de penalização da regressão, que originalmente é o erro quadrático:
 
-$$RSS = \sum_{i = 1}^{n} ( y_i - \beta_0 - \sum_{j=1}^{p}\beta_j x_{ij})^2  $$ 
+$$RSS = \sum_{i = 1}^{n} ( y_i - \beta_0 - \sum_{j=1}^{p}\beta_j x_{ij})^2  $$
 
 Para a regressão Ridge, os coeficientes são penalizados de forma quadrática. Isso diminui a variância do modelo mas não diminui tanto a diminuição do número de coeficientes diferentes de 0:
 
@@ -6407,19 +6168,17 @@ $$Loss_{Ridge} = RSS + \lambda \sum_{j=1}^{p}\beta_j^2 $$
 
 Para a regressão Lasso, os coeficientes são penalizados pelo seu valor absoluto. Isso diminui a variância do modelo E diminui o número de coeficientes diferentes de 0, favorecendo a interpretabilidade
 
-
 $$Loss_{Lasso} = RSS + \lambda \sum_{j=1}^{p} \left| \beta_j \right| $$
 
 ## Conjugando Lasso e Ridge e avaliando o modelo
-`r slide_atual = slide_atual + 1`
 
+`r slide_atual = slide_atual + 1`
 
 Cada conjunto de `r a_r("hiperparâmetros")` do modelo Elastic Net rodado nesta possui dois valores. Um dos valores, $\alpha$ define que peso deve ser dado a cada tipo de penalização Ridge ou Lasso, onde $\alpha = 0$ é Ridge puro e $\alpha = 1$ é Lasso puro. O outro parâmetro, $\lambda$, regula a intensidade da penalização.
 
-Os resultados para várias parametrizações é mostrado abaixo. 
+Os resultados para várias parametrizações é mostrado abaixo.
 
 Veja como podemos passar um grid de hiperparâmetros e avaliar esses resultados.
-
 
 ```{r, cache=TRUE}
 
@@ -6449,9 +6208,7 @@ plot(model_net)
 
 ```
 
-
 Os resultados de cada parametrização são mostrados em ordem decrescente de AUC.
-
 
 ```{r}
 
@@ -6467,8 +6224,8 @@ head(resultados_net, 20)
 
 ```
 
-
 ## Pré-processando com Principal Component Analysis
+
 `r slide_atual = slide_atual + 1`
 
 Uma outra forma de reduzir a dimensionalidade do probelam é usar o método `r a_r("PCA (Principal Component Analysis)")` para transformar as variáveis em componentes principais em menor número mas com boa parte da informação original.
@@ -6505,7 +6262,6 @@ plot(model_net_pca)
 
 ```
 
-
 ```{r, cache=TRUE}
 
 resultados_net_pca <- model_net_pca$resample %>% 
@@ -6518,15 +6274,13 @@ resultados_net_pca
 
 ```
 
-
 ## Árvore de decisão
+
 `r slide_atual = slide_atual + 1`
 
 A `r a_r("árvore de decisão")` particiona o espaço formado pelas variáveis explicativas em subespaços baseando-se na "pureza" desses subespaços com relação à variável dependente.
 
 ![](imagens/decisiontree.png)
-
-
 
 ```{r, cache = TRUE }
 
@@ -6557,20 +6311,19 @@ resultados_tree
 
 ```
 
-
 ## Random Forests
+
 `r slide_atual = slide_atual + 1`
 
-
-A forma como a árvore de decisão é criada faz com que ela tenha muita variância. 
+A forma como a árvore de decisão é criada faz com que ela tenha muita variância.
 
 Cada decisão de particionamento é tomada a partir de características que podem ser muito específicas aos dados de treinamento.
 
-Uma ideia usada nas `r a_r("Random Forests")` é criar conjuntos de treinamento criados a partir do conjunto original, mas retirando amostras de mesmo tamanho COM REPOSIÇÃO. Além disso, cada vez que a árvore é particionada, a partição só pdoe acontecer em $m$ das variáveis explicativas. 
+Uma ideia usada nas `r a_r("Random Forests")` é criar conjuntos de treinamento criados a partir do conjunto original, mas retirando amostras de mesmo tamanho COM REPOSIÇÃO. Além disso, cada vez que a árvore é particionada, a partição só pdoe acontecer em $m$ das variáveis explicativas.
 
 O resultado final é uma média do resultado dessas várias árvores
 
-Estas duas mudanças fazem com que o modelo tenha uma variância muito menor do que as árvore de decisão simples    
+Estas duas mudanças fazem com que o modelo tenha uma variância muito menor do que as árvore de decisão simples
 
 ```{r, cache=TRUE}
 
@@ -6605,12 +6358,11 @@ resultados_ranger
 
 ```
 
-
 ## Montando um modelo ensemble
+
 `r slide_atual = slide_atual + 1`
 
 Podemos montar um modelo `r a_r("ensemble")`, onde cada modelo original vota e a escolha final recai sobre a classificação que receber mais votos
-
 
 ```{r, message=FALSE, warning=FALSE }
 
@@ -6661,18 +6413,17 @@ resultado_ensemble_pra_mostrar
 
 ```
 
+## Uma forma de avaliar o impacto das variáveis
 
-
-## Uma forma de avaliar o impacto das variáveis  
 `r slide_atual = slide_atual + 1`
 
 É possível propor uma forma de avaliação do impacto das variáveis indireta e agnóstica ao modelo, ou seja, que pode ser usada da mesma forma para qualquer modelo e .
 
 Para avaliar o impacto de cada variável nos resultados de cada um dos 5 modelos, podemos gerar casos sintéticos e avaliar a probabilidade de esses casos serem malignos segundo cada modelo.
 
-Dois grupos de casos sintéticos foram gerados. 
+Dois grupos de casos sintéticos foram gerados.
 
-No primeiro grupo, para cada variável explicativa $x_i$, foram criados casos onde o valor de $x_i$ varia em relação a seus quantis, enquanto as outras permanecem parada no valor das suas medianas. 
+No primeiro grupo, para cada variável explicativa $x_i$, foram criados casos onde o valor de $x_i$ varia em relação a seus quantis, enquanto as outras permanecem parada no valor das suas medianas.
 
 No segundo grupo, para avaliar uma região onde os casos têm mais chance de ser malignos, as variáveis que não estão sendo avaliadas a cada gráfico são mantidas no quantil 0,65.
 
@@ -6761,8 +6512,7 @@ prev %>%
 
 ```
 
-
-````{r, cache = TRUE, out.width="90%"}
+```{r, cache = TRUE, out.width="90%"}
 
 
 
@@ -6818,12 +6568,9 @@ prev %>%
 
 ```
 
-
-
 ## Modelos escolhidos e seus thresholds: Model Selection
+
 `r slide_atual = slide_atual + 1`
-
-
 
 ```{r, warning=FALSE, message=FALSE }
 
@@ -6954,11 +6701,9 @@ plota_roc_ensemble()
 
 ```
 
-
 ## Avaliação nos dados de teste: Model Assessment
+
 `r slide_atual = slide_atual + 1`
-
-
 
 ```{r}
 
@@ -6998,7 +6743,6 @@ gera_dados_confusao_teste <- function(modelo, threshold)
 
 ```
 
-
 ```{r}
 
 confusao_logistic <-  confusao_teste(model_logistic, 1e-8)
@@ -7007,9 +6751,6 @@ confusao_logistic
 
 
 ```
-
-
-
 
 ```{r}
 
@@ -7020,9 +6761,6 @@ confusao_net_pca
 
 ```
 
-
-
-
 ```{r}
 
 
@@ -7032,7 +6770,6 @@ confusao_ranger
 
 
 ```
-
 
 ```{r}
 
@@ -7060,8 +6797,6 @@ confusao_ensemble
 
 
 ```
-
-
 
 ```{r}
 
@@ -7094,12 +6829,9 @@ pred_errados_teste
 
 ```
 
-
 ## Avaliando regiões de fraqueza do modelo
+
 `r slide_atual = slide_atual + 1`
-
-
-
 
 ```{r, out.width="90%"}
 
@@ -7142,36 +6874,33 @@ ggplot() +
 
 ```
 
-
 # COMUNICANDO OS RESULTADOS
+
 `r slide_atual = slide_atual + 1`
 
 ## Criando visualizações interativas com Shiny
+
 `r slide_atual = slide_atual + 1`
 
 `r a_r("Shiny")` é um pacote R que permite a criação de `r a_r("aplicações WEB interativas")` que ativam código em R, com as possibilidades de formatação de tabelas, geração de gráficos, execução de modelos etc que as bibliotecas do R disponibilizam.
 
+## Uma aplicação Shiny mínima
 
-## Uma aplicação Shiny mínima 
 `r slide_atual = slide_atual + 1`
-
 
 Os códigos desta seção que fala do Shiny não são executados diretamente, apenas são mostrados.
 
 Uma aplicação Shiny mínima tem 4 itens:
 
-- Carregamento da biblioteca `shiny`
+-   Carregamento da biblioteca `shiny`
 
-- Definição da interface do usuário, ou seja, a página HTML com a qual o usuário vai interagir. Essa interface é definida com o uso da função `r a_r("fluidPage()")`
+-   Definição da interface do usuário, ou seja, a página HTML com a qual o usuário vai interagir. Essa interface é definida com o uso da função `r a_r("fluidPage()")`
 
-- Definição do comportamento da aplicação com a função `server()`
+-   Definição do comportamento da aplicação com a função `server()`
 
-- Execução da função `shinyApp(ui, server)` para construir e iniciar uma aplicação.
+-   Execução da função `shinyApp(ui, server)` para construir e iniciar uma aplicação.
 
-
-
-
-````{r, eval=FALSE}
+```{r, eval=FALSE}
 
 library(shiny)
 ui <- fluidPage(
@@ -7183,10 +6912,9 @@ shinyApp(ui, server)
 
 ```
 
-
 ## Uma aplicação simples funcional
-`r slide_atual = slide_atual + 1`
 
+`r slide_atual = slide_atual + 1`
 
 Abaixo uma aplicação Shiny simples
 
@@ -7203,7 +6931,6 @@ Repare que há duas tabelas, cada uma gerada com uma biblioteca diferente.
 A biblioteca `r a_r("reactable")` permite que tenhamos mais controle sobre a estética
 
 A biblioteca `r a_r("rhandontable")` parece mais com uma tabela de Excel, permitindo inclusive copiar e colar os números.
-
 
 ```{r, eval=FALSE}
 
@@ -7300,9 +7027,8 @@ shinyApp(ui, server)
 
 ```
 
+## Programação reativa
 
-
-## Programação reativa  
 `r slide_atual = slide_atual + 1`
 
 Diferentemente da programação feita em scripts, a execução no Shiny não segue a ordem dos comandos. É o conceito da `r a_r("programação reativa")`
@@ -7314,6 +7040,7 @@ No caso do nosso aplicativo simples, apenas quando o input "pais" é alterado, a
 ![](diagramas/reactive_1.png)
 
 ## Produtores e consumidores
+
 `r slide_atual = slide_atual + 1`
 
 Temos 2 papéis para os objetos: produtores e consumidores
@@ -7324,12 +7051,11 @@ Vamos começar a ver agora objetos que funcionam tanto como produtores como cons
 
 As `r a_r("reactive expressions do shiny")` são objetos que assumem os dois papéis.
 
-Elas possibilitam que cálculos e tratamentos que são comuns a várias saídas sejam executados apenas uma vez. 
-
+Elas possibilitam que cálculos e tratamentos que são comuns a várias saídas sejam executados apenas uma vez.
 
 ## Usando reactive para evitar duplicação
-`r slide_atual = slide_atual + 1`
 
+`r slide_atual = slide_atual + 1`
 
 Na aplicação que desenhamos anteriormente, o select de país filtra da mesma forma os dados que são mostrados no gráfico e nas tabelas.
 
@@ -7337,13 +7063,11 @@ Podemos inserir um reactive que vai realizar esse tratamento que é comum a toda
 
 Assim evitamos mais facilmente, também, duplicar código.
 
-
 ![](diagramas/reactive_2.png)
 
-
 ## Reactive expressions
-`r slide_atual = slide_atual + 1`
 
+`r slide_atual = slide_atual + 1`
 
 Esta é a sintaxe das `r a_r("reactive expressions")`.
 
@@ -7451,19 +7175,13 @@ shinyApp(ui, server)
 
 ```
 
-
-
-
 ## Dashboard exemplo
-`r slide_atual = slide_atual + 1`
 
+`r slide_atual = slide_atual + 1`
 
 Este dashboard de exemplo tem algumas funcionalidades interessantes que vamos explorar nos próximos slides
 
-
 [Dashboard GD]((https://https://crotman.shinyapps.io/DashboardGD/))
-
-
 
 ```{r, eval=FALSE}
  
@@ -7857,8 +7575,8 @@ shinyApp(ui, server)
 
 ```
 
-
 ## Mapa interativo
+
 `r slide_atual = slide_atual + 1`
 
 O usuário pode selecionar áreas do mapa.
@@ -7870,6 +7588,7 @@ Essa opção é habilitada com `r a_r("brushOpts")` e os pontos selecionados sã
 Este tipo de interação pode ser usado com qualquer tipo de gráfico
 
 ## Spinner de espera
+
 `r slide_atual = slide_atual + 1`
 
 Esta aplicação lida com mais de 100.000 dados a respeito de instalações de geração distribuída.
@@ -7878,8 +7597,8 @@ Portanto, o gráfico demora um pouco para ser plotado.
 
 Para que o usuário saiba que a aplicação está calculando alguma coisa e não travada, usamos um `r a_r("waiter")`
 
-
 ## Uso de váriáveis globais de estado
+
 `r slide_atual = slide_atual + 1`
 
 Algumas variáveis de estado são criadas para ajudar a controlar a aplicação.
@@ -7895,47 +7614,44 @@ Em aplicações Shiny exploratórias, é comum que os campos que participam dos 
 Para que as funções do tidyverse usem o conteúdo da variável como o campo a ser considerado (e não o próprio nome da variável), temos que lançar mão das funções `group_by_at`, `summarise_at`, `.data[[variável]]` e o operador `!!`.
 
 ## Diagramação da página
+
 `r slide_atual = slide_atual + 1`
 
-A diagramação da página é toda feita com as funções de diagramação do Shiny. 
+A diagramação da página é toda feita com as funções de diagramação do Shiny.
 
 Entretanto, cada objeto é definido anteriormente, o que é diferente do template que é gerado pelo RStudio quando um template Shiny é gerado.
 
 Isso parece besteira, mas separar a criação dos objetos da diagramação destes objetos facilita muito uma reorganizaçào da diagramação e causa menos problemas relacionados a erros de sintaxe como falta de vírgulas e parênteses
 
 ## Criando relatórios com R Markdown
+
 `r slide_atual = slide_atual + 1`
 
 ## Livros
+
 `r slide_atual = slide_atual + 1`
 
 [Referência Bookdown](https://bookdown.org/yihui/bookdown/html.html)
 
-
 # SÉRIES TEMPORAIS
+
 `r slide_atual = slide_atual + 1`
 
 ## tidyverts
-`r slide_atual = slide_atual + 1`
 
+`r slide_atual = slide_atual + 1`
 
 Os pacotes integrantes do conjunto tidyverts tratam as séries temporais do jeito tidy
 
-
-<table style = "width:90%">
-<tr>
-<td>-Funções básicas para o tsibble (tibble temporal)![tsibble](imagens/tsibble.png)</td>
-<td>-Funções pra extrações de features e estatísticas![feasts](imagens/feasts.png)</td>
-<td>-Funções para projeção![fable](imagens/fable.png)</td>
-</table>
-
++----------------------------------------------------------------------------------+--------------------------------------------------------------------------------+---------------------------------------------------+
+| -Funções básicas para o tsibble (tibble temporal)![tsibble](imagens/tsibble.png) | -Funções pra extrações de features e estatísticas![feasts](imagens/feasts.png) | -Funções para projeção![fable](imagens/fable.png) |
++----------------------------------------------------------------------------------+--------------------------------------------------------------------------------+---------------------------------------------------+
 
 ## tsibbles
+
 `r slide_atual = slide_atual + 1`
 
-
 ")`tsibble`r a_r(" é uma classe derivada da tibbl que tem funcionalidades para séries temporais
-
 
 ```{r}
 
@@ -7945,11 +7661,9 @@ ipca <- BETS::BETSget(433)
 
 ```
 
-
 A função ")`as_tsibble()`r a_r(" cria um tibble a partir de vários tipos de objetos que armazenam séries temporais
 
 O tsibble representa bem séries temporais regulares e reconhece o intervalo entre os valores
-
 
 ```{r}
 
@@ -7961,14 +7675,11 @@ print(tsbl_ipca)
 
 ```
 
-
 ## tsibbles com várias séries a partir de um tibble
 
 No código abaixo calculamos o número de instalações de Geração Distribuída por UF as partir dos dados a respeito das instalações.
 
-Repare que a função ")`yearmonth()### cria uma data mensal que é específica para períodos de um mês
-
-
+Repare que a função ")\`yearmonth()\#\#\# cria uma data mensal que é específica para períodos de um mês
 
 ```{r}
 dados_gd <- read_rds("dados/gd/gd.rds")
@@ -7994,9 +7705,7 @@ dados_gd_cum <- dados_gd %>%
 
 ```
 
-
 A função as_tibble aceita um campo como referência da data, via parâmetro `index`, e um campo como chave de cada série contida no tibble: `key`
-
 
 ```{r}
 
@@ -8008,16 +7717,11 @@ dados_gd_tsbl
 
 ```
 
-
 ## Mudando a periodicidade
 
-
-Podemos mudar a periodicidade da série indexando por uma transformação do índice atual, usando ")`group_by_key`r a_r(" e  ")`index_by`r a_r(".
+Podemos mudar a periodicidade da série indexando por uma transformação do índice atual, usando ")`group_by_key`r a_r(" e ")`index_by`r a_r(".
 
 No caso, queremos as informações no final do ano, portanto vamos usar ")`last()`r a_r(".
-
-
-
 
 ```{r}
 
@@ -8045,13 +7749,9 @@ gd_trimestre
 
 ```
 
-
 ## Plotando uma série
 
-
-A função ")`autoplot()### cuida das principais tarefas para plotar uma série
-
-
+A função ")\`autoplot()\#\#\# cuida das principais tarefas para plotar uma série
 
 ```{r}
 
@@ -8076,11 +7776,9 @@ A função ")`autoplot()### cuida das principais tarefas para plotar uma série
 
 ```
 
-
 ## Plot sazonal
 
 A função ")`gg_season")` ajuda a fazer um gráfico mostrando os períodos sazonais para comparação
-
 
 ```{r}
 
@@ -8110,11 +7808,6 @@ A função ")`gg_season")` ajuda a fazer um gráfico mostrando os períodos sazo
 
 ```
 
-
-
-
-
-
 ```{r}
 
 
@@ -8141,8 +7834,6 @@ A função ")`gg_season")` ajuda a fazer um gráfico mostrando os períodos sazo
 
 ```
 
-
-
 ```{r}
 
 
@@ -8156,28 +7847,19 @@ A função ")`gg_season")` ajuda a fazer um gráfico mostrando os períodos sazo
 
 ```
 
-
-
-
-
-
 # DESENVOLVIMENTO DE PACOTES
-
 
 `r slide_atual = slide_atual + 1`
 
-
 ## Filosofia
+
 `r slide_atual = slide_atual + 1`
 
 Tudo que pode ser automatizado deve ser automatizado *devtools*
 
+## Preparando o ambiente
 
-
-
-## Preparando o ambiente 
 `r slide_atual = slide_atual + 1`
-
 
 Pacotes a instalar para começar:
 
@@ -8189,7 +7871,6 @@ install.packages(c("devtools", "roxygen2", "testthat", "knitr"))
 
 Para checar se o ambiente está preparado para criar pacotes:
 
-
 ```{r, eval = FALSE }
 
 devtools::has_devel()
@@ -8197,28 +7878,27 @@ devtools::has_devel()
 
 ```
 
-
 ## Criando a estrutura
+
 `r slide_atual = slide_atual + 1`
 
+New Project -\> New Directory -\> R Package
 
-New Project -> New Directory -> R Package
-
-The main difference between library() and require() is what happens if a package isn’t found. While library() throws an error, require() prints a warning message and returns FALSE. In practice, this distinction isn’t important because when building a package you should NEVER use either inside a package. See package dependencies for what you should do instead.
- 
+The main difference between library() and require() is what happens if a package isn't found. While library() throws an error, require() prints a warning message and returns FALSE. In practice, this distinction isn't important because when building a package you should NEVER use either inside a package. See package dependencies for what you should do instead.
 
 # Apêndices
+
 `r slide_atual = slide_atual + 1`
 
 ## Índice remissivo
+
 `r slide_atual = slide_atual + 1`
 
 `r escreve_remissivo()`
 
 ## Bibliografia
+
 `r slide_atual = slide_atual + 1`
-
-
 
 ```{r, echo=FALSE }
 
@@ -8274,7 +7954,3 @@ The main difference between library() and require() is what happens if a package
 
 
 ```
-
-
-
-
