@@ -17,7 +17,9 @@ bibliography: bibliography.bib
 
 library(tidymodels)
 library(tidyverse)
-
+library(skimr)
+library(dotwhisker)
+library(ggforce)
 
 ```
 
@@ -178,6 +180,7 @@ glimpse(dados_speed_date)
 
 `r slide_atual = slide_atual + 1`
 
+Algumas colunas devem ser reniomeadas de forma para nomes mais inteligíveis 
 
 
 ```{r}
@@ -249,8 +252,1092 @@ glimpse(dados_speed_date_renomeado)
 
 ```
 
+## Renomeando conjuntos misteriosos em lote
+
+`r slide_atual = slide_atual + 1`
+
+
+Ainda há colunas com sufixos misteriosos, como 1_1
+
+
+```{r, cache=TRUE}
+
+adjust_column_feature <- function(x, suffix, meaning ){
+      
+
+      suffix_removed <- str_remove(string = x, pattern = suffix)
+      
+      type <-  case_when(
+        suffix_removed == "attr" ~ "attractive",
+        suffix_removed == "sinc" ~ "sincere",
+        suffix_removed == "intel" ~ "intelligent",
+        suffix_removed == "fun" ~ "fun",
+        suffix_removed == "amb" ~ "ambitious",
+        suffix_removed == "shar" ~ "shared_interests"
+      ) 
+
+      str_glue("{meaning}_{type}")
+      
+}
+
+
+
+
+dados_speed_date_rename_with <- dados_speed_date_renomeado %>% 
+  rename_with(
+    .cols = matches("^(?:attr|sinc|intel|fun|amb|shar)4_1"),
+    .fn = ~adjust_column_feature(x = .x, suffix = "4_1", meaning = "competitors_look_for_")
+  ) %>%
+  rename_with(
+    .cols = matches("^(?:attr|sinc|intel|fun|amb|shar)4_2"),
+    .fn = ~adjust_column_feature(x = .x, suffix = "4_2", meaning = "competitors_look_for_follow_up_")
+  ) %>%
+  rename_with(
+    .cols = matches("^(?:attr|sinc|intel|fun|amb|shar)4_3"),
+    .fn = ~adjust_column_feature(x = .x, suffix = "4_3", meaning = "competitors_look_for_follow_up_weeks_")
+  ) %>%
+  rename_with(
+    .cols = matches("^(?:attr|sinc|intel|fun|amb|shar)1_1"),
+    .fn = ~adjust_column_feature(x = .x, suffix = "1_1", meaning = "you_look_for_")
+  ) %>%
+  rename_with(
+    .cols = matches("^(?:attr|sinc|intel|fun|amb|shar)1_s"),
+    .fn = ~adjust_column_feature(x = .x, suffix = "1_s", meaning = "you_look_for_half_way_")
+  ) %>%
+  rename_with(
+    .cols = matches("^(?:attr|sinc|intel|fun|amb|shar)1_2"),
+    .fn = ~adjust_column_feature(x = .x, suffix = "1_2", meaning = "you_look_for_follow_up_")
+  ) %>%
+  rename_with(
+    .cols = matches("^(?:attr|sinc|intel|fun|amb|shar)1_3"),
+    .fn = ~adjust_column_feature(x = .x, suffix = "1_3", meaning = "you_look_for_follow_up_weeks_")
+  ) %>%
+  rename_with(
+    .cols = matches("^(?:attr|sinc|intel|fun|amb|shar)2_1"),
+    .fn = ~adjust_column_feature(x = .x, suffix = "2_1", meaning = "you_think_opposite_sex_look_for_")
+  ) %>%
+  rename_with(
+    .cols = matches("^(?:attr|sinc|intel|fun|amb|shar)2_2"),
+    .fn = ~adjust_column_feature(x = .x, suffix = "2_2", meaning = "you_think_opposite_sex_look_for_follow_up_")
+  ) %>%
+  rename_with(
+    .cols = matches("^(?:attr|sinc|intel|fun|amb|shar)2_3"),
+    .fn = ~adjust_column_feature(x = .x, suffix = "2_3", meaning = "you_think_opposite_sex_look_for_follow_up_weeks_")
+  ) %>%
+  rename_with(
+    .cols = matches("^(?:attr|sinc|intel|fun|amb|shar)5_1"),
+    .fn = ~adjust_column_feature(x = .x, suffix = "5_1", meaning = "others_perceive_you_")
+  ) %>%
+  rename_with(
+    .cols = matches("^(?:attr|sinc|intel|fun|amb|shar)5_2"),
+    .fn = ~adjust_column_feature(x = .x, suffix = "5_2", meaning = "others_perceive_you_follow_up_")
+  ) %>%
+  rename_with(
+    .cols = matches("^(?:attr|sinc|intel|fun|amb|shar)5_3"),
+    .fn = ~adjust_column_feature(x = .x, suffix = "5_3", meaning = "others_perceive_you_follow_up_weeks_")
+  ) %>%
+  rename_with(
+    .cols = matches("^(?:attr|sinc|intel|fun|amb|shar)3_1"),
+    .fn = ~adjust_column_feature(x = .x, suffix = "3_1", meaning = "you_perceive_yourself_")
+  ) %>%
+  rename_with(
+    .cols = matches("^(?:attr|sinc|intel|fun|amb|shar)3_2"),
+    .fn = ~adjust_column_feature(x = .x, suffix = "3_2", meaning = "you_perceive_yourself_follow_up_")
+  ) %>%
+  rename_with(
+    .cols = matches("^(?:attr|sinc|intel|fun|amb|shar)3_s"),
+    .fn = ~adjust_column_feature(x = .x, suffix = "3_s", meaning = "you_perceive_yourself_half_way_")
+  ) %>%
+  rename_with(
+    .cols = matches("^(?:attr|sinc|intel|fun|amb|shar)3_3"),
+    .fn = ~adjust_column_feature(x = .x, suffix = "3_3", meaning = "you_perceive_yourself_follow_up_weeks_")
+  ) %>%
+  rename_with(
+    .cols = matches("^(?:attr|sinc|intel|fun|amb|shar)7_2"),
+    .fn = ~adjust_column_feature(x = .x, suffix = "7_2", meaning = "actual_importance_")
+  ) %>%
+  rename_with(
+    .cols = matches("^(?:attr|sinc|intel|fun|amb|shar)7_3"),
+    .fn = ~adjust_column_feature(x = .x, suffix = "7_3", meaning = "actual_importance_follow_up_weeks_")
+  ) %>%
+  select(  
+    -c(
+      undergra,
+      mn_sat,
+      tuition
+    )
+  )  
+
+glimpse(dados_speed_date_rename_with)
+
+
+
+```
+
+## Traduzindo códigos para fatores com strings
+
+`r slide_atual = slide_atual + 1`
+
+
+Muitos atributos estão codificados, o que atrapalha a interpretação, foram transformados em vetores de caracteres.
+
+
+```{r, cache=TRUE}
+
+  dados_speed_date_fatores <- dados_speed_date_rename_with %>%  mutate(
+    choice = if_else(choice == 1, "limited", "extensive") ,
+    field_factor = case_when(
+      cod_field == 1 ~ "Law",
+      cod_field == 2 ~ "Math",
+      cod_field == 3 ~ "Social Science, Psychologist" ,
+      cod_field == 4 ~ "Medical Science, Pharmaceuticals, and Bio Tech" ,
+      cod_field == 5 ~ "Engineering"  ,
+      cod_field == 6 ~ "English/Creative Writing/ Journalism" ,
+      cod_field == 7 ~ "History/Religion/Philosophy" ,
+      cod_field == 8 ~ "Business/Econ/Finance" ,
+      cod_field == 9 ~ "Education, Academia" ,
+      cod_field == 10 ~ "Biological Sciences/Chemistry/Physics",
+      cod_field == 11 ~ "Social Work" ,
+      cod_field == 12 ~ "Undergrad/undecided" ,
+      cod_field == 13 ~ "Political Science/International Affairs" ,
+      cod_field == 14 ~ "Film",
+      cod_field == 15 ~ "Fine Arts/Arts Administration",
+      cod_field == 16 ~ "Languages",
+      cod_field == 17 ~ "Architecture",
+      cod_field == 18 ~ "Other"
+    ),
+    
+    race = case_when(
+      race == 1 ~ "Black",
+      race == 2 ~ "White",
+      race == 3 ~ "Latino", 
+      race == 4 ~ "Asian" ,
+      race == 5 ~ "Native American"  ,
+      race == 6 ~ "Others" 
+    ),
+    
+    partner_race = case_when(
+      partner_race == 1 ~ "Black",
+      partner_race == 2 ~ "White",
+      partner_race == 3 ~ "Latino", 
+      partner_race == 4 ~ "Asian" ,
+      partner_race == 5 ~ "Native American"  ,
+      partner_race == 6 ~ "Others" 
+    ),
+    
+    goal = case_when(
+      goal == 1 ~ "Fun",
+      goal == 2 ~ "Meet new people",
+      goal == 3 ~ "Date",
+      goal == 4 ~ "Serious",
+      goal == 5 ~ "To say",
+      goal == 6 ~ "Other"
+    ),
+    
+    cod_frequency_date = frequency_date
+    
+    ,
+
+    frequency_date = 
+      case_when(
+        frequency_date == 1 ~ "Several a week",
+        frequency_date == 2 ~ "Twice a week",
+        frequency_date == 3 ~ "Once a week",
+        frequency_date == 4 ~ "Twice a month",
+        frequency_date == 5 ~ "Once a month",
+        frequency_date == 6 ~ "Several a year",
+        frequency_date == 7 ~ "Never"
+      ) %>% 
+      factor(
+        level = c(
+          "Several a week",
+          "Twice a week",
+          "Once a week",
+          "Twice a month",
+          "Once a month",
+          "Several a year",
+          "Never"
+        ),
+        ordered = TRUE
+      ) 
+    ,
+    
+    
+    frequency_go_out = 
+      case_when(
+        frequency_go_out == 1 ~ "Several a week",
+        frequency_go_out   == 2 ~ "Twice a week",
+        frequency_date == 3 ~ "Once a week",
+        frequency_date == 4 ~ "Twice a month",
+        frequency_date == 5 ~ "Once a month",
+        frequency_date == 6 ~ "Several a year",
+        frequency_date == 7 ~ "Never"
+      ) %>% 
+      factor(
+        level = c(
+          "Several a week",
+          "Twice a week",
+          "Once a week",
+          "Twice a month",
+          "Once a month",
+          "Several a year",
+          "Never"
+        ),
+        ordered = TRUE
+      ) ,
+
+    
+    
+    career = str_to_title(career),
+
+    career_macro = 
+      case_when(
+        career_macro == 1 ~ "Lawyer",
+        career_macro == 2 ~ "Academic/Research",
+        career_macro == 3 ~ "Psychologist" ,
+        career_macro == 4 ~ "Doctor/Medicine" ,
+        career_macro == 5 ~ "Engineer" ,
+        career_macro == 6 ~ "Creative Arts/Entertainment" ,
+        career_macro == 7 ~ "Banking/Consulting/Finance/Marketing/Business/CEO/Entrepreneur/Admin" ,
+        career_macro == 8 ~ "Real Estate" ,
+        career_macro == 9 ~ "International/Humanitarian Affairs" ,
+        career_macro == 10 ~ "Undecided" ,
+        career_macro == 11 ~ "Social Work",
+        career_macro == 12 ~ "Speech Pathology",
+        career_macro == 13 ~ "Politics",
+        career_macro == 14 ~ "Pro sports/Athletics",
+        career_macro == 15 ~ "Other",
+        career_macro == 16 ~ "Journalism",
+        career_macro == 17 ~ "Architecture"
+    ),
+    
+    met_before = if_else(met_before == 1, TRUE, FALSE),
+    
+    opinion_duration_of_date = case_when(
+      opinion_duration_of_date == 1 ~ "Too little",
+      opinion_duration_of_date == 2 ~ "Too much",
+      opinion_duration_of_date == 3 ~ "Just Right",
+    ),
+    
+    opinion_num_dates = case_when(
+      opinion_num_dates == 1 ~ "Too few",
+      opinion_num_dates == 2 ~ "Too many"
+    ),
+    
+    have_you_dated = case_when(
+      have_you_dated == 1 ~ TRUE,
+      have_you_dated == 2 ~ FALSE
+    )
+    ,
+    sex = if_else(male > 0, "Homem", "Mulher") %>%  as_factor()
+  ) %>% 
+  select(
+    match,
+    unique_id_number,
+    id_within_wave,
+    sex,
+    subject_within_gender,
+    choice,
+    n_people_met_in_wave,
+    position_meeting,
+    position_started,
+    order_meeting,
+    partnet_id_within_wave,
+    partner_unique_id_number,
+    interests_correlation,
+    same_race,
+    my_age,
+    partner_age,
+    partner_race,
+    partner_stated_pref_time0_attractive,
+    partner_stated_pref_time0_sincere,
+    partner_stated_pref_time0_intelligent,
+    partner_stated_pref_time0_fun,
+    partner_stated_pref_time0_ambitious,
+    partner_stated_pref_time0_shared_interests,
+    importance_same_race,
+    importance_same_religion,
+    income_zipcode,
+    frequency_date,
+    frequency_go_out,
+    career_macro,
+    happy_expec,
+    n_expect_like_you,
+    partner_liked_me,
+    i_liked_partner,
+    i_found_partner__attractive,
+    i_found_partner__sincere,
+    i_found_partner__intelligent,
+    i_found_partner__fun,
+    i_found_partner__ambitious,
+    i_found_partner__interests,
+    partner_found_me__attractive,
+    partner_found_me__sincere,
+    partner_found_me__intelligent,
+    partner_found_me__fun,
+    partner_found_me__ambitious,
+    partner_found_me__interests,
+    probability_i_find_partner_liked_me,
+    met_before,
+    opinion_duration_of_date,
+    opinion_num_dates,
+    starts_with("competitors_look_for__"),
+    starts_with("you_look_for__"),
+    starts_with("opposite_sex_look_for__"),
+    starts_with("others_perceive_you__"),
+    starts_with("you_perceive_yourself__"),
+    starts_with("actual_importance__"),
+    choice,
+    race,
+    goal,
+    frequency_date,
+    career_macro,
+    met_before,
+    opinion_duration_of_date,
+    opinion_num_dates,
+  ) %>% 
+  mutate(
+    across(
+      .cols = where(is.character),
+      .fns = as.factor
+    )
+  ) %>% 
+  mutate(
+    across(
+      .cols = c(match, same_race, partner_liked_me, i_liked_partner) ,
+      .fns = as.logical
+    )
+  ) 
+
+
+glimpse(dados_speed_date_fatores)
+
+
+
+```
+
+## Compatibilizando normalizações diferentes
+
+
+`r slide_atual = slide_atual + 1`
+
+
+Algumas perguntas foram feitas de forma inconsistente ao longo dos dias da pesquisa. Em alguns dias foi dado um orçamento de x pontos para os entrevistados distribuírem nos atributos, em outros foi dado um orçamento y.
+
+```{r, cache=TRUE}
+
+normaliza_no_prefixo <-  function(
+  df = dados_com_representacao , 
+  prefixo ="partner_stated_pref_time0_" ){
+  
+
+  dados_speed_date_normalizada <- df %>%
+    rowwise() %>% 
+    mutate(
+      "{prefixo}_soma" := 
+        sum(c_across(starts_with(prefixo)), na.rm = TRUE)
+    ) %>% 
+    mutate(
+      across(
+        .cols = starts_with(prefixo),
+        .fns = ~.x / .data[[str_glue("{prefixo}_soma")]]
+      )
+    ) %>% 
+    select(
+      -contains(str_glue("{prefixo}_soma"))
+    ) 
+    
+}
+
+dados_speed_date_normalizada <- dados_speed_date_fatores %>%  
+  normaliza_no_prefixo("partner_stated_pref_time0_" ) %>% 
+  normaliza_no_prefixo("you_look_for__" ) %>% 
+  normaliza_no_prefixo("opposite_sex_look_for__" ) %>% 
+  ungroup()
+
+
+glimpse(dados_speed_date_normalizada)
+
+
+```
+
+
+## Estatísticas sobre o resumo dos dados
+
+
+`r slide_atual = slide_atual + 1`
+
+
+A biblioteca skimr oferece uma boa forma de ver um resumo com a característica dos dados
+
+
+```{r, cache=TRUE}
+
+
+skim(dados_speed_date_normalizada)
+
+
+```
+
+## Uma boa forma de ver um resumo dos dados
+
+
+`r slide_atual = slide_atual + 1`
+
+
+A função skim() devolve um tibble, que pode ser usado para extrair estatísticas da base
+
+
+```{r, cache=TRUE}
+
+resumo <- skim(dados_speed_date_normalizada)
+
+
+glimpse(resumo)
+
+
+```
+
+Podemos ver que temos muito campos quase completos e alguns campos bem menos preenchidos.
+
+De modo geral, são campos que foram preenchidos numa pesquisa feita semanas depois do evento. 
+
+
+```{r, cache=TRUE}
+
+ggplot(resumo) +
+  geom_density(
+    aes(
+      x = complete_rate
+    ),
+    adjust = 0.1
+  ) +
+  theme_minimal()
+
+
+
+
+```
+
+
+Retiramos, então os dados com pouco representação
+
+
+```{r, cache=TRUE}
+
+campos_com_representacao <-  resumo %>% 
+  filter(
+    complete_rate > 0.75
+  )
+
+
+dados_com_representacao <-  dados_speed_date_normalizada %>% 
+  select(
+    campos_com_representacao$skim_variable
+  )
+
+
+```
+
+
+
+
+## Adicionando dados do parceiro
+
+
+`r slide_atual = slide_atual + 1`
+
+
+Queremos ter algumas impressões do parceiro no nosso conjunto de dados, e assim fazemos o resumo final para começar a brincar com os dados.
+
+
+
+```{r, cache=TRUE}
+dados_speed_date_partner_side <- dados_speed_date_normalizada %>% 
+  select(
+    unique_id_number, 
+    partner_unique_id_number,
+    probability_partner_find_i_liked_partner = probability_i_find_partner_liked_me,
+    partner_career_macro = career_macro,
+    starts_with("you_perceive_yourself__")
+  ) %>% 
+  rename_with(
+    .cols = starts_with("you_perceive_yourself__"),
+    .fn = ~str_replace(.x, "you_perceive_yourself__", "partner_perceives_himself__")
+  )
+
+
+dados_finais <- dados_com_representacao %>% 
+  left_join(
+    dados_speed_date_partner_side,
+    by = c("unique_id_number" = "partner_unique_id_number", "partner_unique_id_number" = "unique_id_number"  )
+  ) %>% 
+  filter(
+    across(
+      .cols = everything(),
+      .fns = ~!is.na(.x)
+    )
+  ) %>% 
+  mutate(
+    across(
+      .cols = where(is.logical) ,
+      .fns = as.numeric
+    )
+  )
+  
+
+
+
+resumo_com_representacao <-  skim(dados_finais)
+
+resumo_com_representacao
+
+
+
+```
+
+
+
+## Alguma análise exploratória
+
+
+`r slide_atual = slide_atual + 1`
+
+Podemos ver, por exemplo, se as pessoas têm uma imagem acurada da própria atratividade
+
+```{r, cache=TRUE}
+
+escala_sexo = c(Homem = "darkblue", Mulher = "darkred")
+
+
+dados_finais %>% 
+  ggplot(
+    aes(
+      y = partner_found_me__attractive,
+      x = you_perceive_yourself__attractive
+    )
+  ) +
+  geom_boxplot(
+    aes(
+      group = you_perceive_yourself__attractive,
+      color = sex,
+      fill = sex,
+      alpha = 0.3
+    ),
+    show.legend = FALSE
+  ) +
+  scale_color_manual(
+    values = escala_sexo
+  ) +
+  scale_fill_manual(
+    values = escala_sexo
+  ) +
+  stat_smooth(
+    method = "loess",
+    formula = y ~ x,
+    show.legend = FALSE,
+    se = FALSE,
+    aes(
+      color = sex
+    )
+    
+  ) +
+  geom_function(
+    fun = identity 
+  ) +
+  facet_wrap(
+    ~sex
+  ) +
+  scale_x_continuous(
+    breaks = 0:10
+  ) +
+  scale_y_continuous(
+    breaks = 0:10
+  ) +
+  labs(
+    x = "Me acho bonito",
+    y = "Parceiro me acha bonito"
+  ) +
+  theme_minimal()
+
+
+
+```
+
+
+## Alguma análise exploratória
+
+
+`r slide_atual = slide_atual + 1`
+
+
+Como o quanto eu achei o parceiro bom em algum atributo está correlacionado com o fato de eu gostar do parceiro?
+
+
+
+```{r, cache=TRUE}
+
+dados_grafico_partner_liked <- dados_finais %>% 
+  select(
+    i_liked_partner,
+    starts_with("i_found_partner__"),
+    sex
+  ) %>% 
+  pivot_longer(
+    cols = -c(i_liked_partner, sex),
+    names_to = "i_found_partner",
+    names_pattern = "i_found_partner__(.*)",
+    values_to = "degree"
+  ) %>% 
+  mutate(
+    degree = round(degree)
+  ) %>% 
+  group_by(
+    degree,
+    i_found_partner,
+    sex
+  ) %>% 
+  summarise(
+    i_liked_partner = mean(i_liked_partner),
+    n = n()
+  ) %>% 
+  filter(
+    n > 100
+  )
+
+  
+ggplot(dados_grafico_partner_liked) +
+  geom_line(
+    aes(
+      x = degree,
+      y = i_liked_partner,
+      color = sex,
+    ),
+    size = 1.2
+
+  ) +
+  geom_point(
+    aes(
+      x = degree,
+      y = i_liked_partner,
+      color = sex,
+      size = n
+    )
+  ) +
+  facet_wrap(
+    ~i_found_partner
+  ) +
+  theme_minimal() +
+  theme(
+    legend.position = "top"
+  ) +
+  scale_x_continuous(
+    breaks = 1:10
+  ) +
+  scale_y_continuous(
+    limits = c(0,1),
+    breaks = seq(0, to = 1, by = .2),
+    labels = percent_format(accuracy = 1)
+  ) +
+  scale_color_manual(
+    values = escala_sexo
+  ) +
+  labs(
+    x = "Gostei deste atributo no parceiro",
+    y = "Gostei do parceiro. Quero ele(a)"
+  )
+  
+
+
+
+```
+
+
+
+## Biblioteca Parnsip
+
+
+`r slide_atual = slide_atual + 1`
+
+
+
+
+
+<div class='left' style='float:left;width:18%'>
+![](imagens/parsnip.png){width=100%}
+</div>
+<div class='right' style='float:right;width:78%'>
+
+Na análise anterior, fizemos a média condicional variável a variável, mas podemos fazer a média condicional a todas as variáveis ao mesmo tempo. 
+
+A melhor forma de faezr isso é rodando uma regressão linear múltipla
+
+parnsnip é a sucessora do núcleo da caret.
+
+Ela é usada para oferecer uma interface genérica a alguns tipos de modelos de aprensizado estatístico
+
+No caso, escolhemos um modelo linear e usamos como engine a função lm do R
+
+```{r}
+
+lm_mod <- 
+  linear_reg() %>% 
+  set_engine("lm")
+
+lm_mod
+
+```
+
+</div>
+
+## Regressão múltipla nos atributos
+
+
+`r slide_atual = slide_atual + 1`
+
+
+
+<div class='left' style='float:left;width:18%'>
+![](imagens/yardstick.png){width=100%}
+</div>
+<div class='right' style='float:right;width:78%'>
+
+Agora rodamos efetivamente o modelo
+
+Notem que o modelo é rodado com as interações entre os atributos e a dummy "sex"
+
+A biblioteca yardstick oferece métodos para extrairmos métrica e estimações de dentro dos objetos retornados pelas funções de treinamento da parsnip, como fit()
+
+
+
+```{r}
+
+
+
+lm_fit <- 
+  lm_mod %>% 
+  fit(  i_liked_partner ~ 
+        sex +
+        i_found_partner__attractive * sex +
+        i_found_partner__ambitious * sex +
+        i_found_partner__fun * sex +
+        i_found_partner__intelligent * sex +
+        i_found_partner__interests * sex +
+        i_found_partner__sincere * sex ,
+
+  data = dados_finais)
+
+
+tidy(lm_fit)
+
+
+```
+Mais fácil ver em forma de gráfico
+
+```{r}
+
+dwplot(tidy(lm_fit), dot_args = list(size = 2, color = "darkblue"),
+         whisker_args = list(color = "darkblue"),
+         vline = geom_vline(xintercept = 0, colour = "darkblue", linetype = 2)) +
+  theme_minimal()
+
+
+```
+
+
+
+</div>
+
+
+## Estimando a resposta com novos dados
+
+
+`r slide_atual = slide_atual + 1`
+
+Podemos usar a função predict() para gerar estimativas para valores de y dados novos valores de x
+
+
+
+```{r, cache=TRUE}
+
+
+medias_i_found <- dados_finais %>% 
+  select(
+    starts_with("i_found_partner__"),
+    sex
+  ) %>% 
+  pivot_longer(
+    cols = -c(sex),
+    names_to = "i_found_partner",
+    names_pattern = "i_found_partner__(.*)",
+    values_to = "degree"
+  ) %>% 
+  mutate(
+    degree = as.numeric(degree)
+  ) %>% 
+  group_by(
+    sex,
+    i_found_partner
+  ) %>% 
+  summarise(
+    p10 = quantile(degree, probs = 0.1, na.rm = TRUE),
+    p90 = quantile(degree, probs = 0.9, na.rm = TRUE),
+    p25 = quantile(degree, probs = 0.25, na.rm = TRUE),
+    p75 = quantile(degree, probs = 0.75, na.rm = TRUE),
+    p33 = quantile(degree, probs = 0.33, na.rm = TRUE),
+    p67 = quantile(degree, probs = 0.67, na.rm = TRUE),
+    mean = mean(degree, na.rm = TRUE)
+  ) %>% 
+  pivot_wider(
+    names_from = i_found_partner,
+    values_from = c(mean, p10, p90, p25, p75, p33, p67)
+  ) 
+  
+
+med_h <- medias_i_found %>% 
+  filter(
+    sex == "Homem"
+  )
+  
+med_m <- medias_i_found %>% 
+  filter(
+    sex == "Mulher"
+  )
+
+pontos_novos <- 
+  tribble(
+    ~attractive,           ~ambitious,     ~fun,      ~intelligent,      ~interests,     ~sincere,       ~sex,    ~nome,
+    med_h$mean_attractive, med_h$mean_ambitious, med_h$mean_fun, med_h$mean_intelligent, med_h$mean_interests, med_h$mean_sincere, "Homem", "Média",
+    med_h$p10_attractive,  med_h$mean_ambitious, med_h$mean_fun, med_h$mean_intelligent, med_h$mean_interests, med_h$mean_sincere, "Homem", "P10",
+    med_h$p25_attractive,  med_h$mean_ambitious, med_h$mean_fun, med_h$mean_intelligent, med_h$mean_interests, med_h$mean_sincere, "Homem", "P25",
+    med_h$p90_attractive, med_h$mean_ambitious, med_h$mean_fun, med_h$mean_intelligent, med_h$mean_interests, med_h$mean_sincere, "Homem",  "P90",
+    med_h$p75_attractive,  med_h$mean_ambitious, med_h$mean_fun, med_h$mean_intelligent, med_h$mean_interests, med_h$mean_sincere, "Homem", "P75",
+    med_h$p33_attractive,  med_h$mean_ambitious, med_h$mean_fun, med_h$mean_intelligent, med_h$mean_interests, med_h$mean_sincere, "Homem", "P33",
+    med_h$p67_attractive,  med_h$mean_ambitious, med_h$mean_fun, med_h$mean_intelligent, med_h$mean_interests, med_h$mean_sincere, "Homem", "P67",
+    med_m$mean_attractive, med_m$mean_ambitious, med_m$mean_fun, med_m$mean_intelligent, med_m$mean_interests, med_m$mean_sincere, "Mulher", "Média",
+    med_m$p10_attractive, med_m$mean_ambitious, med_m$mean_fun, med_m$mean_intelligent, med_m$mean_interests, med_m$mean_sincere, "Mulher", "P10",
+    med_m$p90_attractive, med_m$mean_ambitious, med_m$mean_fun, med_m$mean_intelligent, med_m$mean_interests, med_m$mean_sincere, "Mulher", "P90",
+    med_m$p25_attractive, med_m$mean_ambitious, med_m$mean_fun, med_m$mean_intelligent, med_m$mean_interests, med_m$mean_sincere, "Mulher", "P25",
+    med_m$p75_attractive, med_m$mean_ambitious, med_m$mean_fun, med_m$mean_intelligent, med_m$mean_interests, med_m$mean_sincere, "Mulher", "P75",
+    med_m$p33_attractive, med_m$mean_ambitious, med_m$mean_fun, med_m$mean_intelligent, med_m$mean_interests, med_m$mean_sincere, "Mulher", "P33",
+    med_m$p67_attractive, med_m$mean_ambitious, med_m$mean_fun, med_m$mean_intelligent, med_m$mean_interests, med_m$mean_sincere, "Mulher", "P67" 
+  ) %>% 
+  rename_with(
+    .cols = -c(sex, nome),
+    .fn = ~str_glue("i_found_partner__{.x}")
+  ) 
+  
+
+
+
+
+conf_int_pred <- predict(lm_fit, 
+                         new_data = pontos_novos, 
+                         type = "conf_int")
+
+mean_pred <- predict(lm_fit, 
+                         new_data = pontos_novos
+                         )
+
+
+dados_pred <- pontos_novos %>% 
+  bind_cols(
+    conf_int_pred
+  ) %>% 
+  bind_cols(
+    mean_pred
+  )
+
+
+ggplot(dados_pred, aes(x = i_found_partner__attractive)) + 
+  geom_point(aes(y = .pred, color = sex)) + 
+  geom_errorbar(aes(ymin = .pred_lower, 
+                    ymax = .pred_upper, color = sex),
+                width = .2) + 
+  labs(y = "Prob. I like partner")+
+  # geom_mark_circle(
+  #   aes(
+  #     y = .pred,
+  #     label = nome,
+  #     group = interaction(sex, nome),
+  #     color = sex,
+  #     fill = sex
+  #   ),
+  #   label.fontsize = 7,
+  #   con.cap = 1,
+  #   expand = 0.001,
+  #   label.buffer = unit(1, 'mm'),
+  #   show.legend = FALSE
+  # ) +
+  theme_minimal() +
+  theme(
+    legend.position = "top"
+  ) +
+  geom_line(
+    aes(
+      color = sex,
+      y = .pred
+    )
+  ) +
+  scale_color_manual(
+    values = escala_sexo
+  ) +
+  scale_x_continuous(
+    breaks = 1:10
+  ) +
+  scale_y_continuous(
+    breaks = seq(0, to = 1, by= 0.2),
+    limits = c(0,1),
+    label = percent_format(accuracy = 1)
+  )
+  
+
+
+
+
+```
+
+## Rodando um modelo mais complexo
+
+
+
+
+`r slide_atual = slide_atual + 1`
+
+
+Agora vamos sair do modelo linear e rodar uma rede neural
+
+
+
+
+```{r}
+
+
+
+
+dados_finais_nao_nulos_sex_numerico <- dados_finais %>% 
+  mutate(
+    sex = if_else(sex == "Homem", 1, 0) ,
+    i_liked_partner = as.numeric(i_liked_partner),
+  ) %>% 
+  filter(
+    across(
+      .cols = everything(),
+      .fns = ~!is.na(.x)
+    )
+  )
+
+pontos_novos_rand_for <- pontos_novos %>% 
+  mutate(
+    sex = if_else(sex == "Homem", 1, 0) 
+  ) 
+  
+
+set.seed(192)
+
+modelo_nnet <- mlp(mode = "regression", hidden_units = 10 ) %>%
+  set_engine("nnet") 
+  
+modelo_nnet
+
+
+```
+
+
+
+```{r}
+
+  
+  
+fit_nnet <- modelo_nnet %>% fit(  i_liked_partner ~ 
+        i_found_partner__attractive +
+        i_found_partner__ambitious +
+        i_found_partner__fun +
+        i_found_partner__intelligent +
+        i_found_partner__interests +
+        i_found_partner__sincere +
+        sex,
+        
+
+  data =  dados_finais_nao_nulos_sex_numerico)
+
+fit_nnet
+
+
+
+
+
+```
+
+
+
+
+
+
+```{r}
+
+
+mean_pred <- predict(fit_nnet, 
+                         new_data = pontos_novos_rand_for 
+                         )
+
+
+
+
+
+dados_pred_nnet <- pontos_novos %>% 
+  bind_cols(
+    mean_pred
+  )
+
+
+ggplot(dados_pred_nnet, aes(x = i_found_partner__attractive)) + 
+  geom_point(aes(y = .pred, color = sex)) + 
+  labs(y = "urchin size")+
+  geom_mark_circle(
+    aes(
+      y = .pred,
+      label = nome,
+      group = interaction(nome, sex),
+      color = sex,
+      fill = sex
+    ),
+    label.fontsize = 8,
+    con.cap = 1,
+    expand = 0.001,
+    label.buffer = unit(3.5, 'mm'),
+    show.legend = FALSE
+  ) +
+  theme_minimal() +
+  theme(
+    legend.position = "top"
+  ) +
+  geom_line(
+    aes(
+      color = sex,
+      y = .pred
+    )
+  ) +
+  scale_color_manual(
+    values = escala_sexo
+  ) +
+  scale_y_continuous(
+    breaks = seq(0, to = 1, by= 0.2),
+    limits = c(0,1)
+  )
+
+
+
+
+
+```
+
+
+
 
 
 ## Índice remissivo
+
+
 
 
