@@ -20,6 +20,8 @@ library(tidyverse)
 library(skimr)
 library(dotwhisker)
 library(ggforce)
+library(gt)
+library(ggrepel)
 
 ```
 
@@ -1210,7 +1212,7 @@ Agora vamos sair do modelo linear e rodar uma rede neural
 
 
 
-```{r}
+```{r, cache=TRUE}
 
 
 
@@ -1245,7 +1247,7 @@ modelo_nnet
 
 
 
-```{r}
+```{r, cache=TRUE}
 
   
   
@@ -1269,12 +1271,16 @@ fit_nnet
 
 ```
 
+## Relação entre variável de entrada e saída pela rede neural
+
+
+`r slide_atual = slide_atual + 1`
+
+No caso da rede neural, as relações não precisam ser lineares, é o caso aqui
 
 
 
-
-
-```{r}
+```{r, cache=TRUE}
 
 
 mean_pred <- predict(fit_nnet, 
@@ -1332,11 +1338,1030 @@ ggplot(dados_pred_nnet, aes(x = i_found_partner__attractive)) +
 
 ```
 
+## Análise exploratória pode (e deve) ser muito mais profunda
+
+
+`r slide_atual = slide_atual + 1`
+
+É importante fazer uma sessão de exploração, que pode ser muito mais detalhada do que a que fizemos.
+
+A sessão de exploração nos ajuda fazer alguns testes de sanidades nos dados e a extrair alguns insights que podem ou não ser usados para construir o processo Feature Engineering que pode ajudar o modelo atingir melhores resultados
+
+
+## Processo de escolha e avaliação do modelo: antes de tudo separar os dados de teste
+
+
+`r slide_atual = slide_atual + 1`
+
+
+<div class='left' style='float:left;width:30%'>
+![](imagens/rsample.png){width=80%}
+</div>
+<div class='right' style='float:right;width:68%'>
+
+
+Tudo o que fizermos durante o processo de seleção do modelo, como já vimos, deve ser feito nos dados de treinamento (que tambem servirão como validação).
+
+Após a escolha de um modelo, vamos avaliá-lo nos dados de teste.
+
+A biblioteca rsamples oferece a infraestrutura necessária para retirar amostras dos dados disponíveis.
+
+Usamos ela aqui para isolar os dados de teste.
+
+Ela será usada novamente para criar as amostras usadas no cross-validation.
+
+set.seed() é usada para manter a reprodutibilidade. Com a mesma semente, garantimos que a cada execução do script a mesma sequência (pseudo)aleatória será gerada.
+
+O parâmetro strata garante que o balanceamento de um dos atributos (no caso o que usaremos como saída) será mantido nas duas partições.
+
+
+```{r, cache=TRUE}
+
+
+dados_classificacao <- dados_finais %>% 
+  mutate(
+    i_liked_partner = if_else(i_liked_partner == 1, "Liked", "Not") %>% factor(levels = c("Liked","Not"))
+  )  
+  
+
+set.seed(123)
+# Put 3/4 of the data into the training set 
+split_dado <- initial_split(
+  data = dados_classificacao, 
+  strata = i_liked_partner,
+  prop = 3/4
+)
+
+
+# Create data frames for the two sets:
+dado_treino <- training(split_dado)
+dado_teste  <- testing(split_dado)
+
+
+```
+
+
+
+```{r}
+skim(dado_treino)
+```
+
+```{r}
+
+skim(dado_teste)
+
+```
+
+
+</div>
+
+
+## Especificação e pré-processamento, pra qualquer modelo
+
+
+`r slide_atual = slide_atual + 1`
+
+
+<div class='left' style='float:left;width:30%'>
+![](imagens/recipes.png){width=80%}
+</div>
+<div class='right' style='float:right;width:68%'>
+
+
+Conforme comentamos, as bibliotecas da tidymodels são ortogonais.
+
+A biblioteca recipes serve a um fim específico: definir os passos do pré-processamento dos dados. Esses passos podem ser definidos de forma independente da definição do modelo a ser usado, da forma de cross-validation, da medição da performance etc.
+
+Um dos passos que podem ser definidos na recipes é a identificaão de atributos que não têm papel preditivo e, portanto, não devem ser usados no treinamento e na predição, mas que queremos manter no nosso tibble para identificação das linhas.
+
+
+```{r}
+
+receita <- recipe(i_liked_partner ~ ., data = dado_treino) %>%
+  update_role(
+    match,
+    unique_id_number,
+    id_within_wave,
+    subject_within_gender,
+    partnet_id_within_wave,
+    partner_unique_id_number,
+    new_role = "ID"
+  )
+
+summary(receita)
+
+
+```
+
+
+</div>
+
+
+## Criando dummies
+
+
+`r slide_atual = slide_atual + 1`
+
+Alguns engines de modelos não trabalham bem com fatores. 
+
+Quem está acostumado com a lm, sabe que os fatores são transformados automaticamente em dummies, mas isso não acontece com todo os engines.
+
+step_dummy() faz esse trabalho, ou seja, cria uma variável binária pra cada level do fator (menos um). Veja como podemos usar o seletor all_nominal() e o all_outcomes()
+
+step_zv() retira os as variáveis com variância zero. Isso va acontecer bastante quando temos levels de fatores infrequentes.
+
+
+```{r}
+
+receita <- recipe(i_liked_partner ~ ., data = dado_treino) %>%
+  update_role(
+    match,
+    unique_id_number,
+    id_within_wave,
+    subject_within_gender,
+    partnet_id_within_wave,
+    partner_unique_id_number,
+    new_role = "ID"
+  ) %>% 
+  step_dummy(
+    all_nominal(), -all_outcomes() 
+  ) %>% 
+  step_zv(all_predictors()) 
+  
+
+
+summary(receita) %>% 
+  gt()
 
 
 
 
-## Índice remissivo
+```
+
+
+## Criando variáveis ordinais
+
+
+`r slide_atual = slide_atual + 1`
+
+Alguns fatores são ordinais. Pode ser uma boa ideia codificá-los em uma só variável numérica, que vai manter a ordem natural dos levels.
+
+No nosso exemplo, a variável que representa com qual frequência as pessoas saem à noite apresenta níveis que podem ser ordenados.
+
+
+```{r, cache=TRUE}
+
+receita <- recipe(i_liked_partner ~ ., data = dado_treino) %>%
+  update_role(
+    match,
+    unique_id_number,
+    id_within_wave,
+    subject_within_gender,
+    partnet_id_within_wave,
+    partner_unique_id_number,
+    new_role = "ID"
+  ) %>% 
+  step_ordinalscore(
+    frequency_date
+  ) %>% 
+  step_dummy(
+    all_nominal(), -frequency_date, -all_outcomes()
+  ) %>%
+  step_zv(all_predictors()) 
+
+
+
+```
+
+## Criando um workflow para estimar um modelo
+
+`r slide_atual = slide_atual + 1`
+
+
+<div class='left' style='float:left;width:30%'>
+![](imagens/workflows.png){width=80%}
+</div>
+<div class='right' style='float:right;width:68%'>
+
+
+
+Sabendo criar uma receita de pré-processamento e relembrando como criar uma interface genérica para um modelo com parsnip() e como selecionar um engine pra ele, podemos criar um pequeno fluxo de trabalho para realizar esse procesamento, usando a biblioteca workflows()
+
+
+```{r, cache=TRUE}
+
+lr_mod <- 
+  logistic_reg() %>% 
+  set_engine("glm") 
+
+wf <- workflow() %>% 
+  add_recipe(receita) %>% 
+  add_model(lr_mod) 
+
+wf
+
+
+```
+
+</div>
+
+
+## Estimando o modelo com uso do workflow
+
+`r slide_atual = slide_atual + 1`
+
+Com o workflow criado é possível estimá-lo ussando a função fit()
+
+
+```{r, cache=TRUE}
+
+
+fit_teste <- 
+  wf %>% 
+  fit(
+    data = dado_treino
+  )
+
+fit_teste %>%  tidy() %>% 
+  select(
+    term,
+    estimate,
+    p.value
+  ) %>% 
+  arrange(
+    p.value
+  ) %>% 
+  gt() %>% 
+  fmt_number(
+    columns = one_of("estimate"),
+    decimals = 3
+  ) %>% 
+  fmt_number(
+    columns = one_of("p.value"),
+    decimals = 2
+  ) 
+
+
+
+
+
+
+```
+
+## Adicionando interação entre preditores
+
+`r slide_atual = slide_atual + 1`
+
+
+Um tipo de passo interessante que pode ser adicionado à recipe é a adição de novos preditores que representam interações entre os preditores adicionais.
+
+É interessante poder usar as funções helpers, que tornam muito mais fácil a adição de vários termos de interação de uma só vez.
+
+Aqui vamos usar uma regressão mesmo ao invés de clasificação para facilitar a interpretação dos coeficientes.
+
+
+
+```{r, cache=TRUE}
+
+
+dado_treino_regressao <- dado_treino %>% 
+  mutate(
+    i_liked_partner = if_else(i_liked_partner == "Liked", 1, 0)
+  )
+
+
+receita_com_interacao <- recipe(i_liked_partner ~ ., data = dado_treino_regressao) %>%
+  update_role(
+    match,
+    unique_id_number,
+    id_within_wave,
+    subject_within_gender,
+    partnet_id_within_wave,
+    partner_unique_id_number,
+    new_role = "ID"
+  ) %>% 
+  step_ordinalscore(
+    frequency_date
+  ) %>% 
+  step_dummy(
+    all_nominal(), -frequency_date, -all_outcomes() 
+  ) %>%
+  step_interact(
+    terms = ~ starts_with("race")*starts_with("partner_race")*importance_same_race
+  ) %>% 
+  step_interact(
+    terms = ~ starts_with("i_found_partner__")*starts_with("sex_")
+  ) %>%  
+  step_interact(
+    terms = ~ starts_with("interests_correlation")*starts_with("sex_")
+  ) %>% 
+  step_interact(
+    terms = ~ starts_with("partner_age")*starts_with("sex_")
+  ) %>%  
+  step_interact(
+    terms = ~ starts_with("you_perceive_yourself__")*starts_with("sex_")
+  ) %>% 
+  step_interact(
+    terms = ~ starts_with("partner_perceives_himself__")*starts_with("sex_")
+  ) %>% 
+  step_interact(
+    terms = ~ starts_with("career_macro")*starts_with("partner_career_macro")
+  ) %>% 
+  step_zv(all_predictors()) 
+  
+
+
+```
+
+## Regressões lasso e ridge
+
+`r slide_atual = slide_atual + 1`
+
+Com a adição destes termos de interação, ficamos com muitos preditores, vários deles bem correlacionados.
+
+Uma forma de evitar que muitas variáveis sejam efetivamente usadas no modelo é aplicar uma penalidade de forma a diminuir o número de coeficientes acionados, e, por consequência a variância do modelo. É isso que as regressões do tipo `r a_r("Ridge")` e `r a_r("Lasso")` fazem.
+
+O modelo `r a_r("Elastic Net")` conjuga a penalização do tipo Ridge com a penalização do tipo Lasso modificando a função de penalização da regressão, que na regressão de mínimos quadrados ordinários, a mais comum, como o nome diz, é o erro quadrático:
+
+$$RSS = \sum_{i = 1}^{n} ( y_i - \beta_0 - \sum_{j=1}^{p}\beta_j x_{ij})^2  $$
+
+Para a regressão Ridge, os coeficientes são penalizados de forma quadrática. Isso diminui a variância do modelo mas não diminui tanto a diminuição do número de coeficientes diferentes de 0:
+
+$$Loss_{Ridge} = RSS + \lambda \sum_{j=1}^{p}\beta_j^2 $$
+
+Para a regressão Lasso, os coeficientes são penalizados pelo seu valor absoluto. Isso diminui a variância do modelo E diminui o número de coeficientes diferentes de 0, favorecendo a interpretabilidade
+
+$$Loss_{Lasso} = RSS + \lambda \sum_{j=1}^{p} \left| \beta_j \right| $$
+
+
+## Utilizando os hiperparâmetros
+
+`r slide_atual = slide_atual + 1`
+
+
+<div class='left' style='float:left;width:30%'>
+![](imagens/workflows.png){width=80%}
+</div>
+<div class='right' style='float:right;width:68%'>
+
+
+O conceito de interface é importante na engenharia de software.
+
+É sempre melhor depender de interfaces do que de implementações. A parnsip funciona como uma camada de abstraão que oferece uma interface única que se encarrega de cuidar das diferentes implementações.
+
+As interfaces genéricas da parnsip está prontas para receber os parâmetros mais comuns usados nos engines e estão preparadas para passar ao engine o valor destes parâmetros.
+
+No caso das regressões lineares alguns engines como o glmnet estão preparados para receber os hiperparâmetros necessários para a implementação da regressão lasso-ridge
+
+
+
+```{r, cache=TRUE}
+
+
+
+lr_mod <- 
+  linear_reg(penalty = .02, mixture = 1) %>% 
+  set_engine("glmnet")
+
+wf_com_interacao <- workflow() %>% 
+  add_recipe(receita_com_interacao) %>% 
+  add_model(lr_mod) 
+
+wf_com_interacao
+
+
+
+```
+
+</div>
+
+
+## Fit com Elastic Net
+
+`r slide_atual = slide_atual + 1`
+
+
+Na estimação com Elastic Net temos menos preditores acionados
+
+
+```{r, cache=TRUE}
+
+
+fit_com_interacao <- 
+  wf_com_interacao %>% 
+  fit(
+    data = dado_treino_regressao
+  )
+
+fit_com_interacao %>%  tidy() %>% 
+  filter(
+    estimate != 0
+  ) %>% 
+  arrange(
+    estimate %>% abs() %>% desc()
+  ) %>% 
+  select(
+    term,
+    estimate
+  ) %>% 
+  gt() %>% 
+  fmt_number(
+    columns = one_of("estimate"),
+    decimals = 3
+  )
+
+
+
+```
+
+
+## Mais tipos de pré-processamento
+
+`r slide_atual = slide_atual + 1`
+
+Aqui adicionamos mais alguns passos de pré-processamento:
+
+- step_mutate() cria um novo preditor baseado em um cálculo em cima de outros
+
+- step_poly() adiciona preditores elevados a números naturais maiores que 1 (por default 2) possibilitando a representação de efeitos não lineares (quadráticos, por exemplo) 
+
+- step_corr() retira preditores de forma que 2 a 2 não haja mais nenhum com correlação acima do threshold.
+
+
+
+```{r, cache=TRUE}
+
+
+
+receita_com_interacao_class <- recipe(i_liked_partner ~ ., data = dado_treino) %>%
+  update_role(
+    match,
+    unique_id_number,
+    id_within_wave,
+    subject_within_gender,
+    partnet_id_within_wave,
+    partner_unique_id_number,
+    new_role = "ID"
+  ) %>% 
+  step_ordinalscore(
+    frequency_date
+  ) %>% 
+  step_dummy(
+    all_nominal(), -frequency_date, -all_outcomes() 
+  ) %>%
+  step_mutate(
+    diff_age = my_age - partner_age     
+  ) %>% 
+  step_poly(
+    diff_age
+  ) %>% 
+  step_interact(
+    terms = ~ starts_with("diff_age") * starts_with("sex")
+  ) %>% 
+  step_interact(
+    terms = ~ starts_with("race")*starts_with("partner_race")*importance_same_race
+  ) %>% 
+  step_interact(
+    terms = ~ starts_with("i_found_partner__")*starts_with("sex_")
+  ) %>%  
+  step_interact(
+    terms = ~ starts_with("interests_correlation")*starts_with("sex_")
+  ) %>%
+  step_interact(
+    terms = ~ starts_with("partner_age")*starts_with("sex_")
+  ) %>%
+  step_interact(
+    terms = ~ starts_with("you_perceive_yourself__")*starts_with("sex_")
+  ) %>%
+  step_interact(
+    terms = ~ starts_with("partner_perceives_himself__")*starts_with("sex_")
+  ) %>%
+  step_interact(
+    terms = ~ starts_with("partner_found_me__")*starts_with("sex")
+  ) %>%
+  step_interact(
+    terms = ~ starts_with("you_look_for__")*starts_with("sex")
+  ) %>%
+  step_interact(
+    terms = ~ starts_with("you_look_for__")*starts_with("i_found_partner")
+  ) %>%
+  step_interact(
+    terms = ~ starts_with("probability_partner_find_i_liked_partner")*starts_with("sex")
+  ) %>%
+  step_interact(
+    terms = ~ starts_with("career_")*starts_with("sex")
+  ) %>%
+  step_interact(
+    terms = ~ starts_with("partner_career_")*starts_with("sex")
+  ) %>%
+  step_interact(
+    terms = ~ starts_with("goal")*starts_with("sex")
+  ) %>%
+  step_corr(
+    all_predictors(), 
+    threshold = 0.8  
+  ) %>% 
+  step_zv(all_predictors()) 
+
+  
+log_mod <- 
+  logistic_reg() %>% 
+  set_engine("glm")
+
+wf_com_interacao_class <- workflow() %>% 
+  add_recipe(receita_com_interacao_class) %>% 
+  add_model(log_mod)
+
+
+fit_com_interacao_class <- 
+  wf_com_interacao_class %>% 
+  fit(
+    data = dado_treino
+  )
+
+
+
+```
+
+
+
+## Avaliando a curva ROC a partir da yardstick
+
+`r slide_atual = slide_atual + 1`
+
+
+A curva `r a_r("ROC")` (Receiver Operating Characteristics) foi inventada na época da Segunda Guerra Mundial para avaliar se os operadores de radar americanos estavam detectando confiavelmente aeronaves japonesas a partir de sinais de radar.
+
+A curva mostra, para vários thresholds, qual a fração de verdadeiros positivos (ou sensibilidade) e a fração de falsos positivos (fall-out, ou $1 - especificidade$ ).
+
+Uma métrica numérica que traduz o a precisão geral de um modelo de classificação consiste na área embaixo desta curva (`r a_r("AUC, Area Under the Curve)")`. Note que quanto mais perto de um essa área, menor a taxa de falsos positivos e maior a sensibilidade
+
+
+Aqui executamos a predição nos próprios dados de treinamento e usamos função roc_curve() da yardstick para gerar os dados necessários para plotara curva
+
+
+
+```{r, cache=TRUE}
+
+pred_like <- predict(
+  object = fit_com_interacao_class,
+  new_data = dado_teste,
+  type = "prob"
+) %>% 
+  bind_cols(dado_teste %>%  select(i_liked_partner))
+
+
+dados_roc <- pred_like %>% 
+  roc_curve(
+    truth = i_liked_partner,
+    .pred_Liked
+  )
+
+dados_roc %>% 
+  filter(
+    row_number() %% 100 == 0
+  ) %>% 
+  gt() %>% 
+  fmt_number(
+    columns = everything(),
+    decimals = 3
+  )
+
+
+```
+
+
+Plotando, então a curva
+
+
+```{r, cache=TRUE}
+
+ponto_gatilho <- dados_roc %>% 
+  filter(
+    .threshold > 0.5
+  ) %>% 
+  slice_min(
+    n = 1, order_by = .threshold
+  )
+
+dados_roc %>% ggplot(aes(x = 1 - specificity, y = sensitivity)) +
+  geom_path() +
+  geom_point(
+    data = ponto_gatilho,
+    aes(x = 1 - specificity, y = sensitivity),
+    size = 3,
+    color = "darkblue"
+  ) +
+  geom_text_repel(
+    data = ponto_gatilho,
+    aes(
+      x = 1 - specificity + 0.15, 
+      y = sensitivity - 0.15,
+      label = str_glue("{sensitivity %>% percent(accuracy = 0.1)}/{(1 - specificity) %>%  percent(accuracy = 0.1)}")
+    )
+  ) +
+  geom_abline(lty = 3) +
+  coord_equal() +
+  theme_bw()
+
+
+```
+
+Existe uma função que plota a curva automaticamente
+
+
+```{r, cache=TRUE}
+
+dados_roc %>% 
+  autoplot()
+
+```
+
+A função roc_auc calcula a área embaixo da curva
+
+
+```{r, cache=TRUE}
+
+pred_like %>% 
+  roc_auc(
+    truth = i_liked_partner,
+    .pred_Liked
+  ) %>% 
+  gt()
+
+
+```
+
+
+## Rodando sem interação
+
+`r slide_atual = slide_atual + 1`
+
+
+
+
+```{r, cache=TRUE}
+
+
+
+receita_sem_interacao_class <- recipe(i_liked_partner ~ ., data = dado_treino) %>%
+  update_role(
+    match,
+    unique_id_number,
+    id_within_wave,
+    subject_within_gender, 
+    partnet_id_within_wave,
+    partner_unique_id_number,
+    new_role = "ID"
+  ) %>% 
+  step_ordinalscore(
+    frequency_date
+  ) %>% 
+  step_dummy(
+    all_nominal(), -frequency_date, -all_outcomes() 
+  )
+
+wf_sem_interacao_class <- workflow() %>% 
+  add_recipe(receita_sem_interacao_class) %>% 
+  add_model(log_mod)
+
+
+fit_sem_interacao_class <- 
+  wf_sem_interacao_class %>% 
+  fit(
+    data = dado_treino
+  )
+
+pred_like_sem <- predict(
+  object = fit_sem_interacao_class,
+  new_data = dado_teste,
+  type = "prob"
+) %>% 
+  bind_cols(dado_teste %>%  select(i_liked_partner))
+
+
+
+pred_like_sem %>% 
+  roc_curve(
+    truth = i_liked_partner,
+    .pred_Liked
+  ) %>% 
+  autoplot()
+
+
+
+
+
+```
+
+
+```{r}
+
+
+
+pred_like_sem %>% 
+  roc_auc(
+    truth = i_liked_partner,
+    .pred_Liked
+  ) %>% 
+  gt()
+
+
+```
+
+
+## Comparando as curvas
+
+`r slide_atual = slide_atual + 1`
+
+
+As curvas ficaram muito parecidas.
+
+Nao adiantou muito a adição de interações, mas isso pode ser causado pela simplicidade do modelo
+
+
+```{r}
+
+
+
+rocs <- bind_rows(
+  roc_curve(pred_like_sem, i_liked_partner, .pred_Liked) %>% mutate(tipo = "Sem interação"),
+  roc_curve(pred_like, i_liked_partner, .pred_Liked) %>% mutate(tipo = "Com interação"),
+)
+  
+
+
+
+
+rocs %>%
+  ggplot(aes(x = 1 - specificity, y = sensitivity, color = tipo)) +
+  geom_path() +
+  geom_abline(lty = 3) +
+  coord_equal() +
+  theme_bw() +
+  theme(
+    legend.position = "top"
+  )
+
+
+
+
+```
+
+## Implementando cross validation
+
+`r slide_atual = slide_atual + 1`
+
+
+A biblioteca rsamples, que já vimos, oferece a infraestrutura para geração das amostras necessárias para o cross validation.
+
+
+```{r, cache=TRUE}
+
+
+folds <- vfold_cv(dado_treino, v = 5, repeats = 2, strata = i_liked_partner)
+
+folds
+
+
+
+```
+
+```{r}
+
+analysis(x = folds$splits[[1]] ) %>%  glimpse()
+
+
+```
+
+
+## Executando cross validation
+
+`r slide_atual = slide_atual + 1`
+
+
+Executar o cross validation significa estimar o modelo várias vezes em execuções que são completamente diferentes, o que é perfeito para executar em paralelo.
+
+A função fit_resamples() faz todas as estimações. É possível registrar um backend para fazer a execução de forma paralela
+
+
+
+```{r, cache=TRUE}
+
+
+all_cores <- parallel::detectCores(logical = FALSE)
+
+library(doParallel)
+cl <- makePSOCKcluster(all_cores)
+registerDoParallel(cl)
+
+log_mod <- 
+  logistic_reg() %>% 
+  set_engine("glm")
+
+wf_com_interacao_class <- workflow() %>% 
+  add_recipe(receita_com_interacao_class) %>% 
+  add_model(log_mod)
+
+fit_com_interacao_resample <- 
+  wf_com_interacao_class %>% 
+  fit_resamples(
+    folds,
+    control = control_resamples(allow_par = TRUE )
+  )
+
+stopCluster(cl)
+
+fit_com_interacao_resample
+
+
+
+```
+
+
+
+
+
+```{r}
+
+
+collect_metrics(fit_com_interacao_resample) %>% gt()
+
+
+```
+
+
+
+
+
+
+
+
+
+## Fazendo o tuning nos hiperparâmetros
+
+`r slide_atual = slide_atual + 1`
+
+
+<div class='left' style='float:left;width:30%'>
+![](imagens/tune.svg){width=80%}
+</div>
+<div class='right' style='float:right;width:68%'>
+
+
+O modelo de regressão logística que rodamos anteriormente não tinha hiperparâmetros, mas ao rodar modelos como Elastic Net (lasso-ridge) gostaríamos de avaliar qual o melhor conjunto de hiperparâmetros nos dados de validação.
+
+A biblioteca tune nos ajuda a fazer esse procedimento.
+
+No momento de definir o modelo, atribuimos a resposta de tune() aos parãmetros do modelo que queremos variar para fins de tuning
+
+
+```{r}
+
+tune_spec_logistic_reg <- logistic_reg(
+  penalty = tune(),
+  mixture = tune()
+) %>% 
+  set_engine(
+    engine = "glmnet"
+  ) %>% 
+  set_mode(
+    "classification"
+  )
+
+
+tune_spec_logistic_reg
+
+
+```
+
+
+</div>
+
+
+
+
+
+## Definindo os valores a serem testados
+
+`r slide_atual = slide_atual + 1`
+
+
+
+```{r}
+
+net_grid <- grid_regular(
+  penalty(range = c(-4,-1)),
+  mixture(),
+  levels = 10
+)
+
+net_grid
+
+
+```
+
+
+## Rodando o tuning
+
+`r slide_atual = slide_atual + 1`
+
+
+
+
+```{r, cache=TRUE}
+
+
+all_cores <- parallel::detectCores(logical = FALSE)
+
+library(doParallel)
+cl <- makePSOCKcluster(all_cores)
+registerDoParallel(cl)
+
+
+wf_logreg_tune_sample <- workflow() %>% 
+  add_model(
+    tune_spec_logistic_reg
+  ) %>% 
+  add_recipe(receita_com_interacao_class)
+
+
+res_logreg_tune_sample_optim <- wf_logreg_tune_sample %>% 
+  tune_grid(
+    resamples = folds,
+    grid = net_grid,
+    control = control_grid(allow_par = TRUE)
+  )  
+
+stopCluster(cl)
+
+res_logreg_tune_sample_optim
+
+
+
+
+```
+
+
+## Visualizando os resultados
+
+`r slide_atual = slide_atual + 1`
+
+
+
+
+
+
+```{r, cache=TRUE}
+
+ 
+
+
+plot_result_tune <- function(results){
+  results %>% 
+    collect_metrics() %>%
+    filter(
+      .metric == "roc_auc"
+    ) %>% 
+    mutate(
+      ranque = rank(mean)
+    ) %>%     
+    ggplot() +
+    geom_tile(
+      aes(
+        x = penalty,
+        y = mixture,
+        fill = ranque
+      )
+    ) +
+    geom_text(
+      aes(
+        x = penalty,
+        y = mixture,
+        label = number(mean, accuracy = .001),
+      ),
+      size = 3
+    ) +
+    scale_x_log10() +
+    scale_fill_gradient(low = "white", high = "darkgreen") +
+    theme_minimal() +
+    theme(
+      legend.position = "top"
+    )
+}
+
+
+plot_result_tune(res_logreg_tune_sample_optim)
+
+
+```
+
+
+
+
+
+
+
 
 
 
