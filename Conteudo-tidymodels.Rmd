@@ -22,7 +22,8 @@ library(dotwhisker)
 library(ggforce)
 library(gt)
 library(ggrepel)
-
+library(rpart.plot)
+library(kknn)
 ```
 
 ```{r setup, include=FALSE}
@@ -75,6 +76,7 @@ escreve_remissivo <- function(){
 ![](imagens/tidymodels.svg)
 </div>
 <div class='right' style='float:right;width:78%'>
+
 Tidymodels é um conjunto de bibliotecas que cuida de todos os passos necessários para desenvolver o workflow de seleção e avaliação de modelos de aprendizado estatístico.
 
 O desenvolvimento é financiado pela RStudio e liderado por Max Kuhn, o principal desenvolvedor de uma biblioteca similar mais antiga: caret.
@@ -101,7 +103,7 @@ Tidymodels é formada por pacotes ortogonais.
 
 Este termo é emprestado da matemática. No caso de dois vetores ortogonais, podemos nos mover na direção de um deles sem que nossa projeção no outro seja alterada.
 
-Em programação ou arquitetura de software dizemos que componentes ortogonais são desacoplados: a mudança em um cmponente não afeta outros. Esta propriedade exige componentes menores e mais coesos, com responsabilidades bem definidas, e permite alterações com menos efeitos colaterais. Um bom livro para quem quer entender como usar conceitos como esse em programação se chama Pragmatic Programmer, de David Thomas e Andrew Hunt.
+Em programação ou arquitetura de software dizemos que componentes ortogonais são desacoplados: a mudança em um componente não afeta outros. Esta propriedade exige componentes menores e mais coesos, com responsabilidades bem definidas, e permite alterações com menos efeitos colaterais. Um bom livro para quem quer entender como usar conceitos como esse em programação se chama Pragmatic Programmer, de David Thomas e Andrew Hunt.
 
 As bibliotecas que compõem a tidymodels funcionam assim: ao configurar o workflow que vai implementar o processo de treinamento, seleção e avaliação de modelos, várias etapas ortogonais vão ser preparadas com uso de várias bibliotecas.
 
@@ -119,7 +121,7 @@ As bibliotecas que compõem a tidymodels funcionam assim: ao configurar o workfl
 <div class='right' style='float:right;width:68%'>
 
 
-- **workflows** ajuda a montar todas as etapas do processo de trabalho;
+- **workflows** ajuda a montar todas as etapas do processo de trabalho em uma estrutura de fluxo de trabalho;
 
 - **recipes** permite criar as etapas de pré-processamento, facilitando o processo de feature engineering e sua aplicação a dados fora da amostra;
 
@@ -151,14 +153,14 @@ Os dados vieram de um estudo de pesquisadores da Columbia Business School, Ray F
 
 Eles fizeram várias rodadas de encontros de 4 minutos entre homens e mulheres heterossexuais.
 
-Várias características foram coletadas, incluindo um veredito final determinando se cada parceiro de cnontro gostou do outro
+Várias características foram coletadas, incluindo um veredito final determinando se cada parceiro de encinto gostou do outro.
 
 </div>
 
 `r slide_atual = slide_atual + 1`
 
 
-## Estudo de caso
+## Dados do estudo de caso
 
 `r slide_atual = slide_atual + 1`
 
@@ -182,7 +184,7 @@ glimpse(dados_speed_date)
 
 `r slide_atual = slide_atual + 1`
 
-Algumas colunas devem ser reniomeadas de forma para nomes mais inteligíveis 
+Algumas colunas devem ser renomeadas para nomes mais inteligíveis 
 
 
 ```{r}
@@ -381,8 +383,11 @@ glimpse(dados_speed_date_rename_with)
 `r slide_atual = slide_atual + 1`
 
 
-Muitos atributos estão codificados, o que atrapalha a interpretação, foram transformados em vetores de caracteres.
+Muitos atributos estão codificados numericamente, o que atrapalha a interpretação, eles foram transformados em vetores de caracteres. 
 
+Essa codificação numérica é muito comum em produtos de análise estatística de prateleira, que possibilitam point-and-click.
+
+Reparem que o atributo frequency_date foi transformado em um fator onde os levels tem uma ordem espcífica. Isso trará implicações posteriores.
 
 ```{r, cache=TRUE}
 
@@ -624,13 +629,17 @@ glimpse(dados_speed_date_fatores)
 `r slide_atual = slide_atual + 1`
 
 
-Algumas perguntas foram feitas de forma inconsistente ao longo dos dias da pesquisa. Em alguns dias foi dado um orçamento de x pontos para os entrevistados distribuírem nos atributos, em outros foi dado um orçamento y.
+Algumas perguntas foram feitas de forma inconsistente ao longo dos dias da pesquisa. 
+
+Em alguns dias foi dado um orçamento de x pontos para os entrevistados distribuírem nos atributos de mesmo tipo, em outros foi dado um orçamento pra cada atributo.
+
+
 
 ```{r, cache=TRUE}
 
 normaliza_no_prefixo <-  function(
   df = dados_com_representacao , 
-  prefixo ="partner_stated_pref_time0_" ){
+  prefixo = "partner_stated_pref_time0_" ){
   
 
   dados_speed_date_normalizada <- df %>%
@@ -670,7 +679,7 @@ glimpse(dados_speed_date_normalizada)
 `r slide_atual = slide_atual + 1`
 
 
-A biblioteca skimr oferece uma boa forma de ver um resumo com a característica dos dados
+A biblioteca skim, com a função skimr(), oferece uma boa forma de ver um resumo com a característica dos dados
 
 
 ```{r, cache=TRUE}
@@ -722,7 +731,7 @@ ggplot(resumo) +
 ```
 
 
-Retiramos, então os dados com pouco representação
+Retiramos, então os dados com pouca representação
 
 
 ```{r, cache=TRUE}
@@ -972,7 +981,7 @@ ggplot(dados_grafico_partner_liked) +
 
 Na análise anterior, fizemos a média condicional variável a variável, mas podemos fazer a média condicional a todas as variáveis ao mesmo tempo. 
 
-A melhor forma de faezr isso é rodando uma regressão linear múltipla
+A forma de fazer isso é rodando uma regressão linear de mínimos quadrados ordinários múltipla.
 
 parnsnip é a sucessora do núcleo da caret.
 
@@ -1132,7 +1141,6 @@ pontos_novos <-
 
 
 
-
 conf_int_pred <- predict(lm_fit, 
                          new_data = pontos_novos, 
                          type = "conf_int")
@@ -1148,7 +1156,8 @@ dados_pred <- pontos_novos %>%
   ) %>% 
   bind_cols(
     mean_pred
-  )
+  ) %>% 
+  view()
 
 
 ggplot(dados_pred, aes(x = i_found_partner__attractive)) + 
@@ -1276,7 +1285,7 @@ fit_nnet
 
 `r slide_atual = slide_atual + 1`
 
-No caso da rede neural, as relações não precisam ser lineares, é o caso aqui
+No caso da rede neural, as relações não precisam ser lineares. É o caso aqui
 
 
 
@@ -1330,7 +1339,9 @@ ggplot(dados_pred_nnet, aes(x = i_found_partner__attractive)) +
   scale_y_continuous(
     breaks = seq(0, to = 1, by= 0.2),
     limits = c(0,1)
-  )
+  ) +
+  labs(y = "Prob. I like partner")
+  
 
 
 
@@ -1345,7 +1356,11 @@ ggplot(dados_pred_nnet, aes(x = i_found_partner__attractive)) +
 
 É importante fazer uma sessão de exploração, que pode ser muito mais detalhada do que a que fizemos.
 
-A sessão de exploração nos ajuda fazer alguns testes de sanidades nos dados e a extrair alguns insights que podem ou não ser usados para construir o processo Feature Engineering que pode ajudar o modelo atingir melhores resultados
+A sessão de exploração nos ajuda fazer alguns testes de sanidade nos dados e a extrair alguns insights que podem ou não ser usados para construir o processo Feature Engineering que pode ajudar o modelo atingir melhores resultados.
+
+O processo de feature engineering é o lugar onde mais podemos melhorar o tipo de modelo que vamos usar na maioria das vezes.
+
+A dependência desse processo é menor quando usamos modelos muito complexos, de deep learning, mas para isso é necessário ter uma quantidade colossal de dados.
 
 
 ## Processo de escolha e avaliação do modelo: antes de tudo separar os dados de teste
@@ -1362,7 +1377,9 @@ A sessão de exploração nos ajuda fazer alguns testes de sanidades nos dados e
 
 Tudo o que fizermos durante o processo de seleção do modelo, como já vimos, deve ser feito nos dados de treinamento (que tambem servirão como validação).
 
-Após a escolha de um modelo, vamos avaliá-lo nos dados de teste.
+Após a escolha de UM modelo, vamos avaliá-lo nos dados de teste.
+
+![Fonte: Feature Engineering and Selection: A Practical Approach for Predictive Models (Kuhn e Johnson) ](imagens/resampling.svg){width=80%}
 
 A biblioteca rsamples oferece a infraestrutura necessária para retirar amostras dos dados disponíveis.
 
@@ -1432,7 +1449,7 @@ Conforme comentamos, as bibliotecas da tidymodels são ortogonais.
 
 A biblioteca recipes serve a um fim específico: definir os passos do pré-processamento dos dados. Esses passos podem ser definidos de forma independente da definição do modelo a ser usado, da forma de cross-validation, da medição da performance etc.
 
-Um dos passos que podem ser definidos na recipes é a identificaão de atributos que não têm papel preditivo e, portanto, não devem ser usados no treinamento e na predição, mas que queremos manter no nosso tibble para identificação das linhas.
+Um dos passos que podem ser definidos na recipes é a identificação de atributos que não têm papel preditivo e, portanto, não devem ser usados no treinamento e na predição, mas que queremos manter no nosso tibble para identificação das linhas.
 
 
 ```{r}
@@ -1464,11 +1481,12 @@ summary(receita)
 
 Alguns engines de modelos não trabalham bem com fatores. 
 
-Quem está acostumado com a lm, sabe que os fatores são transformados automaticamente em dummies, mas isso não acontece com todo os engines.
+Quem está acostumado com a lm, sabe que os fatores são transformados automaticamente em dummies, mas isso não acontece com todos os engines.
 
 step_dummy() faz esse trabalho, ou seja, cria uma variável binária pra cada level do fator (menos um). Veja como podemos usar o seletor all_nominal() e o all_outcomes()
 
-step_zv() retira os as variáveis com variância zero. Isso va acontecer bastante quando temos levels de fatores infrequentes.
+step_zv() retira as variáveis com variância zero. Isso vai acontecer bastante quando temos levels de fatores infrequentes.
+
 
 
 ```{r}
@@ -1544,8 +1562,7 @@ receita <- recipe(i_liked_partner ~ ., data = dado_treino) %>%
 <div class='right' style='float:right;width:68%'>
 
 
-
-Sabendo criar uma receita de pré-processamento e relembrando como criar uma interface genérica para um modelo com parsnip() e como selecionar um engine pra ele, podemos criar um pequeno fluxo de trabalho para realizar esse procesamento, usando a biblioteca workflows()
+Sabendo criar uma receita de pré-processamento e relembrando como criar uma interface genérica para um modelo com parsnip() e como selecionar um engine pra ele, podemos criar um pequeno fluxo de trabalho para realizar esse processamento, usando a biblioteca workflows()
 
 
 ```{r, cache=TRUE}
@@ -1613,11 +1630,11 @@ fit_teste %>%  tidy() %>%
 `r slide_atual = slide_atual + 1`
 
 
-Um tipo de passo interessante que pode ser adicionado à recipe é a adição de novos preditores que representam interações entre os preditores adicionais.
+Um tipo de passo interessante que pode ser adicionado à recipe é a adição de novos preditores que representam interações entre os preditores originais.
 
 É interessante poder usar as funções helpers, que tornam muito mais fácil a adição de vários termos de interação de uma só vez.
 
-Aqui vamos usar uma regressão mesmo ao invés de clasificação para facilitar a interpretação dos coeficientes.
+Aqui vamos usar uma regressão mesmo ao invés de classificação para facilitar a interpretação dos coeficientes.   
 
 
 
@@ -1668,18 +1685,81 @@ receita_com_interacao <- recipe(i_liked_partner ~ ., data = dado_treino_regressa
     terms = ~ starts_with("career_macro")*starts_with("partner_career_macro")
   ) %>% 
   step_zv(all_predictors()) 
-  
 
 
 ```
+
+
+## Normaizando os preditores
+
+`r slide_atual = slide_atual + 1`
+
+
+Alguns modelos funcionam melhor com os preditores normalizados, por exemplo os que aplicam penalidades aos coeficientes que multiplicam os preditores. Com os preditores em uma faixa parecida, esta penalização é mais justa.
+
+
+```{r}
+
+receita_com_interacao <- recipe(i_liked_partner ~ ., data = dado_treino_regressao) %>%
+  update_role(
+    match,
+    unique_id_number,
+    id_within_wave,
+    subject_within_gender,
+    partnet_id_within_wave,
+    partner_unique_id_number,
+    new_role = "ID"
+  ) %>% 
+  step_ordinalscore(
+    frequency_date
+  ) %>% 
+  step_dummy(
+    all_nominal(), -frequency_date, -all_outcomes() 
+  ) %>%
+  step_interact(
+    terms = ~ starts_with("race")*starts_with("partner_race")*importance_same_race
+  ) %>% 
+  step_interact(
+    terms = ~ starts_with("i_found_partner__")*starts_with("sex_")
+  ) %>%  
+  step_interact(
+    terms = ~ starts_with("interests_correlation")*starts_with("sex_")
+  ) %>% 
+  step_interact(
+    terms = ~ starts_with("partner_age")*starts_with("sex_")
+  ) %>%  
+  step_interact(
+    terms = ~ starts_with("you_perceive_yourself__")*starts_with("sex_")
+  ) %>% 
+  step_interact(
+    terms = ~ starts_with("partner_perceives_himself__")*starts_with("sex_")
+  ) %>% 
+  step_interact(
+    terms = ~ starts_with("career_macro")*starts_with("partner_career_macro")
+  ) %>% 
+  step_zv(all_predictors()) %>% 
+  step_center(all_numeric()) %>%
+  step_scale(all_numeric())
+
+
+```
+
+
+
 
 ## Regressões lasso e ridge
 
 `r slide_atual = slide_atual + 1`
 
-Com a adição destes termos de interação, ficamos com muitos preditores, vários deles bem correlacionados.
+Com a adição destes termos de interação, ficamos com muitos preditores, vários deles bem correlacionados. 
+
+O uso de termos muito correlacionados (não só em pares) pode levar ao fenômeno da colinearidade. O modelo pode atribuir efeito a uma ou outra variável de entrada de acordo com a amostra usada pra treinamento, ficando, portanto, com maior variância.
 
 Uma forma de evitar que muitas variáveis sejam efetivamente usadas no modelo é aplicar uma penalidade de forma a diminuir o número de coeficientes acionados, e, por consequência a variância do modelo. É isso que as regressões do tipo `r a_r("Ridge")` e `r a_r("Lasso")` fazem.
+
+Essas regressões que o penalizam o número e o tamanho do efeito das relações entre as variáveis de entrada e os coeficientes trocam viés por menor variância e mais interpretabilidade: elas têm mais viés, se adaptam menos ao conjunto de treinamento, mas não variam tanto dependendo de qual amostra da população foi escolhida para o treinamento. Além disso, por ter menos coeficientes "ligados", é mais interpretável.
+
+![](diagramas/flex_interpret.png){width=80%}
 
 O modelo `r a_r("Elastic Net")` conjuga a penalização do tipo Ridge com a penalização do tipo Lasso modificando a função de penalização da regressão, que na regressão de mínimos quadrados ordinários, a mais comum, como o nome diz, é o erro quadrático:
 
@@ -1707,11 +1787,11 @@ $$Loss_{Lasso} = RSS + \lambda \sum_{j=1}^{p} \left| \beta_j \right| $$
 
 O conceito de interface é importante na engenharia de software.
 
-É sempre melhor depender de interfaces do que de implementações. A parnsip funciona como uma camada de abstraão que oferece uma interface única que se encarrega de cuidar das diferentes implementações.
+É sempre melhor depender de interfaces do que de implementações. A parnsip funciona como uma camada de abstração que oferece uma interface única que se encarrega de cuidar da chmada às diferentes implementações.
 
-As interfaces genéricas da parnsip está prontas para receber os parâmetros mais comuns usados nos engines e estão preparadas para passar ao engine o valor destes parâmetros.
+As interfaces genéricas da parnsip estão prontas para receber os parâmetros mais comuns usados nos engines e estão preparadas para passar ao engine o valor destes parâmetros.
 
-No caso das regressões lineares alguns engines como o glmnet estão preparados para receber os hiperparâmetros necessários para a implementação da regressão lasso-ridge
+No caso das regressões lineares, alguns engines como o glmnet estão preparados para receber os hiperparâmetros necessários para a implementação da regressão lasso-ridge.
 
 
 
@@ -1785,7 +1865,7 @@ Aqui adicionamos mais alguns passos de pré-processamento:
 
 - step_poly() adiciona preditores elevados a números naturais maiores que 1 (por default 2) possibilitando a representação de efeitos não lineares (quadráticos, por exemplo) 
 
-- step_corr() retira preditores de forma que 2 a 2 não haja mais nenhum com correlação acima do threshold.
+- step_corr() retira preditores de forma que não haja mais nenhum par com correlação acima do threshold.
 
 
 
@@ -1861,8 +1941,10 @@ receita_com_interacao_class <- recipe(i_liked_partner ~ ., data = dado_treino) %
     all_predictors(), 
     threshold = 0.8  
   ) %>% 
-  step_zv(all_predictors()) 
-
+  step_zv(all_predictors()) %>% 
+  step_center(all_numeric()) %>%
+  step_scale(all_numeric())
+  
   
 log_mod <- 
   logistic_reg() %>% 
@@ -1931,7 +2013,7 @@ dados_roc %>%
 ```
 
 
-Plotando, então a curva
+Plotamos, então, a curva
 
 
 ```{r, cache=TRUE}
@@ -2113,7 +2195,13 @@ rocs %>%
 `r slide_atual = slide_atual + 1`
 
 
-A biblioteca rsamples, que já vimos, oferece a infraestrutura para geração das amostras necessárias para o cross validation.
+A biblioteca rsamples, que já vimos, oferece a infraestrutura para geração das amostras necessárias para o Cross Validation.
+
+Relembrando, temos que montar o seguinte esquema:
+
+![](imagens/k-fold-cross.png)
+
+No código abaixo, fazemos duas divisões em 5 partes.
 
 
 ```{r, cache=TRUE}
@@ -2140,9 +2228,11 @@ analysis(x = folds$splits[[1]] ) %>%  glimpse()
 `r slide_atual = slide_atual + 1`
 
 
-Executar o cross validation significa estimar o modelo várias vezes em execuções que são completamente diferentes, o que é perfeito para executar em paralelo.
+Executar o cross validation, como vimos, significa estimar o modelo várias vezes em execuções que são completamente independentes, o que é perfeito para executar em paralelo.
 
-A função fit_resamples() faz todas as estimações. É possível registrar um backend para fazer a execução de forma paralela
+A função fit_resamples() faz todas as estimações. 
+
+É possível registrar um backend para fazer a execução de forma paralela
 
 
 
@@ -2167,7 +2257,9 @@ fit_com_interacao_resample <-
   wf_com_interacao_class %>% 
   fit_resamples(
     folds,
-    control = control_resamples(allow_par = TRUE )
+    control = control_resamples(
+      allow_par = TRUE 
+    )
   )
 
 stopCluster(cl)
@@ -2179,13 +2271,17 @@ fit_com_interacao_resample
 ```
 
 
-
+A função collect_metrics() recebe o objeto retornado por fit_resamples() e retorna uma estrutura com os resultados das execuções, no nosso caso 10. Como não há hiperparâmetros para variar, há apenas duas métricas relativas ao mesmo conjunto.
 
 
 ```{r}
 
 
-collect_metrics(fit_com_interacao_resample) %>% gt()
+collect_metrics(fit_com_interacao_resample) %>% 
+  gt() %>% 
+  fmt_percent(
+    columns = vars(mean, std_err)
+  )
 
 
 ```
@@ -2213,7 +2309,7 @@ O modelo de regressão logística que rodamos anteriormente não tinha hiperpar�
 
 A biblioteca tune nos ajuda a fazer esse procedimento.
 
-No momento de definir o modelo, atribuimos a resposta de tune() aos parãmetros do modelo que queremos variar para fins de tuning
+No momento de definir o modelo, atribuimos a resposta de tune() aos parâmetros do modelo que queremos variar para fins de tuning
 
 
 ```{r}
@@ -2247,13 +2343,34 @@ tune_spec_logistic_reg
 `r slide_atual = slide_atual + 1`
 
 
+<div class='left' style='float:left;width:30%'>
+![](imagens/dials.png){width=80%}
+</div>
+<div class='right' style='float:right;width:68%'>
+
+
+Uma das formas de executar esta busca pelo melhor conjunto de hiperparâmetros é criar um grid com várias especificações.
+
+A biblioteca dials ajuda na criação deste grid de valores pros hiperparâmetros.
+
+A função grid_regular() cria um grid com intervalos regulares (esses intervalos regulares, dependendo do parãmetro podem ser regulares em log, por exemplo).
+
+Existem funções com os mesmos nomes usados para os parâmetros na interface genérica da parnsnip. Quando chamadas sem parâmetros essas funções geram valores que normalmente fazem sentido, mas é possível escolher os valores de forma personalizada.
+
+O parâmetro levels define quantos valores diferentes serão usados para cada parâmetro.
+
+
+
 
 ```{r}
 
 net_grid <- grid_regular(
   penalty(range = c(-4,-1)),
   mixture(),
-  levels = 10
+  levels = c(
+    penalty = 10,
+    mixture = 10
+  )
 )
 
 net_grid
@@ -2261,10 +2378,15 @@ net_grid
 
 ```
 
+</div>
+
+
 
 ## Rodando o tuning
 
 `r slide_atual = slide_atual + 1`
+
+A função tunegrid() roda a busca dentro deste grid de valores de parâmetros rodando o processo de cross validation de acordo com o que for passado para o parâmetro resample.
 
 
 
@@ -2308,8 +2430,7 @@ res_logreg_tune_sample_optim
 `r slide_atual = slide_atual + 1`
 
 
-
-
+Uma forma de visualizar os resultados é com geom_tile, após rodar a função collect_metrics()
 
 
 ```{r, cache=TRUE}
@@ -2338,7 +2459,7 @@ plot_result_tune <- function(results){
       aes(
         x = penalty,
         y = mixture,
-        label = number(mean, accuracy = .001),
+        label = percent(mean, accuracy = .01),
       ),
       size = 3
     ) +
@@ -2357,11 +2478,1411 @@ plot_result_tune(res_logreg_tune_sample_optim)
 ```
 
 
+```{r}
+
+res_logreg_tune_sample_optim %>% 
+  collect_metrics() %>% 
+  filter(
+    .metric == "roc_auc"
+  ) %>% 
+  arrange(mean %>%  desc()) %>% 
+  gt() %>% 
+  fmt_percent(
+    columns = vars(mean, std_err)
+  ) %>% 
+  fmt_number(
+    columns = vars(penalty, mixture),
+    n_sigfig = 2
+  )
+  
+      
+
+
+```
+
+
+## Árvore de decisão
+
+`r slide_atual = slide_atual + 1`
+
+A `r a_r("árvore de decisão")` particiona o espaço formado pelas variáveis explicativas em subespaços baseando-se na "pureza" desses subespaços com relação à variável dependente.
+
+Abaixo fazemos uma experiência com apenas 2 features contínuas e uma feature categórrica com dois valores possíveis .
+
+
+```{r, cache=TRUE}
+
+receita_arvore_decisao_demo <- recipe(
+  i_liked_partner ~
+    i_found_partner__attractive +
+    sex +
+    my_age,
+   data = dado_treino
+)
+
+arvore_decisao_mod <- 
+  decision_tree(
+    tree_depth = 4,
+    min_n = 1,
+    cost_complexity = 0
+    
+  ) %>% 
+  set_engine("rpart") %>% 
+  set_mode("classification")
+
+wf_arvore_decisao_demo <- workflow() %>% 
+  add_recipe(receita_arvore_decisao_demo) %>% 
+  add_model(arvore_decisao_mod)
+
+fit_ad_demo <- 
+  wf_arvore_decisao_demo %>% 
+  fit(
+    data = dado_treino
+  )
+  
+
+```
+
+O algoritmo cira uma árvore de decisão como essa.
+
+Ele escolhe, portanto, a ordem e os valores dos atributos que fatiarão a população. Seguindo a árvore até suas folhas, que são os nós sem filhos, podemos determinar a saída prevista de cada valor do vetor x.
+
+
+```{r, cache=TRUE}
+
+fit_ad_demo$fit$fit$fit %>% rpart.plot() 
+
+
+```
+
+Temos um espaço formado por duas features contínuas e uma feature categórica com duas categorias, podemos pensar este espaço como dois planos.
+
+O algoritmo da árvore de decisão escolhe qual feature divide cada plano em duas partes mais puras no sentido da classificação (com mais pontos com a mesma categoria). 
+
+Como temos duas features contínuas e mais uma com duas categorias possíveis, isso é equivalente a dividir o espaço representado por dois planos com retas na vertical e horizontal.
+
+
+```{r, cache=TRUE}
+
+valores_partner_atractive = tibble(i_found_partner__attractive = seq(0, 10, by = 0.1))
+
+valores_my_age = 
+  tibble(
+    my_age = seq(min(dado_treino$my_age), max(dado_treino$my_age), by = 1 ) 
+  )
+
+valores_sex = tibble( sex = c("Homem", "Mulher")  )
+
+
+
+dados_novos <- crossing(
+  valores_partner_atractive,
+  valores_my_age,
+  valores_sex
+)
+
+predicoes_arvore <- predict(
+  object = fit_ad_demo,
+  new_data = dados_novos
+)
+
+
+predicoes_arvore_com_dados <- bind_cols(
+  dados_novos,
+  predicoes_arvore
+) 
+
+
+ggplot(predicoes_arvore_com_dados) +
+  geom_tile(
+    aes(
+      x = i_found_partner__attractive,
+      y = my_age,
+      fill = .pred_class,
+      alpha = 0.1
+    )
+  ) +
+  geom_jitter(
+    data = dado_treino,
+    width = 0.5,
+    aes(
+      x = i_found_partner__attractive,
+      y = my_age,
+      color = i_liked_partner
+    ),
+    size = 0.8,
+    show.legend = FALSE
+  ) +
+  geom_vline(
+    xintercept = 6.75
+  ) +
+  geom_vline(
+    xintercept = 7.25
+  ) +
+  geom_hline(
+    data = tibble(
+      my_age = 20.5,
+      sex = "Homem"
+    ), 
+    aes(
+      yintercept = my_age
+    )
+  ) +
+  geom_hline(
+    data = tibble(
+      my_age = 28.5,
+      sex = "Mulher"
+    ), 
+    aes(
+      yintercept = my_age
+    )
+  ) +
+  facet_wrap(
+    ~sex
+  ) +
+  guides(
+    alpha = FALSE
+  ) +
+  theme_minimal() +
+  scale_fill_manual(
+    values = c(Liked = "darkgreen", Not = "darkred")
+  ) +
+  scale_color_manual(
+    values = c(Liked = "darkgreen", Not = "darkred")
+  ) +
+  theme(
+    legend.position = "top"
+  ) +
+  labs(
+    fill = "",
+    x = "Achei bonito",
+    y = "Minha idade"
+  )
+
+
+
+```
+
+
+```{r}
+
+
+log_reg_mod <- 
+  logistic_reg(
+  ) %>% 
+  set_engine("glm") %>% 
+  set_mode("classification")
+
+wf_log_reg_demo <- workflow() %>% 
+  add_recipe(receita_arvore_decisao_demo) %>% 
+  add_model(log_reg_mod)
+
+fit_log_reg_demo <- 
+  wf_log_reg_demo %>% 
+  fit(
+    data = dado_treino
+  )
+
+
+```
+
+
+A título de comparação, podemos ver o mesmo esquema com a regressão logística
+
+
+```{r}
+
+predicoes_log_reg <- predict(
+  object = fit_log_reg_demo,
+  new_data = dados_novos
+)
+
+
+predicoes_log_reg_com_dados <- bind_cols(
+  dados_novos,
+  predicoes_log_reg
+) 
+
+
+
+ggplot(predicoes_log_reg_com_dados) +
+  geom_tile(
+    aes(
+      x = i_found_partner__attractive,
+      y = my_age,
+      fill = .pred_class,
+      alpha = 0.1
+    )
+  ) +
+  geom_jitter(
+    data = dado_treino,
+    width = 0.5,
+    aes(
+      x = i_found_partner__attractive,
+      y = my_age,
+      color = i_liked_partner
+    ),
+    size = 0.8,
+    show.legend = FALSE
+  ) +
+  facet_wrap(
+    ~sex
+  ) +
+  guides(
+    alpha = FALSE
+  ) +
+  theme_minimal() +
+  scale_fill_manual(
+    values = c(Liked = "darkgreen", Not = "darkred")
+  ) +
+  scale_color_manual(
+    values = c(Liked = "darkgreen", Not = "darkred")
+  ) +
+  theme(
+    legend.position = "top"
+  ) +
+  labs(
+    fill = "",
+    x = "Achei bonito",
+    y = "Minha idade"
+  )
+
+
+
+```
+
+
+## Random Forest
+
+`r slide_atual = slide_atual + 1`
+
+A forma como a árvore de decisão é criada faz com que ela tenha muita variância.
+
+Cada decisão de particionamento é tomada a partir de características que podem ser muito específicas aos dados de treinamento.
+
+Uma ideia usada nas `r a_r("Random Forests")` é criar $trees$ conjuntos de treinamento a partir do conjunto original, mas retirando amostras de mesmo tamanho do conjunto original, COM REPOSIÇÃO. Além disso, cada vez que a árvore é particionada, a partição só pode acontecer em $mtry$ das variáveis explicativas.
+
+O resultado final é uma média da decisão dessas $trees$ árvores.
+
+Estas duas mudanças fazem com que o modelo tenha uma variância muito menor do que as árvore de decisão simples.
+
+
+`r slide_atual = slide_atual + 1`
+
+
+```{r}
+
+ranger_mod <- 
+  rand_forest(
+    mtry = 2,
+    trees = 100,
+    min_n = 1
+  ) %>% 
+  set_engine("ranger") %>% 
+  set_mode("classification")
+
+wf_ranger_demo <- workflow() %>% 
+  add_recipe(receita_arvore_decisao_demo) %>% 
+  add_model(ranger_mod)
+
+fit_ranger_demo <- 
+  wf_ranger_demo %>% 
+  fit(
+    data = dado_treino
+  )
+
+
+
+```
+
+
+## Random Forest: maior flexibilidade
+
+`r slide_atual = slide_atual + 1`
+
+
+Abaixo podemos ver que o modelo oferece muito mais flexibilidade que as árvores de decisão simples.
+
+
+```{r}
+
+
+
+predicoes_ranger <- predict(
+  object = fit_ranger_demo,
+  new_data = dados_novos
+)
+
+
+predicoes_ranger_com_dados <- bind_cols(
+  dados_novos,
+  predicoes_ranger
+) 
+
+
+
+ggplot(predicoes_ranger_com_dados) +
+  geom_tile(
+    aes(
+      x = i_found_partner__attractive,
+      y = my_age,
+      fill = .pred_class,
+      alpha = 0.1
+    )
+  ) +
+  geom_jitter(
+    data = dado_treino,
+    width = 0.5,
+    aes(
+      x = i_found_partner__attractive,
+      y = my_age,
+      color = i_liked_partner
+    ),
+    size = 0.8,
+    show.legend = FALSE
+  ) +
+  facet_wrap(
+    ~sex
+  ) +
+  guides(
+    alpha = FALSE
+  ) +
+  theme_minimal() +
+  scale_fill_manual(
+    values = c(Liked = "darkgreen", Not = "darkred")
+  ) +
+  scale_color_manual(
+    values = c(Liked = "darkgreen", Not = "darkred")
+  ) +
+  theme(
+    legend.position = "top"
+  ) +
+  labs(
+    fill = "",
+    x = "Achei bonito",
+    y = "Minha idade"
+  )
+
+
+
+
+```
+
+
+## Random Forest: montando o tuning da Random Forest
+
+`r slide_atual = slide_atual + 1`
+
+
+
+Abaixo montamos a nova configuração de modelo, com seus hiperparâmetros a serem tunados.
+
+
+
+```{r}
+
+
+tune_spec_rand_forest <- rand_forest(
+  mtry = tune(),
+  trees = tune(),
+  min_n = tune()
+) %>% 
+  set_engine(
+    engine = "ranger"
+  ) %>% 
+  set_mode(
+    "classification"
+  )
+
+tune_spec_rand_forest
+
+```
+
+
+## Fazendo o tuning da random forest
+
+`r slide_atual = slide_atual + 1`
+
+
+Vamos criar um primeiro grid para tentar otimizar o valor dos hiperparâmetros
+
+
+
+```{r}
+
+
+
+rand_for_grid <- grid_regular(
+  mtry(range = c(3,50)),
+  trees(range = c(1,100)),
+  min_n(),
+  levels = 4
+)
+
+rand_for_grid
+
+```
+
+```{r, eval=FALSE}
+
+
+all_cores <- parallel::detectCores(logical = FALSE)
+
+library(doParallel)
+cl <- makePSOCKcluster(all_cores)
+registerDoParallel(cl)
+
+
+wf_rand_for_tune_sample <- workflow() %>% 
+  add_model(
+    tune_spec_rand_forest
+  ) %>% 
+  add_recipe(receita_com_interacao_class)
+
+
+res_rand_for <- wf_rand_for_tune_sample %>% 
+  tune_grid(
+    resamples = folds,
+    grid = rand_for_grid,
+    control = control_grid(allow_par = TRUE, verbose = TRUE)
+  )  
+
+stopCluster(cl)
+ 
+
+
+
+```
+
+
+```{r, cache=TRUE}
+
+res_rand_for <- read_rds("resultados/res_rand_for.rds" )
+
+
+collect_metrics(res_rand_for) %>% arrange(desc(mean)) %>% 
+  filter(
+    .metric == "roc_auc"
+  ) %>% 
+  head(
+    n = 10
+  ) %>% 
+  gt() %>% 
+  fmt_percent(
+    columns = vars(mean, std_err)
+  ) 
+
+
+
+```
+
+## Visualizando os primeiros resultados do tuning 
+
+`r slide_atual = slide_atual + 1`
 
 
 
 
 
+```{r}
+
+
+
+
+plot_result_tune_ranger <- function(results){
+  
+
+  results %>% 
+    map_df(
+      .f = collect_metrics
+    ) %>% 
+    filter(
+      .metric == "roc_auc"
+    ) %>% 
+    mutate(
+      ranque = rank(mean)
+    ) %>% 
+    ggplot() +
+    geom_tile(
+      aes(
+        x = mtry %>%  factor(),
+        y = trees %>%  factor(),
+        fill = ranque
+      )
+    ) +
+    geom_text(
+      aes(
+        x = mtry %>% factor(),
+        y = trees %>%  factor(),
+        label = percent(mean, accuracy = .01),
+      ),
+      color = "black",
+      size = 3,
+      face = "bold"
+    ) +
+    scale_fill_gradient(low = "white", high = "darkgreen") +
+    facet_wrap(
+      ~min_n, 
+      ncol = 1, 
+      labeller = as_labeller( function(x){str_glue("min_n: {x}")}  )
+    ) +
+    theme_minimal() +
+    theme(
+      legend.position = "top"
+    ) +
+    labs(
+      x = "mtry",
+      y = "trees"
+       
+    ) 
+}
+
+plot_result_tune_ranger(list(res_rand_for))
+
+
+
+```
+
+
+
+## Segunda rodada de otimização
+
+`r slide_atual = slide_atual + 1`
+
+
+
+
+```{r, eval=FALSE}
+
+rand_for_grid_optim <- grid_regular(
+  mtry(range = c(4,45)),
+  trees(range = c(150,350)),
+  min_n(c(1,6)),
+  levels = 4
+)
+
+
+
+
+
+all_cores <- parallel::detectCores(logical = FALSE)
+
+library(doParallel)
+cl <- makePSOCKcluster(all_cores)
+registerDoParallel(cl)
+
+
+res_rand_for_optim <- wf_rand_for_tune_sample %>% 
+  tune_grid(
+    resamples = folds,
+    grid = rand_for_grid_optim,
+    control = control_grid(allow_par = TRUE, verbose = TRUE)
+  )  
+
+stopCluster(cl)
+ 
+
+
+```
+
+
+
+
+```{r, cache=TRUE}
+
+res_rand_for_optim <- read_rds("resultados/res_rand_for_optim.rds" )
+
+
+collect_metrics(res_rand_for_optim) %>% arrange(desc(mean)) %>% 
+  filter(
+    .metric == "roc_auc"
+  ) %>% 
+  head(
+    n = 10
+  ) %>% 
+  gt() %>% 
+  fmt_percent(
+    columns = vars(mean, std_err)
+  ) 
+
+
+
+```
+
+
+```{r cache=TRUE, fig.height= 10}
+
+
+plot_result_tune_ranger(list(res_rand_for, res_rand_for_optim))
+
+
+```
+
+
+## Terceira rodada de otimização
+
+`r slide_atual = slide_atual + 1`
+
+
+
+
+```{r, eval=FALSE}
+
+rand_for_grid_optim_2 <- grid_regular(
+  mtry(range = c(10,35)),
+  trees(range = c(350,500)),
+  min_n(range = c(1, 3)),
+  levels = c(mtry = 3, trees = 4, min_n = 3)
+    
+)
+
+
+
+all_cores <- parallel::detectCores(logical = FALSE)
+
+library(doParallel)
+cl <- makePSOCKcluster(all_cores)
+registerDoParallel(cl)
+
+
+res_rand_for_optim_2 <- wf_rand_for_tune_sample %>% 
+  tune_grid(
+    resamples = folds,
+    grid = rand_for_grid_optim_2,
+    control = control_grid(allow_par = TRUE, verbose = TRUE)
+  )  
+
+stopCluster(cl)
+
+
+
+```
+
+
+
+
+```{r}
+
+res_rand_for_optim_2 <- read_rds("resultados/res_rand_for_optim_2.rds" )
+
+collect_metrics(res_rand_for_optim_2) %>% arrange(desc(mean)) %>% 
+  filter(
+    .metric == "roc_auc"
+  ) %>% 
+  head(
+    n = 10
+  ) %>% 
+  gt() %>% 
+  fmt_percent(
+    columns = vars(mean, std_err)
+  ) 
+
+
+
+```
+
+
+```{r, fig.height= 14}
+
+
+plot_result_tune_ranger(list(res_rand_for, res_rand_for_optim, res_rand_for_optim_2 ))
+
+
+```
+
+
+## Quarta rodada de otimização
+
+`r slide_atual = slide_atual + 1`
+
+
+```{r}
+
+
+rand_for_grid_optim_3 <- grid_regular(
+  mtry(range = c(8, 22)),
+  trees(range = c(400,500)),
+  min_n(range = c(1,1)),
+  levels = c(mtry = 5, trees = 5, min_n = 1)
+    
+)
+
+rand_for_grid_optim_3
+
+
+
+```
+
+
+```{r}
+
+res_rand_for_optim_3 <- read_rds("resultados/res_rand_for_optim_3.rds" )
+
+collect_metrics(res_rand_for_optim_3) %>% arrange(desc(mean)) %>% 
+  filter(
+    .metric == "roc_auc"
+  ) %>% 
+  head(
+    n = 10
+  ) %>% 
+  gt() %>% 
+  fmt_percent(
+    columns = vars(mean, std_err)
+  ) 
+
+
+
+```
+
+
+```{r, fig.height=15}
+
+
+plot_result_tune_ranger(
+  list(
+    res_rand_for,
+    res_rand_for_optim,
+    res_rand_for_optim_2,
+    res_rand_for_optim_3
+  )
+)
+
+
+
+```
+
+
+## Redes neurais
+
+`r slide_atual = slide_atual + 1`
+
+<div class='left' style='float:left;width:30%'>
+![](imagens/redeneural.jpg){width=100%}
+</div>
+<div class='right' style='float:right;width:68%'>
+
+
+Apesar do hype que envolve as redes neurais, que faz elas parecerem mágicas e misteriosas, elas são métodos não lineares onde são aplicadas regressões lineares em cima de saída de outras regressões. Algumas dessa saídas são modificadas por funções de ativação não lineares, dando caráter não linear ao método. Os coeficientes dessas regressões, também chamados de pesos, são calibrados de forma a minimizar o erro através de um algoritmo inteligente chamado backpropagation.
+
+</div>
+
+
+## Uma arquitetura de rede neural
+
+`r slide_atual = slide_atual + 1`
+
+
+<div class='left' style='float:left;width:30%'>
+![](imagens/nnet.png){width=100%}
+</div>
+<div class='right' style='float:right;width:68%'>
+
+
+Existem várias arquiteturas de redes neurais. 
+
+Vamos usar a arquitetura mais simples e mais usada: single hidden layer. 
+
+Como mostra a figura à esquerda, esse modelo tem uma camada de entrada, uma camada "escondida" intermediária e uma camada de saída. 
+
+$p$ é o número de entradas, $K$ o número de categorias de saída possíveis (no caso de classificação, no caso de regressão há uma saída) e $M$, o número de neurônios na camada escondida.
+
+O nome neurônio vem de uma simplificação de como funciona a célula. Assim como os nós da rede neural, a célula também recebe várias entradas e tem um processo de ativação (liga ou desliga) dependendo da intensidade da informação que rebebe nas entradas.
+
+![](imagens/neuron.png){width=50%}
+
+No entando o cérebro humano é uma rede extremamente complexa com uma arquitetura que foi selecionada durante bilhões de anos.
+
+Existem arquiteturas de rede neural mais complicadas, mas o número de pesos a serem calibrados é explosivo. Elas exigem uma quantidade massiva de dados. A área que estuda essa redes profundas se chama deep learning.
+
+
+</div>
+
+## Um exemplo de rede neural com 3 entradas
+
+`r slide_atual = slide_atual + 1`
+
+
+Vamos fazer o mesmo exercício que já fizemos com os outros modelos, treinando ela para apenas dois features contínuos e um categórico.
+
+
+```{r}
+
+
+set.seed(555)
+
+
+receita_nnet_demo <- recipe(
+  i_liked_partner ~
+    i_found_partner__attractive +
+    sex +
+    my_age,
+   data = dado_treino
+) %>% 
+  step_center(all_numeric()) %>%
+  step_scale(all_numeric())
+  
+
+nnet_mod <- 
+  mlp(
+    hidden_units = 10,
+    epochs = 1000
+  ) %>% 
+  set_engine("nnet") %>% 
+  set_mode("classification")
+
+wf_nnet_demo <- workflow() %>% 
+  add_recipe(receita_nnet_demo) %>% 
+  add_model(nnet_mod)
+
+fit_nnet_demo <- 
+  wf_nnet_demo %>% 
+  fit(
+    data = dado_treino
+  )
+  
+fit_nnet_demo
+
+
+```
+
+Podemos perceber que o modelo cria um padrão de classificação complexo, que consegue considerar a interação entre as entradas.
+
+
+```{r}
+
+
+predicoes_nnet <- predict(
+  object = fit_nnet_demo,
+  new_data = dados_novos
+)
+
+
+predicoes_nnet_com_dados <- bind_cols(
+  dados_novos,
+  predicoes_nnet
+) 
+
+
+
+ggplot(predicoes_nnet_com_dados) +
+  geom_tile(
+    aes(
+      x = i_found_partner__attractive,
+      y = my_age,
+      fill = .pred_class,
+      alpha = 0.1
+    )
+  ) +
+  geom_jitter(
+    data = dado_treino,
+    width = 0.5,
+    aes(
+      x = i_found_partner__attractive,
+      y = my_age,
+      color = i_liked_partner
+    ),
+    size = 0.8,
+    show.legend = FALSE
+  ) +
+  facet_wrap(
+    ~sex
+  ) +
+  guides(
+    alpha = FALSE
+  ) +
+  theme_minimal() +
+  scale_fill_manual(
+    values = c(Liked = "darkgreen", Not = "darkred")
+  ) +
+  scale_color_manual(
+    values = c(Liked = "darkgreen", Not = "darkred")
+  ) +
+  theme(
+    legend.position = "top"
+  ) +
+  labs(
+    fill = "",
+    x = "Achei bonito",
+    y = "Minha idade"
+  )
+
+
+
+```
+
+
+## Fazendo tuning na rede neural
+
+`r slide_atual = slide_atual + 1`
+
+
+hidden units é o número de neurônios na camada escondida. Quanto maior o número maior a flexibilidade da rede.
+
+penalty é uma penalidade similar à da regressão do tipo ridge, também limita o número de pesos ativos.
+
+epochs é o número de iterações usadas pra treinar a rede. Quanto mais iterações mais adaptada ao conjunto de entrada a rede estará.
+
+
+```{r}
+
+
+
+nnet_grid <- grid_regular(
+  hidden_units(),
+  penalty(),
+  epochs(),
+  levels = 3
+)
+
+nnet_grid
+
+
+```
+
+
+
+```{r eval=FALSE}
+
+receita_com_interacao_class <- receita_com_interacao_class %>% 
+  step_center(all_numeric()) %>%
+  step_scale(all_numeric())
+  
+
+tune_spec_nnet <- parsnip::mlp(
+  
+  hidden_units = tune(),
+  penalty = tune(),
+  epochs = tune()
+
+) %>% 
+  set_engine(
+    engine = "nnet",
+    MaxNWts = 3000
+  ) %>% 
+  set_mode(
+    "classification"
+  )
+
+
+wf_nnet_tune_sample <- workflow() %>% 
+  add_model(
+    tune_spec_nnet
+  ) %>% 
+  add_recipe(receita_com_interacao_class_center_scale)
+
+
+all_cores <- parallel::detectCores(logical = FALSE)
+
+library(doParallel)
+cl <- makePSOCKcluster(all_cores)
+registerDoParallel(cl)
+
+
+res_nnet <- wf_nnet_tune_sample %>% 
+  tune_grid(
+    resamples = folds,
+    grid = nnet_grid,
+    control = control_grid(allow_par = TRUE, verbose = TRUE)
+  )  
+
+stopCluster(cl)
+ 
+
+
+
+write_rds(res_nnet, "resultados/res_nnet.rds")
+
+
+```
+
+
+
+```{r}
+
+res_nnet <- read_rds("resultados/res_nnet.rds")
+
+collect_metrics(res_nnet) %>% arrange(desc(mean))
+
+
+```
+
+
+```{r, fig.height=10}
+
+
+plot_result_tune_nnet <- function(results){
+  
+
+  results %>% 
+    map_df(
+      .f = collect_metrics
+    ) %>% 
+    filter(
+      .metric == "roc_auc"
+    ) %>% 
+    group_by(
+      penalty, epochs, hidden_units
+    ) %>% 
+    summarise(
+      mean = mean(mean)
+    ) %>% 
+    ungroup() %>% 
+    mutate(
+      ranque = rank(mean)
+    ) %>% 
+    ggplot() +
+    geom_tile(
+      aes(
+        x = penalty ,
+        y = epochs %>%  factor(),
+        fill = ranque
+      )
+    ) +
+    scale_x_log10() +
+    geom_text(
+      aes(
+        x = penalty,
+        y = epochs %>%  factor(),
+        label = percent(mean, accuracy = .01),
+      ),
+      color = "black",
+      size = 3,
+      face = "bold"
+    ) +
+    scale_fill_gradient(low = "white", high = "darkgreen") +
+    facet_wrap(
+      ~hidden_units, 
+      ncol = 1,
+      labeller = as_labeller( function(x){str_glue("hidden: {x}")}  )
+    ) +
+    theme_minimal() +
+    theme(
+      legend.position = "top"
+    )
+}
+
+
+plot_result_tune_nnet(list(res_nnet))
+
+
+
+
+```
+
+## Fazendo tuning na rede neural, segunda rodada
+
+`r slide_atual = slide_atual + 1`
+
+
+
+```{r}
+
+
+nnet_grid_2 <- grid_regular(
+  hidden_units(range = c(1,10)),
+  penalty( range = c(-1,1)),
+  epochs(range = c(10, 1000)),
+  levels = c(hidden_units = 3, penalty = 2, epochs = 3)
+)
+
+nnet_grid_2
+
+
+
+
+```
+
+
+```{r eval=FALSE}
+
+
+all_cores <- parallel::detectCores(logical = FALSE)
+
+library(doParallel)
+cl <- makePSOCKcluster(all_cores)
+registerDoParallel(cl)
+
+
+res_nnet_2 <- wf_nnet_tune_sample %>% 
+  tune_grid(
+    resamples = folds,
+    grid = nnet_grid_2,
+    control = control_grid(allow_par = TRUE, verbose = TRUE)
+  )  
+
+stopCluster(cl)
+ 
+write_rds(res_nnet_2, "resultados/res_nnet_2.rds")
+
+
+
+
+```
+
+
+
+```{r}
+
+res_nnet_2 <- read_rds("resultados/res_nnet_2.rds")
+
+
+collect_metrics(res_nnet_2) %>% arrange(desc(mean))
+
+
+```
+
+
+```{r}
+
+plot_result_tune_nnet(list(res_nnet_2, res_nnet))
+
+
+```
+
+
+
+
+```{r, eval=FALSE}
+
+
+nnet_grid_3 <- grid_regular(
+  hidden_units(range = c(1,15)),
+  penalty( range = c(0,1)),
+  epochs(range = c(1500, 2000)),
+  levels = c(hidden_units = 4, penalty = 2, epochs = 2)
+)
+
+
+
+
+
+all_cores <- parallel::detectCores(logical = FALSE)
+
+library(doParallel)
+cl <- makePSOCKcluster(all_cores)
+registerDoParallel(cl)
+
+
+res_nnet_3 <- wf_nnet_tune_sample %>% 
+  tune_grid(
+    resamples = folds,
+    grid = nnet_grid_3,
+    control = control_grid(allow_par = TRUE, verbose = TRUE)
+  )  
+
+stopCluster(cl)
+ 
+write_rds(res_nnet_3, "resultados/res_nnet_3.rds")
+
+
+
+
+```
+
+
+
+
+
+
+```{r}
+
+res_nnet_3 <- read_rds("resultados/res_nnet_3.rds")
+
+
+collect_metrics(res_nnet_3) %>% arrange(desc(mean))
+
+
+```
+
+
+
+```{r}
+
+
+plot_result_tune_nnet(list(res_nnet_2, res_nnet, res_nnet_3))
+
+
+
+```
+
+
+```{r, eval=FALSE}
+
+
+
+nnet_grid_4 <- grid_regular(  
+  hidden_units(range = c(10,15)),
+  penalty( range = c(1,2)),
+  epochs(range = c(2500, 3500)),
+  levels = c(hidden_units = 2, penalty = 2, epochs = 3)
+)
+
+
+
+all_cores <- parallel::detectCores(logical = FALSE)
+
+library(doParallel)
+cl <- makePSOCKcluster(all_cores)
+registerDoParallel(cl)
+
+
+res_nnet_4 <- wf_nnet_tune_sample %>% 
+  tune_grid(
+    resamples = folds,
+    grid = nnet_grid_4,
+    control = control_grid(allow_par = TRUE, verbose = TRUE)
+  )  
+
+stopCluster(cl)
+ 
+write_rds(res_nnet_4, "resultados/res_nnet_4.rds")
+
+
+
+
+```
+
+
+
+```{r}
+
+res_nnet_4 <- read_rds("resultados/res_nnet_4.rds")
+
+
+collect_metrics(res_nnet_4) %>% arrange(desc(mean))
+
+
+```
+
+```{r}
+
+
+plot_result_tune_nnet(list(res_nnet_2, res_nnet, res_nnet_3, res_nnet_4))
+
+
+```
+
+
+
+
+
+
+
+
+
+
+```{r}
+
+
+
+set.seed(555)
+
+
+receita_knn_demo <- recipe(
+  i_liked_partner ~
+    i_found_partner__attractive +
+    sex +
+    my_age,
+   data = dado_treino
+) 
+
+knn_mod <- 
+  parsnip::nearest_neighbor(
+  ) %>% 
+  set_engine("kknn") %>% 
+  set_mode("classification")
+
+wf_knn_demo <- workflow() %>% 
+  add_recipe(receita_knn_demo) %>% 
+  add_model(knn_mod)
+
+fit_knn_demo <- 
+  wf_knn_demo %>% 
+  fit(
+    data = dado_treino
+  )
+  
+fit_knn_demo
+
+
+
+
+
+```
+
+
+
+
+```{r}
+
+
+predicoes_knn <- predict(
+  object = fit_knn_demo,
+  new_data = dados_novos
+)
+
+
+predicoes_knn_com_dados <- bind_cols(
+  dados_novos,
+  predicoes_knn
+) 
+
+
+
+ggplot(predicoes_knn_com_dados) +
+  geom_tile(
+    aes(
+      x = i_found_partner__attractive,
+      y = my_age,
+      fill = .pred_class,
+      alpha = 0.1
+    )
+  ) +
+  geom_jitter(
+    data = dado_treino,
+    width = 0.5,
+    aes(
+      x = i_found_partner__attractive,
+      y = my_age,
+      color = i_liked_partner
+    ),
+    size = 0.8,
+    show.legend = FALSE
+  ) +
+  facet_wrap(
+    ~sex
+  ) +
+  guides(
+    alpha = FALSE
+  ) +
+  theme_minimal() +
+  scale_fill_manual(
+    values = c(Liked = "darkgreen", Not = "darkred")
+  ) +
+  scale_color_manual(
+    values = c(Liked = "darkgreen", Not = "darkred")
+  ) +
+  theme(
+    legend.position = "top"
+  ) +
+  labs(
+    fill = "",
+    x = "Achei bonito",
+    y = "Minha idade"
+  )
+
+
+
+
+```
+
+
+```{r}
+
+
+
+
+```
 
 
 
