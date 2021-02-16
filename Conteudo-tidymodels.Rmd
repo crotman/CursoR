@@ -9,7 +9,11 @@ output:
       in_header: header.html
       before_body: doc_prefix.html
       after_body: doc_suffix.html
+
 bibliography: bibliography.bib
+
+
+
 ---
 
 ```{r, warning=FALSE, message=FALSE, echo=FALSE}
@@ -24,6 +28,12 @@ library(gt)
 library(ggrepel)
 library(rpart.plot)
 library(kknn)
+library(shadowtext)
+library(tsibble)
+library(feasts)
+library(lubridate)
+library(fable)
+library(furrr)
 ```
 
 ```{r setup, include=FALSE}
@@ -1363,7 +1373,7 @@ O processo de feature engineering é o lugar onde mais podemos melhorar o tipo d
 A dependência desse processo é menor quando usamos modelos muito complexos, de deep learning, mas para isso é necessário ter uma quantidade colossal de dados.
 
 
-## Processo de escolha e avaliação do modelo: antes de tudo separar os dados de teste
+## Escolha e avaliação do modelo: antes separar os dados de teste
 
 
 `r slide_atual = slide_atual + 1`
@@ -1587,7 +1597,7 @@ wf
 
 `r slide_atual = slide_atual + 1`
 
-Com o workflow criado é possível estimá-lo ussando a função fit()
+Com o workflow criado é possível estimá-lo usando a função fit()
 
 
 ```{r, cache=TRUE}
@@ -1634,7 +1644,7 @@ Um tipo de passo interessante que pode ser adicionado à recipe é a adição de
 
 É interessante poder usar as funções helpers, que tornam muito mais fácil a adição de vários termos de interação de uma só vez.
 
-Aqui vamos usar uma regressão mesmo ao invés de classificação para facilitar a interpretação dos coeficientes.   
+Aqui vamos usar uma regressão ao invés de classificação para facilitar a interpretação dos coeficientes.   
 
 
 
@@ -1690,7 +1700,7 @@ receita_com_interacao <- recipe(i_liked_partner ~ ., data = dado_treino_regressa
 ```
 
 
-## Normaizando os preditores
+## Normalizando os preditores
 
 `r slide_atual = slide_atual + 1`
 
@@ -1757,7 +1767,7 @@ O uso de termos muito correlacionados (não só em pares) pode levar ao fenômen
 
 Uma forma de evitar que muitas variáveis sejam efetivamente usadas no modelo é aplicar uma penalidade de forma a diminuir o número de coeficientes acionados, e, por consequência a variância do modelo. É isso que as regressões do tipo `r a_r("Ridge")` e `r a_r("Lasso")` fazem.
 
-Essas regressões que o penalizam o número e o tamanho do efeito das relações entre as variáveis de entrada e os coeficientes trocam viés por menor variância e mais interpretabilidade: elas têm mais viés, se adaptam menos ao conjunto de treinamento, mas não variam tanto dependendo de qual amostra da população foi escolhida para o treinamento. Além disso, por ter menos coeficientes "ligados", é mais interpretável.
+Essas regressões que penalizam o número e o tamanho do efeito das relações entre as variáveis de entrada e os coeficientes trocam viés por variância e (no caso da lasso) interpretabilidade: elas têm mais viés, se adaptam menos ao conjunto de treinamento, mas não variam tanto dependendo de qual amostra da população foi escolhida para o treinamento. Além disso, por ter menos coeficientes "ligados" (no caso da lasso), é mais interpretável.
 
 ![](diagramas/flex_interpret.png){width=80%}
 
@@ -1765,7 +1775,7 @@ O modelo `r a_r("Elastic Net")` conjuga a penalização do tipo Ridge com a pena
 
 $$RSS = \sum_{i = 1}^{n} ( y_i - \beta_0 - \sum_{j=1}^{p}\beta_j x_{ij})^2  $$
 
-Para a regressão Ridge, os coeficientes são penalizados de forma quadrática. Isso diminui a variância do modelo mas não diminui tanto a diminuição do número de coeficientes diferentes de 0:
+Para a regressão Ridge, os coeficientes são penalizados de forma quadrática. Isso diminui a variância do modelo mas não diminui tantoo número de coeficientes diferentes de 0:
 
 $$Loss_{Ridge} = RSS + \lambda \sum_{j=1}^{p}\beta_j^2 $$
 
@@ -1787,11 +1797,11 @@ $$Loss_{Lasso} = RSS + \lambda \sum_{j=1}^{p} \left| \beta_j \right| $$
 
 O conceito de interface é importante na engenharia de software.
 
-É sempre melhor depender de interfaces do que de implementações. A parnsip funciona como uma camada de abstração que oferece uma interface única que se encarrega de cuidar da chmada às diferentes implementações.
+É sempre melhor depender de interfaces do que de implementações. A parnsip funciona como uma camada de abstração que oferece uma interface única que se encarrega de cuidar da chamada às diferentes implementações.
 
 As interfaces genéricas da parnsip estão prontas para receber os parâmetros mais comuns usados nos engines e estão preparadas para passar ao engine o valor destes parâmetros.
 
-No caso das regressões lineares, alguns engines como o glmnet estão preparados para receber os hiperparâmetros necessários para a implementação da regressão lasso-ridge.
+No caso das regressões lineares, alguns engines como o glmnet estão preparados para receber os hiperparâmetros necessários para a implementação da regressão Elçastic Net lasso-ridge.
 
 
 
@@ -2201,7 +2211,7 @@ Relembrando, temos que montar o seguinte esquema:
 
 ![](imagens/k-fold-cross.png)
 
-No código abaixo, fazemos duas divisões em 5 partes.
+No código abaixo, fazemos 2 divisões em 5 partes. Ficaremos, portanto, com 10 particionamentos entre treinamento e validação.
 
 
 ```{r, cache=TRUE}
@@ -2271,7 +2281,7 @@ fit_com_interacao_resample
 ```
 
 
-A função collect_metrics() recebe o objeto retornado por fit_resamples() e retorna uma estrutura com os resultados das execuções, no nosso caso 10. Como não há hiperparâmetros para variar, há apenas duas métricas relativas ao mesmo conjunto.
+A função collect_metrics() recebe o objeto retornado por fit_resamples() e retorna uma estrutura com os resultados das execuções, no nosso caso 10. Como não há hiperparâmetros para variar, há apenas duas linhas, com duas métricas relativas ao mesmo conjunto único de hiperparâmetros.
 
 
 ```{r}
@@ -2353,9 +2363,9 @@ Uma das formas de executar esta busca pelo melhor conjunto de hiperparâmetros �
 
 A biblioteca dials ajuda na criação deste grid de valores pros hiperparâmetros.
 
-A função grid_regular() cria um grid com intervalos regulares (esses intervalos regulares, dependendo do parãmetro podem ser regulares em log, por exemplo).
+A função grid_regular() cria um grid com intervalos regulares (esses intervalos regulares, dependendo do parâmetro podem ser regulares em log, por exemplo).
 
-Existem funções com os mesmos nomes usados para os parâmetros na interface genérica da parnsnip. Quando chamadas sem parâmetros essas funções geram valores que normalmente fazem sentido, mas é possível escolher os valores de forma personalizada.
+Existem funções com os mesmos nomes usados para os parâmetros na interface genérica da parnsnip. Quando chamadas sem parâmetros, essas funções geram valores que normalmente fazem sentido, mas é possível escolher os valores de forma personalizada.
 
 O parâmetro levels define quantos valores diferentes serão usados para cada parâmetro.
 
@@ -2455,13 +2465,16 @@ plot_result_tune <- function(results){
         fill = ranque
       )
     ) +
-    geom_text(
+    geom_shadowtext(
       aes(
         x = penalty,
         y = mixture,
         label = percent(mean, accuracy = .01),
       ),
-      size = 3
+      size = 3,
+      color = "white",
+      bg.colour="black",
+      
     ) +
     scale_x_log10() +
     scale_fill_gradient(low = "white", high = "darkgreen") +
@@ -2507,7 +2520,7 @@ res_logreg_tune_sample_optim %>%
 
 A `r a_r("árvore de decisão")` particiona o espaço formado pelas variáveis explicativas em subespaços baseando-se na "pureza" desses subespaços com relação à variável dependente.
 
-Abaixo fazemos uma experiência com apenas 2 features contínuas e uma feature categórrica com dois valores possíveis .
+Abaixo fazemos uma experiência com apenas 2 features contínuas e uma feature categórica com dois valores possíveis .
 
 
 ```{r, cache=TRUE}
@@ -2760,7 +2773,7 @@ A forma como a árvore de decisão é criada faz com que ela tenha muita variân
 
 Cada decisão de particionamento é tomada a partir de características que podem ser muito específicas aos dados de treinamento.
 
-Uma ideia usada nas `r a_r("Random Forests")` é criar $trees$ conjuntos de treinamento a partir do conjunto original, mas retirando amostras de mesmo tamanho do conjunto original, COM REPOSIÇÃO. Além disso, cada vez que a árvore é particionada, a partição só pode acontecer em $mtry$ das variáveis explicativas.
+Uma ideia usada nas `r a_r("Random Forests")` é criar $trees$ conjuntos de treinamento a partir do conjunto original, mas retirando amostras de mesmo tamanho do conjunto original, com reposição. Além disso, cada vez que a árvore é particionada, a partição só pode acontecer em $mtry$ das variáveis explicativas.
 
 O resultado final é uma média da decisão dessas $trees$ árvores.
 
@@ -2923,6 +2936,20 @@ rand_for_grid
 
 ```
 
+```{r}
+
+
+wf_rand_for_tune_sample <- workflow() %>% 
+  add_model(
+    tune_spec_rand_forest
+  ) %>% 
+  add_recipe(receita_com_interacao_class)
+
+
+```
+
+
+
 ```{r, eval=FALSE}
 
 
@@ -2931,13 +2958,6 @@ all_cores <- parallel::detectCores(logical = FALSE)
 library(doParallel)
 cl <- makePSOCKcluster(all_cores)
 registerDoParallel(cl)
-
-
-wf_rand_for_tune_sample <- workflow() %>% 
-  add_model(
-    tune_spec_rand_forest
-  ) %>% 
-  add_recipe(receita_com_interacao_class)
 
 
 res_rand_for <- wf_rand_for_tune_sample %>% 
@@ -3010,15 +3030,15 @@ plot_result_tune_ranger <- function(results){
         fill = ranque
       )
     ) +
-    geom_text(
+    geom_shadowtext(
       aes(
         x = mtry %>% factor(),
         y = trees %>%  factor(),
         label = percent(mean, accuracy = .01),
       ),
-      color = "black",
+      color = "white",
+      bg.colour="black",
       size = 3,
-      face = "bold"
     ) +
     scale_fill_gradient(low = "white", high = "darkgreen") +
     facet_wrap(
@@ -3110,7 +3130,8 @@ collect_metrics(res_rand_for_optim) %>% arrange(desc(mean)) %>%
 ```
 
 
-```{r cache=TRUE, fig.height= 10}
+```{r, fig.height= 10}
+
 
 
 plot_result_tune_ranger(list(res_rand_for, res_rand_for_optim))
@@ -3262,7 +3283,7 @@ plot_result_tune_ranger(
 <div class='right' style='float:right;width:68%'>
 
 
-Apesar do hype que envolve as redes neurais, que faz elas parecerem mágicas e misteriosas, elas são métodos não lineares onde são aplicadas regressões lineares em cima de saída de outras regressões. Algumas dessa saídas são modificadas por funções de ativação não lineares, dando caráter não linear ao método. Os coeficientes dessas regressões, também chamados de pesos, são calibrados de forma a minimizar o erro através de um algoritmo inteligente chamado backpropagation.
+Apesar do hype que envolve as redes neurais, que faz elas parecerem mágicas e misteriosas, elas são métodos não lineares onde são aplicadas regressões lineares em cima de saída de outras regressões. Algumas dessas saídas são modificadas por funções de ativação não lineares, dando caráter não linear ao método. Os coeficientes dessas regressões, também chamados de pesos, são calibrados de forma a minimizar o erro através de um algoritmo inteligente chamado backpropagation.
 
 </div>
 
@@ -3539,15 +3560,15 @@ plot_result_tune_nnet <- function(results){
       )
     ) +
     scale_x_log10() +
-    geom_text(
+    geom_shadowtext(
       aes(
         x = penalty,
         y = epochs %>%  factor(),
         label = percent(mean, accuracy = .01),
       ),
-      color = "black",
-      size = 3,
-      face = "bold"
+      color = "white",
+      bg.colour="black",
+      size = 3
     ) +
     scale_fill_gradient(low = "white", high = "darkgreen") +
     facet_wrap(
@@ -3632,7 +3653,7 @@ collect_metrics(res_nnet_2) %>% arrange(desc(mean))
 ```
 
 
-```{r}
+```{r, fig.height= 10}
 
 plot_result_tune_nnet(list(res_nnet_2, res_nnet))
 
@@ -3696,7 +3717,7 @@ collect_metrics(res_nnet_3) %>% arrange(desc(mean))
 
 
 
-```{r}
+```{r, fig.height= 14}
 
 
 plot_result_tune_nnet(list(res_nnet_2, res_nnet, res_nnet_3))
@@ -3754,7 +3775,7 @@ collect_metrics(res_nnet_4) %>% arrange(desc(mean))
 
 ```
 
-```{r}
+```{r, fig.height= 16}
 
 
 plot_result_tune_nnet(list(res_nnet_2, res_nnet, res_nnet_3, res_nnet_4))
@@ -3764,45 +3785,450 @@ plot_result_tune_nnet(list(res_nnet_2, res_nnet, res_nnet_3, res_nnet_4))
 
 
 
+## Validando o modelo: selecionando o melhor modelo
+
+`r slide_atual = slide_atual + 1`
+
+
+Já experimentamos alguns modelos e otimizamos seus hiperparâmetros, testando-os no conjunto de validação, sempre fora do conjunto de treinamento.
+
+O nosso melhor modelo foi uma das configurações de random forest.
+
+Selecionamos esse modelo com select_best()
+
+
+```{r}
+
+best_ranger <- 
+  select_best(
+    res_rand_for_optim_2  
+  )
+
+best_ranger
+
+
+
+```
+
+
+Então criamos um workflow baseado no workflow que estávamos usando mas adicionando a informação de que este é o modelo escolhido
+
+
+
+```{r, cache=TRUE}
+
+
+final_wf_ranger <- wf_rand_for_tune_sample %>% 
+  finalize_workflow(best_ranger)
+
+final_wf_ranger
 
 
 
 
+```
+
+
+
+## Validando o modelo: treinando o modelo com todos os dados de treinamento/validação
+
+`r slide_atual = slide_atual + 1`
+
+```{r, cache=TRUE}
+
+final_ranger <- 
+  final_wf_ranger %>%
+  fit(data = dado_treino) 
+
+
+final_ranger
+
+
+
+
+```
+
+
+## Validando o modelo: treinando o modelo com todos os dados de treinamento/validação
+
+`r slide_atual = slide_atual + 1`
+
+
+
+
+```{r eval=FALSE}
+
+all_cores <- parallel::detectCores(logical = FALSE)
+
+
+cl <- makePSOCKcluster(all_cores)
+registerDoParallel(cl)
+
+
+final_fit_ranger <- 
+  final_wf_ranger %>% 
+  last_fit(split_dado)
+
+stopCluster(cl)
+
+write_rds(final_fit_ranger, "resultados/final_fit_ranger.rds")
+
+
+
+
+```
+
+
+Podemos perceber que o modelo conseguiu generalizar os resultados para os dados de teste. Uma boa notícia.
 
 
 
 ```{r}
 
 
+final_fit_ranger <- read_rds("resultados/final_fit_ranger.rds")
 
-set.seed(555)
+
+final_fit_ranger %>% collect_metrics() %>% 
+  gt() %>% 
+  fmt_percent(
+    columns = vars(.estimate)
+  )
 
 
-receita_knn_demo <- recipe(
-  i_liked_partner ~
-    i_found_partner__attractive +
-    sex +
-    my_age,
-   data = dado_treino
-) 
 
-knn_mod <- 
-  parsnip::nearest_neighbor(
+```
+
+
+
+## Performance nos dados de teste: curva ROC
+
+`r slide_atual = slide_atual + 1`
+
+
+```{r}
+
+
+
+curva <- final_fit_ranger %>% 
+  collect_predictions() %>% 
+  roc_curve(
+    truth = i_liked_partner,
+    .pred_Liked
+  )
+
+ponto_gatilho <- curva %>% 
+  filter(
+    .threshold > 0.45 
   ) %>% 
-  set_engine("kknn") %>% 
-  set_mode("classification")
-
-wf_knn_demo <- workflow() %>% 
-  add_recipe(receita_knn_demo) %>% 
-  add_model(knn_mod)
-
-fit_knn_demo <- 
-  wf_knn_demo %>% 
-  fit(
-    data = dado_treino
+  slice_min(
+    n = 1, order_by = .threshold
   )
   
-fit_knn_demo
+
+  
+curva %>% ggplot(aes(x = 1 - specificity, y = sensitivity)) +
+  geom_path() +
+  geom_point(
+    data = ponto_gatilho,
+    aes(x = 1 - specificity, y = sensitivity),
+    size = 3,
+    color = "darkblue"
+  ) +
+  geom_text_repel(
+    data = ponto_gatilho,
+    aes(
+      x = 1 - specificity + 0.15, 
+      y = sensitivity - 0.15,
+      label = str_glue("{sensitivity %>% percent(accuracy = 0.1)}/{(1 - specificity) %>%  percent(accuracy = 0.1)}")
+    )
+  ) +
+  geom_abline(lty = 3) +
+  coord_equal() +
+  theme_bw()
+
+
+
+
+```
+
+
+
+
+## Séries temporais: resumo muito sucinto
+
+`r slide_atual = slide_atual + 1`
+
+
+As séries temporais possuem propriedades impõem desafios ao uso do arcabouço que vimos anteriormente. Estas propriedades levaram à criação de modelos específicos: os modelos autorregressivos do tipo ARIMA.
+
+A principal delas é o fato de que as observações das séries temporais frequentemente não são independentes, ou seja $x_t$ depende de $x_{t-1}, x_{t-2}, ...$. Isso acontece para a maioria das séries que interessam pra nós.
+
+É muito comum, também, lidarmos com séries não-estacionárias. 
+
+Existem alguns tipos de estacionariedade, mas, grosso modo, a série estacionária é aquela que mantém sua distribuição ao longo do tempo, ou seja, a distribuição de $x_t$, portanto média e variância também, não depende de $t$.
+
+Lidamos com muitas séries onde a cada $t$ as informações que chegam são incorporadas à série como alterações (relativas e não absolutas) no patamar que a série tinha em $t-1$, como é o caso de preços de ativos (não derivativos). Estas séries temporais flutuam ao redor de patamares diferentes ao longo do tempo. 
+
+
+
+
+
+
+## Tidyverts: tidyverse das time series
+
+`r slide_atual = slide_atual + 1`
+
+
+<div class='left' style='float:left;width:16%'>
+![](imagens/tsibble.png){width=80%}
+</div>
+<div class='right' style='float:right;width:78%'>
+
+Tidyverts é um conjunto de bibliotecas tidy friendly para lidar com séries temporais.
+
+É possível obter mais informações em [tidyverts.org](https://tidyverts.org/).
+
+Além da documentação exposta neste site o autor disponibiliza um livro sobre séries temporais, que não é tão aprofundado quanto os livros clássicos do tema, como os do Box e do Hamilton, mas apresenta os conceitos adequadamente, além de estar disponível online e usar a tidyverts nos exemplos.
+
+[Forecasting: Principles and Practice](https://otexts.com/fpp2/)
+
+</div>
+
+
+
+
+## Criando um tsibble
+
+`r slide_atual = slide_atual + 1`
+
+
+O código abaixo cria um tsibble, a estrutura usada na tidyverts para representar uma série temporal.
+
+
+Vale a pena notar:
+
+- O uso de yearmonth() para criar uma coluna que representa um mês-calendário
+
+- na criação do tsibble, o uso do parâmetro index, que recebe a data que server como referência de tempo para a série
+
+
+
+```{r, cache=TRUE}
+
+crime_rio <- read_csv2(
+  "dados/crime_rio/BaseDPEvolucaoMensalCisp.csv",
+  locale = locale(encoding = "latin1")
+) 
+
+crime_estado <- crime_rio %>% 
+  select(
+    mes_ano,
+    hom_doloso, lesao_corp_morte, latrocinio, hom_por_interv_policial, tentat_hom, lesao_corp_dolosa, estupro, hom_culposo, lesao_corp_culposa, roubo_comercio, roubo_residencia, roubo_veiculo, roubo_carga, roubo_transeunte, roubo_em_coletivo, roubo_banco, roubo_cx_eletronico, roubo_celular, roubo_conducao_saque, roubo_apos_saque, roubo_bicicleta, outros_roubos, total_roubos, furto_veiculos, furto_transeunte, furto_coletivo, furto_celular, furto_bicicleta, outros_furtos, total_furtos, sequestro, extorsao, sequestro_relampago, estelionato, apreensao_drogas, posse_drogas, trafico_drogas, apreensao_drogas_sem_autor, recuperacao_veiculos, apf, aaapai, cmp, cmba, ameaca, pessoas_desaparecidas, encontro_cadaver, encontro_ossada, pol_militares_mortos_serv, pol_civis_mortos_serv, indicador_letalidade, indicador_roubo_rua, indicador_roubo_veic, registro_ocorrencias, fase   
+  ) %>% 
+  group_by(
+    mes_ano
+  ) %>% 
+  summarise(
+    across(
+      .cols = everything(),
+      .fns = ~sum(.x, na.rm = TRUE)
+    )
+  ) %>% 
+  ungroup() %>% 
+  separate(
+    col = mes_ano,
+    sep = "m",
+    into = c("ano", "mes")
+  ) %>% 
+  mutate(
+    data = make_date(ano, mes, 1) %>% yearmonth()
+  ) %>% 
+  arrange(data) %>% 
+  mutate(
+    across(
+      .cols = -c(ano, mes, data) ,
+      .fns = list(diff_log = function(x){c(NA,x %>% log() %>% diff())}  )
+    )
+  ) %>% 
+  mutate(
+    across(
+      .cols = ends_with("diff_log"),
+      .fns = ~if_else(is.na(.x), 0, .x)
+    )
+  ) %>% 
+  relocate(
+    data,
+    hom_doloso,
+    hom_doloso_diff_log
+  ) 
+
+crime_estado_ts <- as_tsibble(crime_estado, index = data)
+
+
+```
+
+
+O tsibble é criado e entende que tem um dado a cada mês
+
+```{r}
+crime_estado_ts
+
+
+```
+
+
+## Várias séries no mesmo tsibble
+
+`r slide_atual = slide_atual + 1`
+
+Na série anterior, somamos a cada mês os crimes do estado todo. No código abaixo, criamos um tsibble que contém as séries de cada delegacia.
+
+Isso é feito usando o parâmetro key.
+
+
+
+```{r}
+
+crime_delegacia <- crime_rio %>% 
+  select(
+    CISP, AISP,  RISP, munic, Regiao,
+    mes_ano,
+    hom_doloso, lesao_corp_morte, latrocinio, hom_por_interv_policial, tentat_hom, lesao_corp_dolosa, estupro, hom_culposo, lesao_corp_culposa, roubo_comercio, roubo_residencia, roubo_veiculo, roubo_carga, roubo_transeunte, roubo_em_coletivo, roubo_banco, roubo_cx_eletronico, roubo_celular, roubo_conducao_saque, roubo_apos_saque, roubo_bicicleta, outros_roubos, total_roubos, furto_veiculos, furto_transeunte, furto_coletivo, furto_celular, furto_bicicleta, outros_furtos, total_furtos, sequestro, extorsao, sequestro_relampago, estelionato, apreensao_drogas, posse_drogas, trafico_drogas, apreensao_drogas_sem_autor, recuperacao_veiculos, apf, aaapai, cmp, cmba, ameaca, pessoas_desaparecidas, encontro_cadaver, encontro_ossada, pol_militares_mortos_serv, pol_civis_mortos_serv, indicador_letalidade, indicador_roubo_rua, indicador_roubo_veic, registro_ocorrencias, fase   
+  ) %>% 
+  separate(
+    col = mes_ano,
+    sep = "m",
+    into = c("ano", "mes")
+  ) %>% 
+  mutate(
+    data = make_date(ano, mes, 1) %>% yearmonth()
+  ) 
+
+crime_delegacias_ts <- as_tsibble(
+  x = crime_delegacia,
+  index = data,
+  key = c(CISP, AISP,  RISP, munic, Regiao)
+) 
+
+crime_delegacias_ts 
+
+
+```
+
+
+## Observando algumas características da série
+`r slide_atual = slide_atual + 1`
+
+
+<div class='left' style='float:left;width:18%'>
+![](imagens/feasts.png){width=100%}
+</div>
+<div class='right' style='float:right;width:78%'>
+
+feasts é uma biblioteca que ajuda a extrair características de uma série temporal.
+
+Abaixo vemos os três gráficos que ela gera:
+
+- O gráfico da série em si,
+
+- O gráfico da ACF, ou seja, a função de autocorrelação. ACF(lag) é a correlação entre $x_t$ e $x_{t-lag}$. Vemos que existe uma forte correlação entre $x_t$ e $x_{t-1}$, o que, dependendo do nível de autocorrelação, pode ser característico de processos não estacionários. Se olharmos para série podemos perceber que ela vaga ao redor de um patamar que muda com o tempo. Isso também é característico de séries não estacionárias. Vamos ver em seguida um teste que nos diz se existe evidência de que a série não-estacionária
+
+- Um gráfico de sazonalidade. Podemos verificar que parece haver uma sazonalidade na série: ela atinge patamares maiores no início do ano e patamares menores no meio.
+
+
+
+
+```{r, cache=TRUE}
+conjunto <- gg_tsdisplay(
+  crime_estado_ts, 
+  y = hom_doloso
+) 
+
+
+embeleza_gg_tsdisplay <- function(obj){
+  
+  
+  
+  obj[[1]] <- obj[[1]] + 
+    theme_minimal() +
+    scale_x_yearmonth(
+      date_breaks = "1 year"
+    ) +
+    theme(
+      axis.text.x = element_text(angle = 90)
+    )
+  
+  obj[[2]] <- obj[[2]] + 
+    theme_minimal()
+  
+  
+  obj[[3]] <- obj[[3]] + 
+    theme_minimal() +
+    scale_color_gradient(
+      low = "lightblue",
+      high = "darkblue",
+      labels = function(x){x+2003},
+      breaks = seq(0, 20, by = 2)
+    ) + 
+    theme(
+      axis.text.x = element_text(angle = 90)
+    )
+
+  obj
+    
+}
+
+
+embeleza_gg_tsdisplay(conjunto)
+   
+```
+
+</div>
+
+
+## Primeiras diferenças do log da série
+`r slide_atual = slide_atual + 1`
+
+
+
+
+## Primeiras diferenças do log da série
+`r slide_atual = slide_atual + 1`
+
+
+
+
+
+```{r, cache=TRUE}
+
+gg_tsdisplay(crime_estado_ts, y = hom_doloso_diff_log )
+
+
+
+```
+
+
+```{r}
+
+
+
+crime_estado_ts %>% 
+  mutate(
+    diff_perc = hom_doloso/lag(hom_doloso) - 1
+  ) %>% 
+  select(
+    data,
+    hom_doloso,
+    hom_doloso_diff_log,
+    diff_perc
+  )  %>% 
+  gt() %>% 
+  fmt_percent(
+    columns = vars(hom_doloso_diff_log, diff_perc)
+    
+  )
+
 
 
 
@@ -3813,76 +4239,505 @@ fit_knn_demo
 
 
 
+```{r, cache=TRUE}
+
+dcmp <- crime_estado_ts %>%
+  model(STL(hom_doloso ~ season(window = Inf)))
+
+components(dcmp) %>%  autoplot()
+
+```
+
+```{r, cache=TRUE}
+
+
+
+dcmp <- crime_estado_ts %>%
+  model(STL(hom_doloso_diff_log ~ season(window = Inf)))
+
+components(dcmp) %>%  autoplot()
+
+
+
+
+```
+
+
+```{r,  cache=TRUE}
+
+crime_estado_ts %>% 
+  features(hom_doloso, unitroot_kpss )
+
+
+
+```
+
+```{r}
+
+crime_estado_ts %>% 
+  features(hom_doloso_diff_log, unitroot_kpss )
+
+
+```
+
+
+```{r, eval=FALSE}
+estacao_rio <- worldmet::getMeta(country = "BR")
+
+
+
+dados_temp <- worldmet::importNOAA(code = "837460-99999", year = 2003:2020, hourly = TRUE)
+
+write_rds(dados_temp, "dados/crime_rio/temperatura.rds")
+
+
+```
+
+
+
+
+
+
+
+
+```{r, cache=TRUE}
+
+dados_temp <- read_rds("dados/crime_rio/temperatura.rds")
+
+dados_temperatura_mensais_normais <- dados_temp %>% 
+  mutate(
+    mes = month(date)
+  ) %>% 
+  group_by(
+    mes
+  ) %>% 
+  summarise(
+    p67_temp_normal = quantile(air_temp, probs = .5, na.rm = TRUE)
+  )
+
+
+
+dados_temperatura_mensais <- dados_temp %>% 
+  mutate(
+    ano_mes = yearmonth(date),
+    mes = month(date)
+  ) %>% 
+  group_by(
+    ano_mes,
+    mes
+  ) %>% 
+  summarise(
+    p67_temp = quantile(air_temp, probs = .67, na.rm = TRUE)
+  ) %>%  
+  left_join(
+    dados_temperatura_mensais_normais, by = c("mes")
+  ) %>% 
+  mutate(
+    desvio_temperatura = p67_temp - p67_temp_normal
+  ) 
+
+
+
+```
+
+
+
 ```{r}
 
 
-predicoes_knn <- predict(
-  object = fit_knn_demo,
-  new_data = dados_novos
+
+crime_estado_ts <- crime_estado_ts %>% 
+  left_join(
+    dados_temperatura_mensais,
+    by = c("data" = "ano_mes")
+  )
+
+
+```
+
+
+
+
+
+```{r, cache=TRUE}
+
+modelo <- crime_estado_ts %>%
+  model(arima = ARIMA(log(hom_doloso) ~ 0 )) 
+
+modelo %>%
+  report()
+
+
+
+```
+
+
+```{r}
+
+modelo %>%
+  accuracy()
+
+```
+
+
+
+```{r}
+
+modelo_temp <- crime_estado_ts %>% 
+  model(arima = ARIMA(log(hom_doloso) ~ p67_temp )) 
+
+modelo_temp %>%
+  report()
+
+
+```
+
+
+```{r}
+
+modelo_temp %>%  accuracy()
+
+
+```
+
+
+
+
+
+```{r}
+
+
+previsao <- forecast(
+  modelo_temp, 
+  h = 10, 
+  new_data = 
+    tsibble(
+      data = 
+        seq.Date(
+          from = max(crime_estado_ts$data %>% as_date() %m+% months(1)), 
+          length.out = 5, 
+          by = "1 month") %>%  yearmonth(),
+      p67_temp = replicate(expr = 27, n = 5),
+      index = data
+    )
 )
 
 
-predicoes_knn_com_dados <- bind_cols(
-  dados_novos,
-  predicoes_knn
-) 
+
+```
 
 
 
-ggplot(predicoes_knn_com_dados) +
-  geom_tile(
+```{r}
+
+ggplot() +
+  geom_line(
+    data = crime_estado_ts,
     aes(
-      x = i_found_partner__attractive,
-      y = my_age,
-      fill = .pred_class,
-      alpha = 0.1
+      x = data,
+      y = hom_doloso
     )
   ) +
-  geom_jitter(
-    data = dado_treino,
-    width = 0.5,
+  geom_point(
+    data = crime_estado_ts,
     aes(
-      x = i_found_partner__attractive,
-      y = my_age,
-      color = i_liked_partner
+      x = data,
+      y = hom_doloso
+    )
+  ) +
+  geom_line(
+    data = previsao,
+    aes(
+      x = data,
+      y = .mean
     ),
-    size = 0.8,
-    show.legend = FALSE
+    color = "red"
   ) +
-  facet_wrap(
-    ~sex
-  ) +
-  guides(
-    alpha = FALSE
-  ) +
-  theme_minimal() +
-  scale_fill_manual(
-    values = c(Liked = "darkgreen", Not = "darkred")
-  ) +
-  scale_color_manual(
-    values = c(Liked = "darkgreen", Not = "darkred")
-  ) +
-  theme(
-    legend.position = "top"
-  ) +
-  labs(
-    fill = "",
-    x = "Achei bonito",
-    y = "Minha idade"
+  geom_point(
+    data = previsao,
+    aes(
+      x = data,
+      y = .mean
+    ),
+    color = "red"
+  ) 
+  
+
+
+
+```
+
+
+
+
+
+
+
+
+```{r, cache = TRUE}
+
+
+modelo_puro <- function(dado){
+  dado %>% 
+  model(arima = ARIMA(log(hom_doloso) ))
+}
+  
+
+crime_estado_ts_treino <-  crime_estado_ts %>% 
+  filter(
+    data < yearmonth("20190101")
   )
+
+fit_treino <- crime_estado_ts_treino %>% 
+  modelo_puro
+
+previsao <- fit_treino %>% 
+  forecast(
+    h = 1,
+    crime_estado_ts %>% filter(data >= yearmonth("20190101"))
+  )
+
+accuracy(previsao, crime_estado_ts)
+
+
+```
+
+
+```{r, cache=TRUE}
+
+
+modelo_com_temp <- function(dado){
+  dado %>% 
+  model(arima = ARIMA(log(hom_doloso) ~ p67_temp ))
+}
+  
+
+crime_estado_ts_treino <-  crime_estado_ts %>% 
+  filter(
+    data < yearmonth("20190101")
+  )
+
+fit_treino <- crime_estado_ts_treino %>% 
+  modelo_com_temp
+
+previsao <- fit_treino %>% 
+  forecast(
+    h = 1,
+    crime_estado_ts %>% filter(data >= yearmonth("20190101"))
+  )
+
+accuracy(previsao, crime_estado_ts)
 
 
 
 
 ```
+
+
+
+
+
 
 
 ```{r}
 
 
+previsao_fora_amostra <- function(modelo, data_corte, dado){
+  
+  dado_treino <-  dado %>% 
+  filter(
+    data < yearmonth(data_corte)
+  )
+
+  fit_treino <- dado_treino %>% 
+    modelo
+  
+  previsao <- fit_treino %>% 
+    forecast(
+      dado %>% filter(data >= yearmonth(data_corte)) %>% slice_min(1)
+    )
+  
+
+  previsao %>% 
+    select(
+      data, .mean
+    ) %>% 
+    as_tibble() %>% 
+    select(
+        data, .mean
+    )    
+
+}
+
+
+fora <- previsao_fora_amostra(
+  modelo = modelo_puro,
+  data = make_date(2018,1,1),
+  dado = crime_estado_ts
+)
+
 
 
 ```
+
+
+```{r, eval=FALSE}
+
+cortes <- seq.Date(
+  from = make_date(2008,1,1),
+  to = max(crime_estado_ts$data) %>% as.Date(),
+  by = "1 month"
+)
+
+plan(multiprocess)
+
+previsoes_fora_1_puro <- cortes %>% 
+  future_map_dfr(
+    .f = ~previsao_fora_amostra(modelo = modelo_puro, data_corte = .x, dado = crime_estado_ts),
+    .progress = TRUE
+  )
+
+previsoes_fora_1_puro_ts <- previsoes_fora_1_puro %>% 
+  mutate(
+    hom_doloso = .mean
+  ) %>% 
+  as_tsibble(
+    index = data
+  )
+
+dados_reais <- crime_estado_ts %>% 
+  filter(
+    data %in% (cortes %>% yearmonth())
+  )
+
+
+performance_puro <- accuracy(previsoes_fora_1_puro_ts$hom_doloso, dados_reais$hom_doloso)
+
+write_rds(performance_puro, "dados/crime_rio/performance_puro.rds")
+
+
+```
+
+
+```{r, eval=FALSE}
+
+
+plan(multiprocess)
+
+previsoes_fora_1_com_temp <- cortes %>% 
+  future_map_dfr(
+    .f = ~previsao_fora_amostra(modelo = modelo_com_temp, data_corte = .x, dado = crime_estado_ts),
+    .progress = TRUE
+  )
+
+previsoes_fora_1_com_temp_ts <- previsoes_fora_1_com_temp %>% 
+  mutate(
+    hom_doloso = .mean
+  ) %>% 
+  as_tsibble(
+    index = data
+  )
+
+dados_reais_com_temp <- crime_estado_ts %>% 
+  filter(
+    data %in% (cortes %>% yearmonth())
+  )
+
+performance_com_temp <- accuracy(previsoes_fora_1_com_temp_ts$hom_doloso, dados_reais_com_temp$hom_doloso)
+
+write_rds(performance_com_temp, "dados/crime_rio/performance_com_temp.rds")
+
+```
+
+```{r, eval=FALSE}
+
+
+
+modelo_bobo <- function(dado){
+  dado %>% 
+    model(snaive = SNAIVE(hom_doloso ~ drift() + lag("year")))
+}
+
+
+
+plan(multiprocess)
+
+previsoes_fora_1_bobo <- cortes %>% 
+  future_map_dfr(
+    .f = ~previsao_fora_amostra(modelo = modelo_bobo, data_corte = .x, dado = crime_estado_ts),
+    .progress = TRUE
+  )
+
+previsoes_fora_1_bobo_ts <- previsoes_fora_1_bobo %>% 
+  mutate(
+    hom_doloso = .mean
+  ) %>% 
+  as_tsibble(
+    index = data
+  )
+
+
+performance_bobo <- accuracy(previsoes_fora_1_bobo_ts$hom_doloso, dados_reais_com_temp$hom_doloso)
+
+
+
+write_rds(performance_bobo, "dados/crime_rio/performance_bobo")
+
+
+
+```
+
+
+
+
+
+
+```{r}
+
+
+modelo_decomp <- function(dado){
+  dado %>% 
+    model(lm = TSLM(log(hom_doloso) ~ trend() + season()))
+}
+
+
+
+plan(multiprocess)
+
+previsoes_fora_1_decomp <- cortes %>% 
+  future_map_dfr(
+    .f = ~previsao_fora_amostra(modelo = modelo_decomp, data_corte = .x, dado = crime_estado_ts),
+    .progress = TRUE
+  )
+
+previsoes_fora_1_decomp_ts <- previsoes_fora_1_decomp %>% 
+  mutate(
+    hom_doloso = .mean
+  ) %>% 
+  as_tsibble(
+    index = data
+  )
+
+
+performance_decomp <- accuracy(previsoes_fora_1_decomp_ts$hom_doloso, dados_reais_com_temp$hom_doloso)
+
+
+
+write_rds(performance_decomp, "dados/crime_rio/performance_bobo")
+
+
+
+
+
+```
+
+
+
+
+
+
+
+
 
 
 
