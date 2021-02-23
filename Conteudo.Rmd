@@ -5664,6 +5664,8 @@ ggplot(grid_previsao %>% filter(weight_class == "Heavyweight")) +
 Rodando o modelo com o grid
 
 ```{r, message=FALSE, warning=FALSE, cache=TRUE, out.width="90%" }
+
+
 previsoes <- augment(modelo_lm, newdata = grid_previsao  ) 
 
 
@@ -5707,7 +5709,7 @@ Estes comandos criam um tibble com uma coluna de tibbles aninhados já separados
 
 modelo_ufc_por_classe <- ufc_aprend %>% 
   group_by(weight_class) %>% 
-  nest_legacy() %>%
+  nest() %>%
   mutate(
     modelo = map(data, ~lm(zebra_blue ~ idade_red  + red_mais_velho, data = .x)),
   ) %>% 
@@ -5971,6 +5973,28 @@ ggplot( bind_rows(ufc_aprend_classes_selec) ) +
 
 
 ```
+
+
+## Tidymodels
+
+`r slide_atual = slide_atual + 1`
+
+Tidymodels é um conjunto de bibliotecas que cuida de todos os passos necessários para o workflow de seleção e avaliação de modelos de aprensizado estatístico.
+
+
+Com ele podemos definir:
+
+
+* Procedimentos de Feature Engineering
+
+* 
+
+
+
+![tidymodels](imagens/tidymodels.svg)
+
+
+
 
 ## Execução de modelos com caret
 

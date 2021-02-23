@@ -3311,7 +3311,7 @@ O nome neurônio vem de uma simplificação de como funciona a célula. Assim co
 
 ![](imagens/neuron.png){width=50%}
 
-No entando o cérebro humano é uma rede extremamente complexa com uma arquitetura que foi selecionada durante bilhões de anos.
+No entanto o cérebro humano é uma rede extremamente complexa com uma arquitetura que foi selecionada durante bilhões de anos.
 
 Existem arquiteturas de rede neural mais complicadas, mas o número de pesos a serem calibrados é explosivo. Elas exigem uma quantidade massiva de dados. A área que estuda essa redes profundas se chama deep learning.
 
@@ -3830,9 +3830,12 @@ final_wf_ranger
 
 
 
-## Validando o modelo: treinando o modelo com todos os dados de treinamento/validação
+## Validando o modelo: treinamento final
 
 `r slide_atual = slide_atual + 1`
+
+
+Treinando o modelo com todos os dados de treinamento/validação
 
 ```{r, cache=TRUE}
 
@@ -3849,12 +3852,11 @@ final_ranger
 ```
 
 
-## Validando o modelo: treinando o modelo com todos os dados de treinamento/validação
+## Validando o modelo: avaliando fora da amostra
 
 `r slide_atual = slide_atual + 1`
 
-
-
+Vamos avaliar o modelo fora da amostra usada pra validação.
 
 ```{r eval=FALSE}
 
@@ -4128,7 +4130,7 @@ crime_delegacias_ts
 
 feasts é uma biblioteca que ajuda a extrair características de uma série temporal.
 
-Abaixo vemos os três gráficos que ela gera:
+Abaixo vemos os três gráficos que ela gera com a função gg_tsdisplay():
 
 - O gráfico da série em si,
 
@@ -4160,7 +4162,10 @@ embeleza_gg_tsdisplay <- function(obj){
     )
   
   obj[[2]] <- obj[[2]] + 
-    theme_minimal()
+    theme_minimal() +
+    scale_y_continuous(
+      limits = c(-1,1)
+    )
   
   
   obj[[3]] <- obj[[3]] + 
@@ -4187,27 +4192,43 @@ embeleza_gg_tsdisplay(conjunto)
 </div>
 
 
-## Primeiras diferenças do log da série
+
+## Testando se a série é estacionária
 `r slide_atual = slide_atual + 1`
 
 
+Existem testes que verificam a hipótese de que a série é estacionária. 
+
+No teste executado abaixo, Kwiatkowski, a hipótese nula é de que a série é não-estacionária (na verdade não-estacionária com a posibilidade de tendência constante). 
+
+Sendo assim p-value obtido mostra que a chance de se obter um resultado tão extremo quanto o observado se a hipótese nula for verdadeira é baixíssima e podemos rejeitar a hipótese nula.
 
 
-## Primeiras diferenças do log da série
-`r slide_atual = slide_atual + 1`
+```{r,  cache=TRUE}
 
-
-
-
-
-```{r, cache=TRUE}
-
-gg_tsdisplay(crime_estado_ts, y = hom_doloso_diff_log )
+crime_estado_ts %>% 
+  features(log(hom_doloso), unitroot_kpss )
 
 
 
 ```
 
+
+
+## Primeiras diferenças do log da série
+`r slide_atual = slide_atual + 1`
+
+Uma transformação comum nas séries temporais que muitas vezes deriva uma série estacionária a partir de uma série não-estacionária é aplicar a diferença no log da série. Ou seja, a série $y$ obtida a partir da série $x$ é $y_t = log(x_t) - log(x_{t-1})$.
+
+A transformação faz sentido, pois:
+
+- Muitas vezes a informação em $t$ se reflete na alteração do patamar de $x_{t-1}$ para $x_{t}$. Pense no retorno do preço de um ativo. Por isso a diferença.
+
+- Esta alteração no patamar muitas vezes é relativa ao patamar e não um número absoluto. mais uma vez pense no retorno do preço de um ativo, que medimos em percentual. Por isso o $log$.
+
+Uma característica interessante do log na base natural é que $log(a) - log(b)$ se aproxima de $\frac{a}{b}-1$, que é o retorno percentual. Esta aproximação funciona melhor quanto este número é pequeno.
+
+Essa característica facilita a interpretação de alguns resultados.
 
 ```{r}
 
@@ -4231,12 +4252,49 @@ crime_estado_ts %>%
 
 
 
+```
 
+
+
+## Observando as características de diff(log(serie))
+`r slide_atual = slide_atual + 1`
+
+
+A série de diferenças do log apresenta um média e variância mais constante visualmente.
+
+As autocorrelações ainda estão presentes, mas têm magnitude bem menor. É possível notar uma autocorrelação com o lag 12, devida à sazonalidade.
+
+
+```{r, cache=TRUE}
+
+serie_diff_log <- gg_tsdisplay(crime_estado_ts, y = hom_doloso_diff_log )
+
+embeleza_gg_tsdisplay(serie_diff_log)
+
+```
+
+
+## Testando a estacionariedade de diff(log(serie))
+`r slide_atual = slide_atual + 1`
+
+O teste dessa vez não oferece evidências para descartarmos a hipótese nula de que a aérie é não-estacionária.
+
+
+```{r}
+
+crime_estado_ts %>% 
+  features(hom_doloso_diff_log, unitroot_kpss )
 
 
 ```
 
 
+
+## Uma decomposição da série
+`r slide_atual = slide_atual + 1`
+
+
+A feasts oferece uma forma de decompor a série temporal em tendência, sazonalidade e ruído.
 
 
 ```{r, cache=TRUE}
@@ -4247,6 +4305,12 @@ dcmp <- crime_estado_ts %>%
 components(dcmp) %>%  autoplot()
 
 ```
+
+
+
+
+## Decomposição de diff(log(serie))
+`r slide_atual = slide_atual + 1`
 
 ```{r, cache=TRUE}
 
@@ -4263,22 +4327,146 @@ components(dcmp) %>%  autoplot()
 ```
 
 
-```{r,  cache=TRUE}
 
-crime_estado_ts %>% 
-  features(hom_doloso, unitroot_kpss )
+## Modelo autoregressivo ARIMA
+`r slide_atual = slide_atual + 1`
+
+
+Um modelo muito usado para previsão de séries temporais, que leva em conta e tira proveito da propriedade da autocorrelação, é o ARIMA.
+
+
+ARIMA é uma junção dos modelos AR (autoregressivo) e MA ("médias móveis", na verdade soma dos choques prévios). O I (integrated) fica por conta da transformação, que fizemos anteriormente, que pega a diferença entre elementos da série. 
+
+
+No modelo Autoregressivo (AR), a série é representada como um processo dependente dos elementos anteriores da própria série, mais um choque em $t$. Um AR(p), portanto, é assim:
+
+$$x_t = \phi_1 z_{t-1} + \phi_2 z_{t-2} + ... + \phi_p z_{t-p} + a_t  $$
+
+
+No modelo "Média Móvel" (MA), a série é representada como um processo dependente dos choques anteriores, mais um choque em $t$. Um MA(q), portanto, é assim:
+
+$$x_t = \theta_1 a_{t-1} + \theta_2 a_{t-2} + ... + \theta_q  a_{t-q} + a_t  $$
+
+
+
+É possível descrever um processo AR com um procersso MA e vice-versa, mas isso exigiria uma quantidade infinita de coeficientes. 
+
+Por parcimônia, pois os coeficientes precisam ser estimados e cada estimativa eleva a incerteza, é comum conjugar os dois modelos em um ARMA(p,q):
+
+
+$$x_t = \phi_1 z_{t-1} + \phi_2 z_{t-2} + ... + \phi_p z_{t-p} + \theta_1 a_{t-1} + \theta_2 a_{t-2} + ... + \theta_q  a_{t-q} + a_t  $$
+
+
+Ao usar o ARMA na diferença entre elementos da série, ele vira ARIMA(p,d,q), onde o d é o número de vezes que se diferencia a série.
+
+
+É possível adicionar P + Q termos autoregressivos e de média móvel referentes a multiplos do lag que representa o período m da série. 
+
+No caso de uma série mensal com sazonalidade anual, seriam adicionados termos AR e MA relativos aos lags 12, 24, 36, ... e a diferenciação poderia ser feita no lag 12. 
+
+Alguns chamam este modelo com sazonalidade de SARIMA(p, d, q)(P, D, Q)[m]
+
+
+## Estimando um ARIMA com fable
+`r slide_atual = slide_atual + 1`
+
+<div class='left' style='float:left;width:18%'>
+![](imagens/fable.png){width=100%}
+</div>
+<div class='right' style='float:right;width:78%'>
+
+A biblioteca fable ajuda a estimar alguns modelos usados para previsão de séries temporais.
+
+Um dos modelos disponíveis é o SARIMA.
+
+A especificação do modelo é escolhida de forma a obter um modelo parcimonioso. A métrica de desempenho usada (AIC) penaliza os modelos com mais coeficientes, portanto maior soma de p, q, P e Q.
+
+O d e D são escolhidos de forma a serem os menores em que a série se apresenta estacionária.
+
+Note que usamos o log, pois acreditamos que a série sofre alterações sempre relativas ao seu patamar anterior e não absolutas.
+
+
+```{r, cache=TRUE}
+
+modelo <- crime_estado_ts %>%
+  model(arima = ARIMA(log(hom_doloso) ~ 0 )) 
+
+modelo %>%
+  report()
 
 
 
 ```
+
+A função accuracy mostra algumas métricas de perfomance NO CONJUNTO DE TREINAMENTO
+
 
 ```{r}
 
-crime_estado_ts %>% 
-  features(hom_doloso_diff_log, unitroot_kpss )
+modelo %>%
+  accuracy()
+
+```
+
+
+
+
+</div>
+
+
+
+## Projetando valores usando o modelo estimado
+
+`r slide_atual = slide_atual + 1`
+
+
+A função forecast da fabletools nos permite extrair as previsões do modelo para um horizonte.
+
+Veja que os números já são transformados de volta para a unidade original da série
+
+
+```{r}
+
+previsao <- modelo %>% 
+  forecast(
+    h = "1 year"
+  ) 
+
+
+previsao
+  
+  
+  
+
+```
+
+Existe uma função de autoplot(), da biblioteca feasts que mostra um gráfico incluindo o intervalo de confiança.
+
+
+```{r}
+
+previsao %>% 
+  autoplot(
+    crime_estado_ts
+  ) +
+  theme_minimal()
+
 
 
 ```
+
+
+
+## Adicionando regressores adicionais ao ARIMA
+
+`r slide_atual = slide_atual + 1`
+
+
+É possível adicionar outros regressores além dos termos relacionados ao ARIMA.
+
+Imagina que acreditemos que o calor faz as pessoas ficarem mais nervosas a ponto de aumentar o número de homicídios.
+
+Vamos pegar os dados de temperatura de uma estação na cidade do Rio de janeiro como proxy da temperatura do estado.
 
 
 ```{r, eval=FALSE}
@@ -4293,11 +4481,7 @@ write_rds(dados_temp, "dados/crime_rio/temperatura.rds")
 
 ```
 
-
-
-
-
-
+Vamos usar o percentil 67 da temperatura horária a cada mês
 
 
 ```{r, cache=TRUE}
@@ -4342,6 +4526,10 @@ dados_temperatura_mensais <- dados_temp %>%
 
 
 
+
+E juntar aos dados que já tínhamos
+
+
 ```{r}
 
 
@@ -4356,41 +4544,24 @@ crime_estado_ts <- crime_estado_ts %>%
 ```
 
 
+É possível rodar o modelo com essa variável.
 
-
-
-```{r, cache=TRUE}
-
-modelo <- crime_estado_ts %>%
-  model(arima = ARIMA(log(hom_doloso) ~ 0 )) 
-
-modelo %>%
-  report()
-
-
-
-```
-
-
-```{r}
-
-modelo %>%
-  accuracy()
-
-```
-
+O resultado estima que a cada grau de temperatura adicional, observamos 0,02 a mais no log da diferença da série (veja que d=1). Lembrando da equivalência entre log e delta percentual, podemos dizer que observamos aproximadamente 2% de aumento nos homicídios a cada grau de temperatura adicional.
 
 
 ```{r}
 
 modelo_temp <- crime_estado_ts %>% 
-  model(arima = ARIMA(log(hom_doloso) ~ p67_temp )) 
+  model(arima = ARIMA(log(hom_doloso) ~  p67_temp )) 
 
 modelo_temp %>%
   report()
 
 
 ```
+
+O modelo oferece uma performance um pouco melhor, também, DENTRO DA AMOSTRA
+
 
 
 ```{r}
@@ -4400,14 +4571,19 @@ modelo_temp %>%  accuracy()
 
 ```
 
+## Mas não sabemos o valor da variável exógena!
 
+`r slide_atual = slide_atual + 1`
 
+É claro que isso é um modelo inexequível, pois não sabemos qual será a temperatura nos próximos meses, mas poderíamos traçar cenários ou usar um outro modelo para prever essa variável.
+
+Aqui mostramos dois cenários, com o percentil 67 da temperatura em 26 e em 29 
 
 
 ```{r}
 
 
-previsao <- forecast(
+previsao_29 <- forecast(
   modelo_temp, 
   h = 10, 
   new_data = 
@@ -4415,13 +4591,27 @@ previsao <- forecast(
       data = 
         seq.Date(
           from = max(crime_estado_ts$data %>% as_date() %m+% months(1)), 
-          length.out = 5, 
+          length.out = 12, 
           by = "1 month") %>%  yearmonth(),
-      p67_temp = replicate(expr = 27, n = 5),
+      p67_temp = replicate(expr = 29, n = 12),
       index = data
     )
 )
 
+previsao_26 <- forecast(
+  modelo_temp, 
+  h = 10, 
+  new_data = 
+    tsibble(
+      data = 
+        seq.Date(
+          from = max(crime_estado_ts$data %>% as_date() %m+% months(1)), 
+          length.out = 12, 
+          by = "1 month") %>%  yearmonth(),
+      p67_temp = replicate(expr = 26, n = 12),
+      index = data
+    )
+)
 
 
 ```
@@ -4446,7 +4636,7 @@ ggplot() +
     )
   ) +
   geom_line(
-    data = previsao,
+    data = previsao_29,
     aes(
       x = data,
       y = .mean
@@ -4454,13 +4644,32 @@ ggplot() +
     color = "red"
   ) +
   geom_point(
-    data = previsao,
+    data = previsao_29,
     aes(
       x = data,
       y = .mean
     ),
     color = "red"
+  ) +
+    geom_line(
+    data = previsao_26,
+    aes(
+      x = data,
+      y = .mean
+    ),
+    color = "blue"
+  ) +
+  geom_point(
+    data = previsao_26,
+    aes(
+      x = data,
+      y = .mean
+    ),
+    color = "blue"
   ) 
+  
+
+
   
 
 
@@ -4469,10 +4678,18 @@ ggplot() +
 
 
 
+## Dividindo os dados em treinamento e validação
+`r slide_atual = slide_atual + 1`
 
 
+Assim como fizemos nos modelos que não eram de séries temporais, podemos dividir os dados em treinamento em teste.
+
+Mas no caso das sérier, precisamos manter a ordem cronológica de cada um deles.
+
+Podemos escolher uma data específica e separar os dados anteriores para treinamento e os posteriores para teste.
 
 
+Primeiro o modelo sem temperatura
 
 ```{r, cache = TRUE}
 
@@ -4493,7 +4710,6 @@ fit_treino <- crime_estado_ts_treino %>%
 
 previsao <- fit_treino %>% 
   forecast(
-    h = 1,
     crime_estado_ts %>% filter(data >= yearmonth("20190101"))
   )
 
@@ -4502,6 +4718,7 @@ accuracy(previsao, crime_estado_ts)
 
 ```
 
+Depois o modelo com temperatura, que se sai melhor
 
 ```{r, cache=TRUE}
 
@@ -4522,7 +4739,6 @@ fit_treino <- crime_estado_ts_treino %>%
 
 previsao <- fit_treino %>% 
   forecast(
-    h = 1,
     crime_estado_ts %>% filter(data >= yearmonth("20190101"))
   )
 
@@ -4534,10 +4750,16 @@ accuracy(previsao, crime_estado_ts)
 ```
 
 
+## Validação rolling
+`r slide_atual = slide_atual + 1`
 
+Podemos rolar essa data de corte entre dados de treinamento e dados de validação, criando uma série com dados projetados sempre ao mesmo horizonte
 
+Na imagem abaixo, o esquema é mostrado: a cada rodada escolhemos uma data de corte, que vai rolando, deixamos os dados anteriores como conjunto de treinamento e o dado imediatamente posterior como dado de validação (poderíamos escolher o dado sempre 6 meses posterior à data de corte, por exemplo se quiséssemos avaliar a performance neste horizonte).
 
+![](imagens/cv1-1.png){width=100%}
 
+Abaixo implementamos uma função que deve ser chamada a cada data de corte escolhida
 
 ```{r}
 
@@ -4570,21 +4792,18 @@ previsao_fora_amostra <- function(modelo, data_corte, dado){
 }
 
 
-fora <- previsao_fora_amostra(
-  modelo = modelo_puro,
-  data = make_date(2018,1,1),
-  dado = crime_estado_ts
-)
-
 
 
 ```
 
 
+Realizamos o procedimento para o modelo simples, sem temperatura
+
+
 ```{r, eval=FALSE}
 
 cortes <- seq.Date(
-  from = make_date(2008,1,1),
+  from = make_date(2013,1,1),
   to = max(crime_estado_ts$data) %>% as.Date(),
   by = "1 month"
 )
@@ -4618,6 +4837,8 @@ write_rds(performance_puro, "dados/crime_rio/performance_puro.rds")
 
 ```
 
+E para o modelo com temperatura
+
 
 ```{r, eval=FALSE}
 
@@ -4649,13 +4870,43 @@ write_rds(performance_com_temp, "dados/crime_rio/performance_com_temp.rds")
 
 ```
 
+
+O modelo com temperatura se mostrou melhor.
+
+
+```{r}
+read_rds("dados/crime_rio/performance_puro.rds")
+
+```
+
+
+```{r}
+
+read_rds("dados/crime_rio/performance_com_temp.rds")
+
+```
+
+
+
+
+## Outros modelos para comparação: NAIVE
+`r slide_atual = slide_atual + 1`
+
+
+A biblioteca fable disponibiliza outros modelos, alguns deles bem simples.
+
+É uma boa prática realizar o mesmo teste com estes modelos simples, de forma a identificar se realmente o modelo mais complexo está adicionando valor.
+
+O modelo Naive com sazonalidade repete o valor do período anterior (considerando a sazonalidade) e adiciona um drift constante estimado para a série.
+
+
 ```{r, eval=FALSE}
 
 
 
 modelo_bobo <- function(dado){
   dado %>% 
-    model(snaive = SNAIVE(hom_doloso ~ drift() + lag("year")))
+    model(snaive = SNAIVE(log(hom_doloso) ~ drift() + lag("year")))
 }
 
 
@@ -4689,10 +4940,24 @@ write_rds(performance_bobo, "dados/crime_rio/performance_bobo")
 
 
 
-
-
+O resultado é pior
 
 ```{r}
+read_rds("dados/crime_rio/performance_bobo")
+
+
+```
+
+
+## Outros modelos para comparação: TSLM
+`r slide_atual = slide_atual + 1`
+
+
+Este modelo é estimado com uma tendência e a sazonalidade
+
+
+
+```{r, eval=FALSE}
 
 
 modelo_decomp <- function(dado){
@@ -4723,7 +4988,7 @@ performance_decomp <- accuracy(previsoes_fora_1_decomp_ts$hom_doloso, dados_reai
 
 
 
-write_rds(performance_decomp, "dados/crime_rio/performance_bobo")
+write_rds(performance_decomp, "dados/crime_rio/performance_tslm")
 
 
 
@@ -4732,6 +4997,13 @@ write_rds(performance_decomp, "dados/crime_rio/performance_bobo")
 ```
 
 
+O erro foi similar ao do modelo NAIVE
+
+
+```{r}
+
+read_rds("dados/crime_rio/performance_tslm")
+```
 
 
 
