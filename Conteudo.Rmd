@@ -62,7 +62,7 @@ library(fpp3)
 library(gtrendsR)
 library(gganimate)
 library(gt)
-
+library(feather)
 
 library(electionsBR)
 library(worldmet)
@@ -5477,9 +5477,9 @@ ufc_data <- read_csv("dados/ufc/data.csv")
 
 ufc_raw_data <- read_csv2("dados/ufc/raw_total_fight_data.csv") 
 
-ufc_raw_fighter <- read_csv2("dados/ufc/raw_fighter_details.csv") 
+ufc_raw_fighter <- read_csv("dados/ufc/raw_fighter_details.csv") 
 
-ufc_raw_pre <- read_csv2("dados/ufc/preprocessed_data.csv") 
+ufc_raw_pre <- read_csv("dados/ufc/preprocessed_data.csv") 
 
 
 ufc_cada_lutador <- bind_cols(ufc_data, ufc_raw_data ) %>% 
@@ -5720,9 +5720,10 @@ modelo_ufc_por_classe <- ufc_aprend %>%
   group_by(weight_class) %>% 
   nest() %>%
   mutate(
-    modelo = map(data, ~lm(zebra_blue ~ idade_red  + red_mais_velho, data = .x)),
+    modelo = map(.x = data, ~lm(zebra_blue ~ idade_red  + red_mais_velho, data = .x)),
   ) %>% 
-  select(-data)
+  select(-data) %>% 
+  view()
 
 ufc_por_classe <- modelo_ufc_por_classe %>%
   mutate(
@@ -5994,6 +5995,8 @@ ggplot( bind_rows(ufc_aprend_classes_selec) ) +
 
 `r a_r("Shiny")` é um pacote R que permite a criação de `r a_r("aplicações WEB interativas")` que ativam código em R, com as possibilidades de formatação de tabelas, geração de gráficos, execução de modelos etc que as bibliotecas do R disponibilizam.
 
+É a melhor alternativa para criação de aplicações Web interativas para desenvolvedores que já estão acostumados e utilizam muitas funcionalidades já providas pela linguagem R
+
 ## Uma aplicação Shiny mínima
 
 `r slide_atual = slide_atual + 1`
@@ -6030,9 +6033,9 @@ Abaixo uma aplicação Shiny simples
 
 Na função `r a_r("ui() do aplicativo shiny")`, definimos a interface.
 
-No exemplo abaixo, além dos títulos, há um select e espaços para um gráfico e duas tabelas
+No exemplo abaixo, além dos títulos, há um select, ou seja, uma lista de opções, e espaços para um gráfico e duas tabelas.
 
-Na função `r a_r("server() do aplicativo shiny")`, definimos o comportamento
+Na função `r a_r("server() do aplicativo shiny")`, definimos o comportamento, ou seja, como o aplicativo reage a mudanças nos inputs
 
 No exemplo abaixo, definimos como o gráfico e as tabelas são gerados a partir do conteúdo do select contido na interface.
 
@@ -6044,12 +6047,17 @@ A biblioteca `r a_r("rhandontable")` parece mais com uma tabela de Excel, permit
 
 ```{r, eval=FALSE}
 
+library(shiny)
+library(reactable)
+library(rhandsontable)
+library(gapminder)
+library(tidyverse)
 
 selectPaises <-     
     selectInput(
         "pais", 
         label = "País", 
-        choices = gapminder$country,
+        choices = gapminder$country %>% unique() %>% sort(),
         multiple = TRUE 
     )
 
@@ -6068,7 +6076,7 @@ ui <- fluidPage(
 )
 
 server <- function(input, output, session) {
-
+    
     output$grafico <- renderPlot({
         gapminder %>% 
             filter(country %in% input$pais) %>% 
@@ -6078,7 +6086,7 @@ server <- function(input, output, session) {
             theme_light()
         
     }) 
-
+    
     
     output$tabela_reactable <- renderReactable({
         
@@ -6098,9 +6106,9 @@ server <- function(input, output, session) {
                     format = colFormat(digits = 0, separators = TRUE) 
                 )
             )
-            
-    })
         
+    })
+    
     
     output$tabela_rhanson <- renderRHandsontable({
         gapminder %>% 
@@ -6133,6 +6141,7 @@ server <- function(input, output, session) {
 
 
 shinyApp(ui, server)
+
 
 
 ```
@@ -6169,7 +6178,7 @@ Elas possibilitam que cálculos e tratamentos que são comuns a várias saídas 
 
 Na aplicação que desenhamos anteriormente, o select de país filtra da mesma forma os dados que são mostrados no gráfico e nas tabelas.
 
-Podemos inserir um reactive que vai realizar esse tratamento que é comum a todas as saídas de uma só vez.
+Podemos inserir um reactive que vai realizar esse tratamento, que é comum a todas as saídas, de uma só vez.
 
 Assim evitamos mais facilmente, também, duplicar código.
 
@@ -6179,15 +6188,60 @@ Assim evitamos mais facilmente, também, duplicar código.
 
 `r slide_atual = slide_atual + 1`
 
-Esta é a sintaxe das `r a_r("reactive expressions")`.
+Esta é a sintaxe das `r a_r("reactive expressions")`. Elas devem ser declaradas dentro de server().
+
+
+São funções disparadas no momento em que algum input que elas usam é alterado. O mecanismo disponibilizado pela shiny se encarrega disso
+
+
+```{r, eval=FALSE}
+
+  dados_filtrados <- reactive({
+      
+      gapminder %>% 
+          filter(country %in% input$pais)
+      
+  })
+
+
+```
+
+
+O resultado pode ser usado por outras funções em server. É necesário usar "()".
+
+
+```{r eval=FALSE}
+
+    output$grafico <- renderPlot({
+            dados_filtrados() %>% 
+            ggplot() +
+            geom_line(aes(x = year, y = gdpPercap, color = country )) +
+            geom_point(aes(x = year, y = gdpPercap, color = country )) +
+            theme_light()
+        
+    }) 
+
+
+```
+
+
+Ao refatorar nossa aplicação para que o gráfico e as tabelas compartilhem a saída do reactive, temos a seguinte aplicação:
+
 
 ```{r, eval=FALSE }
+
+library(shiny)
+library(reactable)
+library(rhandsontable)
+library(gapminder)
+library(tidyverse)
+
 
 selectPaises <-     
     selectInput(
         "pais", 
         label = "País", 
-        choices = gapminder$country,
+        choices = gapminder$country %>%  unique() %>%  sort(),
         multiple = TRUE 
     )
 
@@ -6285,720 +6339,493 @@ shinyApp(ui, server)
 
 ```
 
-## Dashboard exemplo
+
+## Rastreio da reatividade
 
 `r slide_atual = slide_atual + 1`
 
-Este dashboard de exemplo tem algumas funcionalidades interessantes que vamos explorar nos próximos slides
 
-[Dashboard GD]((https://https://crotman.shinyapps.io/DashboardGD/))
+É possível rastrear a reatividade dos componentes do Shiny.
+
+Com a progressão do desenvolvimento de uma aplicação, o grafo (conjunto de vértices e arestas que os ligam) relativo aos componentes (vérices) e seus disparos que os ligam (arestas) pode ficar muito complexo.
+
+![](imagens/reactivity-graph-00.png){width="80%"}
+
+A biblioteca reactlog ajuda a rastreas essas ligações.
+
+Ao habilitar a reactlog, como no código abaixo, podemos rodar uma aplicação shiny e clicar em Ctrl + F3 para visualziar o grafo 
+
+
+```{r, eval=FALSE}
+
+library(reactlog)
+
+reactlog_enable()
+
+
+```
+
+
+## Reatividade quando a aplicação é executada
+
+`r slide_atual = slide_atual + 1`
+
+
+É possível ver o que acontece todos os passos relacionados à reatividade   
+
+Num primeiro momento todos os valores estão inválidos
+
+![](imagens/reactlog1.png){width="80%"}
+
+O caminho até o primeiro objeto válido é seguido, então, pra cada elemento inválido
+
+![](imagens/reactlog2.png){width="80%"}
+
+![](imagens/reactlog3.png){width="80%"}
+
+![](imagens/reactlog4.png){width="80%"}
+
+
+## Reatividade quando o usuário muda um input
+
+`r slide_atual = slide_atual + 1`
+
+
+Quando um usuário muda um input, ele fica inválido.
+
+![](imagens/reactlog5.png){width="80%"}
+
+Isso invalida todos os objetos que dependem dele
+
+![](imagens/reactlog6.png){width="80%"}
+
+O processo de cálculo é seguido de novo
+
+![](imagens/reactlog7.png){width="80%"}
+
+
+## Ativando a reatividade apenas quando um evernto acontece: eventReactive
+`r slide_atual = slide_atual + 1`
+
+Nem sempre é interessante que todos os cálculos sejam disparados assim que o usuário muda o valor do input.
+
+Pode ser que os cálculos sejam demorados, por exemplo, ou que haja muitos inputs para ajustar.
+
+O eventReactive só é disparado mediante um evento específico, por exemplo o clique em um actionButton()
+
+Para iso, ao invés de usar o reactive, vamos usar o eventReactive, que vai observar um actionButton
+
 
 ```{r, eval=FALSE}
  
 library(shiny)
-library(tidyverse)
 library(reactable)
-library(sf)
-library(waiter)
-library(ggmap)
-library(RColorBrewer)
-library(scales)
+library(rhandsontable)
+library(gapminder)
+library(tidyverse)
 
-#### LEITURA DE DADOS ####
 
-gd <- read_rds("dados/gd/gd.rds") %>% 
-    mutate(
-        unidade = 1
+selectPaises <-     
+    selectInput(
+        "pais", 
+        label = "País", 
+        choices = gapminder$country %>%  unique() %>%  sort(),
+        multiple = TRUE 
     )
 
-#### VARIÁVEIS DE ESTADO GLOBAIS ####
-
-ultimos_pontos <- gd
-ultimo_grafico <- NA
-ultimo_n_amostra <- 0
-
-#### OPÇÕES DOS SELECTS ####
-
-agrupadores <- c(
-    "Setor econômico" = "USER_DscCl", 
-    "Tarifa" = "USER_DscGr",  
-    "Tipo de geração" = "USER_DscMo", 
-    "Município" =  "USER_NomMu", 
-    "Região" = "USER_NomRe", 
-    "UF" = "USER_SigUF",
-    "Tipo de fonte" = "USER_SigTi", 
-    "Combustível" = "USER_DscCo",
-    "Agente" = "USER_SigAg"
-)
-
-
-somas <- c(
-    
-    "Quantidade" = "unidade",
-    "Potência (MW)" = "USER_MdaPo"
-)
-
-#### ELEMENTOS DE UI ####
-
-
-mapa <- plotOutput(
-    "mapa", 
-    height = "600px",
-    brush = brushOpts(
-        id = "brush_mapa",
-        #resetOnNew = TRUE,
-        opacity = 0.2,
-        stroke = "black",
-        fill = "white",
-        clip = FALSE,
-        delay = 5000
-    )
-    
-)
-
-
-selectUFs <- selectInput(
-    "ufs",
-    "UFs:",
-    choices = unique(gd$USER_SigUF) %>% sort(),
-    multiple = TRUE
-)
-
-slider_n_amostra <- sliderInput(
-    "n_amostra",
-    label = "% amostrado no gráfico",
-    min = 10,
-    max = 100,
-    step = 10,
-    value = 10,
-    post = "%"
-    
-)
-
-slider_tamanho_ponto <- sliderInput(
-    "tamanho_ponto",
-    "Tamanho do ponto",
-    min = 0,
-    max = 2,
-    step = 0.05,
-    value = 0.05
-    
-)
-
-
-agrupador <- selectInput(
-    "campo_grupo",
-    "Agrupar por:",
-    choices = agrupadores
-)
-
-
-soma_por <- selectInput(
-    "campo_soma",
-    "Somar por:",
-    choices = somas
-)
-
-
-tabela_count <- reactableOutput("info")
-
-grafico_barras <- plotOutput("grafico_barras")
-
-#### DIAGRAMAÇÃO DA UI ####
+botao <- actionButton(inputId = "botao_vai", label = "Vai!")
 
 
 ui <- fluidPage(
-    theme = "bootstrap.css",
-    use_waiter(),
-    titlePanel(
-        fluidRow(
-            column(width = 1, img(height = 40, src = "logo-epe-azul-15-anos.gif")),
-            column(
-                width = 11,
-                tags$div(style = "height:10px"),
-                h3("Dashboard Geração Distribuída")
-                
-            )
-        )    
-    ),
-    tags$hr(),
-    sidebarLayout(
-        sidebarPanel(
-            h4("Filtros" %>% tags$b()),
-            wellPanel(
-                selectUFs 
-            ),
-            h4("Configurações do gráfico" %>% tags$b()),
-            wellPanel(
-                agrupador,
-                soma_por,
-                slider_n_amostra,
-                slider_tamanho_ponto
-            ),
-            width = 3
-        ),
-        mainPanel(
-            width = 9,
-            splitLayout(
-                cellWidths =  c("60%","40%"),
-                div(style = 'overflow: hidden',mapa),
-                div(style = 'overflow: hidden',
-                    verticalLayout(
-                        grafico_barras,
-                        tabela_count
-                    )
-                )
-            )
-        ) 
-    )
+    h1("Dashboard Gapminder"),
+    hr(),
+    h3("Filtros:"),
+    selectPaises,
+    botao,
+    h3("Gráfico:"),
+    plotOutput("grafico"),
+    h3("Tabela bonita:"),
+    reactableOutput("tabela_reactable"),
+    h3("Tabela pros viciados:"),
+    rHandsontableOutput("tabela_rhanson")
 )
-
-
-
 
 server <- function(input, output, session) {
     
-    #### MAPA ####
     
     
-    output$mapa <- renderPlot({
+    dados_filtrados <- eventReactive(
+      eventExpr = input$botao_vai, 
+      valueExpr = 
+      {
         
-        
-        pontos_selecionados <- pontos()
-
-        if(isTRUE(all_equal(ultimos_pontos, pontos_selecionados)) & ultimo_n_amostra == input$n_amostra)
-        {
-            resposta <- ultimo_grafico
-        }
-        else
-        {
-            print("atualiza")
-
-            xmin <- min(pontos_selecionados$X)
-            ymin <- min(pontos_selecionados$Y)
-            xmax <- max(pontos_selecionados$X)
-            ymax <- max(pontos_selecionados$Y)
-            
-            margem_x <- min((ymax - ymin)/7,2)
-            margem_y <- min((xmax - xmin)/7,2)
-            
-            xmin <- xmin - margem_x 
-            ymin <- ymin - margem_y
-            xmax <- xmax + margem_x 
-            ymax <- ymax + margem_y
-            
-            
-    
-            if (is.na(xmin)){
-                local <- c(-67.85551, -31.76278, -34.80921, -1.198088)
-            }
-            else{
-                local <- c(xmin, ymin, xmax, ymax)    
-            }
-            
-            map = get_map(local,source = "stamen", maptype = "toner-lite") 
-            
-            
-            resposta <- ggmap(ggmap = map) +
-                stat_density_2d(
-                    aes(x = X, y = Y, fill = ..level.. ), 
-                    bins = 30,
-                    geom = "polygon", 
-                    data = pontos_selecionados ,
-                    alpha = .1
-                ) +
-                geom_point(
-                    data = pontos_selecionados, 
-                    aes(
-                        x = X,
-                        y = Y
-                    ),
-                    alpha = 0.01,
-                    color = "darkblue",
-                    size = input$tamanho_ponto
-                ) +
-                scale_fill_gradientn(colors = brewer.pal(7, "YlOrRd")) +  
-                theme_inset()
-            
-            ultimo_grafico <<- resposta 
-            ultimos_pontos <<- pontos_selecionados
-            ultimo_n_amostra <<- input$n_amostra 
-        
-        }
-
-        resposta 
+        gapminder %>% 
+            filter(country %in% input$pais)
         
     })
-
-    #### PONTOS DO MAPA SELECIONADOS ####
-
-        
-    pontos <- reactive({
-        
-        
-        waiter <- Waiter$new(id = "mapa")$show()
-
-        resposta <- brushedPoints(gd_sample(), input$brush_mapa, xvar = "X", yvar = "Y") 
-        
-
-        if (nrow(resposta) == 0){
-            resposta <- gd_sample()
-        }
-        
-
-        resposta
-    })
-
-    #### DADOS SELECIONADOS PELO MAPA####
-    
-        
-    dados <- reactive({
-
-        resposta <- brushedPoints(gd_filtro(), input$brush_mapa, xvar = "X", yvar = "Y") 
-        
-        if (nrow(resposta) == 0){
-            resposta <- gd_filtro()
-        }
-
-        campo_grupo <- names(agrupadores)[agrupadores == input$campo_grupo]
-        campo_soma <- names(somas)[somas == input$campo_soma]
-        
-        resposta %>% 
-            group_by_at(input$campo_grupo) %>% 
-            summarise_at(input$campo_soma, sum) %>% 
-            ungroup() %>% 
-            mutate(
-                Parcela = .data[[input$campo_soma]]/sum(.data[[input$campo_soma]])
-            ) %>% 
-            arrange(desc(.data[[input$campo_soma]])) %>% 
-            rename(
-                !!campo_grupo := 1,
-                !!campo_soma := 2
-            )
-        
-    })
-
-    #### TABELA ####
     
     
-    output$info <- renderReactable({
-        
-
-        
-        dados() %>% 
-            reactable(
-                pagination = FALSE,
-                defaultColDef = colDef(
-                    format = colFormat(
-                        digits = 0,
-                        separators = TRUE
-                    )
-                ),
-                columns = list(
-                    Parcela = colDef(
-                        format = colFormat(
-                            percent = TRUE,
-                            digits = 0
-                        )
-                    )
-                )
-                    
-            )
-        
-    })
-
-    #### GRÁFICO DE BARRAS HORIZONTAIS ####
-    
-    
-    output$grafico_barras <- renderPlot({
-
-        campo_grupo <- names(agrupadores)[agrupadores == input$campo_grupo]
-        campo_soma <- names(somas)[somas == input$campo_soma]
-
-        dados() %>% 
-            mutate(
-                !!campo_grupo := 
-                    fct_lump(
-                        f = .data[[campo_grupo]], 
-                        prop = 0.05, 
-                        w = .data[[campo_soma]] ,
-                        other_level = "Outros"
-                    )
-            ) %>% 
-            mutate(
-                !!campo_grupo :=
-                    fct_reorder(
-                        .f = .data[[campo_grupo]],
-                        .x = .data[[campo_soma]],
-                        .fun = sum
-                    )
-            ) %>% 
+    output$grafico <- renderPlot({
+            dados_filtrados() %>% 
             ggplot() +
-            geom_col(
-                aes(
-                    x = .data[[campo_grupo]],
-                    y = .data[[campo_soma]],
-                    fill = .data[[campo_grupo]]
+            geom_line(aes(x = year, y = gdpPercap, color = country )) +
+            geom_point(aes(x = year, y = gdpPercap, color = country )) +
+            theme_light()
+        
+    }) 
+    
+    
+    output$tabela_reactable <- renderReactable({
+        
+        dados_filtrados() %>% 
+            select(
+                country,
+                year,
+                gdpPercap
+            ) %>% 
+            pivot_wider(
+                names_from = year,
+                values_from = gdpPercap
+            ) %>% 
+            reactable(
+                defaultColDef = colDef(
+                    format = colFormat(digits = 0, separators = TRUE) 
                 )
-            ) +
-            labs(
-                y = campo_soma,
-                x = campo_grupo,
-                fill = campo_grupo
-            ) +
-            coord_flip() +
-            theme_minimal() +
-            scale_y_continuous(
-                labels = number_format(
-                    big.mark = ".",
-                    accuracy = 1
-                )
-            ) +
-            theme(
-                legend.position =  "top"
-            ) +
-            NULL
-        
-        
+            )
         
     })
     
     
+    output$tabela_rhanson <- renderRHandsontable({
 
-    gd_filtro <- reactive({
-        
-        gd %>%
-            filter(USER_SigUF %in% input$ufs | length(input$ufs) == 0 )
+        dados_filtrados() %>% 
+            select(
+                country,
+                year,
+                gdpPercap
+            ) %>% 
+            pivot_wider(
+                names_from = year,
+                values_from = gdpPercap
+            ) %>% 
+            mutate_at(
+                vars(matches("[0-9]{4}")),
+                ~round(x = .x, digits = 0)
+            ) %>% 
+            rhandsontable(
+                readOnly = TRUE
+            ) %>% 
+            hot_cols(
+                format = "0,000",
+                language = "pt-BR"
+            )
         
     })
     
-    gd_sample <- reactive({
-        gd_filtro() %>% 
-            sample_frac(input$n_amostra/100)
-    })
-
-
+    
 }
 
 
 shinyApp(ui, server)
 
+
+
 ```
 
-## Mapa interativo
 
+
+## Seguindo os passos de um eventReactive
 `r slide_atual = slide_atual + 1`
 
-O usuário pode selecionar áreas do mapa.
+No primeiro momento, o eventReactive consulta o actionButton e verifica que não é necessário ser disparado, portanto fica "ready" sem disparar nada para os elementos posteriores da cadeia.
 
-A seleção dessa área leva a uma seleção de pontos
 
-Essa opção é habilitada com `r a_r("brushOpts")` e os pontos selecionados são acessados com `brushedPoints`
+![](imagens/reactlog8.png){width="80%"}
 
-Este tipo de interação pode ser usado com qualquer tipo de gráfico
 
-## Spinner de espera
+No momento em que clicamos no botão, todos os elementos dependentes são invalidados
 
+
+![](imagens/reactlog9.png){width="80%"}
+
+![](imagens/reactlog10.png){width="80%"}
+
+
+Então os elementos buscam de novo os valores dos quais dependem
+
+Dessa vez, como o objeto que disparao eventReactive tem valor 1, o valor é calculado, e o input do qual o cálculo é consultado
+
+
+![](imagens/reactlog11.png){width="80%"}
+
+Todos os valores são calculados e o grafo fica todo em estado "ready".
+
+![](imagens/reactlog12.png){width="80%"}
+
+
+Quando o input é alterado, ele não causa a invalidez dos outros elementos porque o botão não mudou de valor
+
+![](imagens/reactlog13.png){width="80%"}
+
+Apenas quando o botão muda de valor, os elementos são invalidados e os cálculos, refeitos
+
+![](imagens/reactlog14.png){width="80%"}
+
+
+## Filtro vazio = Todos ?
 `r slide_atual = slide_atual + 1`
 
-Esta aplicação lida com mais de 100.000 dados a respeito de instalações de geração distribuída.
+Um filtro do tipo select vazio pode querer dizer que o usuário que ver todos os elementos. Podemos emular esse comportamento acrescentando uma operação "ou" testando se o valor relativo ao filtro tem comprimento zero.
 
-Portanto, o gráfico demora um pouco para ser plotado.
+Incluí aqui uma função chamada browser(), que faz com que a execução seja interrompida. A função browser estabelece um breakpoint na execução. Assim o desenvolvedor pode visualizar o estado das variáveis. Esta técnica de debug é importante, principalmente nos casos de programação reativa.
 
-Para que o usuário saiba que a aplicação está calculando alguma coisa e não travada, usamos um `r a_r("waiter")`
 
-## Uso de váriáveis globais de estado
+- updateselect
+- bindcache
+- eval
+- dashboard
+- shinymodules
+- download
 
-`r slide_atual = slide_atual + 1`
 
-Algumas variáveis de estado são criadas para ajudar a controlar a aplicação.
 
-Elas são atribuídas com o operador `<<-`
 
-## Programando com Tidy evaluation
+```{r eval = FALSE}
 
-O Tidy evaluation deixa que usemos os nomes dos campos sem aspas.
 
-Em aplicações Shiny exploratórias, é comum que os campos que participam dos agrupamentos ou dos cálculos sejam escolhidos pelo usuário. Portanto, estes campos estarão no comteúdo de variáveis.
 
-Para que as funções do tidyverse usem o conteúdo da variável como o campo a ser considerado (e não o próprio nome da variável), temos que lançar mão das funções `group_by_at`, `summarise_at`, `.data[[variável]]` e o operador `!!`.
+library(shiny)
+library(reactable)
+library(rhandsontable)
+library(gapminder)
+library(tidyverse)
 
-## Diagramação da página
 
-`r slide_atual = slide_atual + 1`
+selectContinentes <-     
+    selectInput(
+        "continent", 
+        label = "Continente", 
+        choices = gapminder$continent %>%  unique() %>%  sort(),
+        multiple = TRUE 
+    )
 
-A diagramação da página é toda feita com as funções de diagramação do Shiny.
 
-Entretanto, cada objeto é definido anteriormente, o que é diferente do template que é gerado pelo RStudio quando um template Shiny é gerado.
+selectPaises <-     
+    selectInput(
+        "pais", 
+        label = "País", 
+        choices = gapminder$country %>%  unique() %>%  sort(),
+        multiple = TRUE 
+    )
 
-Isso parece besteira, mas separar a criação dos objetos da diagramação destes objetos facilita muito uma reorganizaçào da diagramação e causa menos problemas relacionados a erros de sintaxe como falta de vírgulas e parênteses
+botao <- actionButton(inputId = "botao_vai", label = "Vai!")
+
+
+ui <- fluidPage(
+    h1("Dashboard Gapminder"),
+    hr(),
+    h3("Filtros:"),
+    selectContinentes,
+    selectPaises,
+    botao,
+    h3("Gráfico:"),
+    plotOutput("grafico"),
+    h3("Tabela bonita:"),
+    reactableOutput("tabela_reactable"),
+    h3("Tabela pros viciados:"),
+    rHandsontableOutput("tabela_rhanson")
+)
+
+server <- function(input, output, session) {
+    
+    
+    
+    dados_filtrados <- eventReactive(
+        eventExpr = input$botao_vai, 
+        valueExpr = 
+            {
+                browser()
+                gapminder %>% 
+                    filter(country %in% input$pais | length(input$pais) == 0) %>% 
+                    filter(continent %in% input$continent | length(input$continent) == 0)
+                
+            })
+    
+    
+    output$grafico <- renderPlot({
+        dados_filtrados() %>% 
+            ggplot() +
+            geom_line(aes(x = year, y = gdpPercap, color = country )) +
+            geom_point(aes(x = year, y = gdpPercap, color = country )) +
+            theme_light()
+        
+    }) 
+    
+    
+    output$tabela_reactable <- renderReactable({
+        
+        dados_filtrados() %>% 
+            select(
+                country,
+                year,
+                gdpPercap
+            ) %>% 
+            pivot_wider(
+                names_from = year,
+                values_from = gdpPercap
+            ) %>% 
+            reactable(
+                defaultColDef = colDef(
+                    format = colFormat(digits = 0, separators = TRUE) 
+                )
+            )
+        
+    })
+    
+    
+    output$tabela_rhanson <- renderRHandsontable({
+        
+        dados_filtrados() %>% 
+            select(
+                country,
+                year,
+                gdpPercap
+            ) %>% 
+            pivot_wider(
+                names_from = year,
+                values_from = gdpPercap
+            ) %>% 
+            mutate_at(
+                vars(matches("[0-9]{4}")),
+                ~round(x = .x, digits = 0)
+            ) %>% 
+            rhandsontable(
+                readOnly = TRUE
+            ) %>% 
+            hot_cols(
+                format = "0,000",
+                language = "pt-BR"
+            )
+        
+    })
+    
+    
+}
+
+
+shinyApp(ui, server)
+
+
+
+```
+
+
+
+
+## Exemplo de Dashboard
+
+
+```{r, eval=FALSE}
+
+eventos <- read_feather(here("dados/football_events/gameevents.feather"))
+
+dicionario <- read_lines(here("dados/football_events/dictionary.txt")) %>%
+    enframe(
+        value = "linha"
+    ) %>%
+    mutate(
+        inicio_tabela = str_detect(linha, "^[a-z]"),
+        vazio = str_length(linha) == 0,
+        tabela = cumsum(inicio_tabela)
+    ) %>%
+    filter(
+        !vazio
+    ) %>%
+    group_by(tabela) %>%
+    nest() %>%
+    mutate(
+        conteudo_limpo = map(
+            .x = data, .f = ~janitor::row_to_names(dat = .x, row_number = 1, remove_row = TRUE)
+        )
+    ) %>%
+    unnest(
+        conteudo_limpo
+    ) %>%
+    ungroup(tabela) %>%
+    select(
+        -matches("^[0-9]")
+    ) %>%
+    select(
+        -matches("TRUE")
+    ) %>%
+    select(
+        -matches("FALSE")
+    ) %>%
+    select(
+        -matches("tabela")
+    ) %>%
+    select(
+        -matches("data")
+    ) %>%
+    pivot_longer(
+        cols = everything(),
+        names_to = "campo",
+        values_to = "valor",
+        values_drop_na = TRUE
+    ) %>%
+    separate(
+        col = valor,
+        into = c("cod", "valor"),
+        sep = "\t"
+    ) %>%
+    mutate(cod = as.integer(cod))
+
+
+eventos %>% 
+    head(100) %>% 
+    left_join(
+        dicionario %>% filter(campo == "event_type") %>% rename(event_type_str = valor),
+        by = c("event_type" = "cod")
+    ) %>% 
+    left_join(
+        dicionario %>% filter(campo == "event_type2") %>% rename(event_type2_str = valor),
+        by = c("event_type2" = "cod")
+    ) %>%
+    left_join(
+        dicionario %>% filter(campo == "shot_place") %>% rename(shot_place_str = valor),
+        by = c("shot_place" = "cod")
+    ) %>%
+    left_join(
+        dicionario %>% filter(campo == "shot_outcome") %>% rename(shot_outcome_str = valor),
+        by = c("shot_outcome" = "cod")
+    ) %>%
+    left_join(
+        dicionario %>% filter(campo == "location") %>% rename(location_str = valor),
+        by = c("location" = "cod")
+    ) %>%
+    left_join(
+        dicionario %>% filter(campo == "bodypart") %>% rename(bodypart_str = valor),
+        by = c("bodypart" = "cod")
+    ) %>%
+    left_join(
+        dicionario %>% filter(campo == "assist_method") %>% rename(assist_method_str = valor),
+        by = c("assist_method" = "cod")
+    ) %>%
+    left_join(
+        dicionario %>% filter(campo == "situation") %>% rename(situation_str = valor),
+        by = c("situation" = "cod")
+    )
+    
+write_feather()
+
+```
+
+
 
 ## Criando relatórios com R Markdown
 
 `r slide_atual = slide_atual + 1`
 
-## Livros
-
-`r slide_atual = slide_atual + 1`
-
-[Referência Bookdown](https://bookdown.org/yihui/bookdown/html.html)
-
-# SÉRIES TEMPORAIS
-
-`r slide_atual = slide_atual + 1`
-
-## tidyverts
-
-`r slide_atual = slide_atual + 1`
-
-Os pacotes integrantes do conjunto tidyverts tratam as séries temporais do jeito tidy
-
-+----------------------------------------------------------------------------------+--------------------------------------------------------------------------------+---------------------------------------------------+
-| -Funções básicas para o tsibble (tibble temporal)![tsibble](imagens/tsibble.png) | -Funções pra extrações de features e estatísticas![feasts](imagens/feasts.png) | -Funções para projeção![fable](imagens/fable.png) |
-+----------------------------------------------------------------------------------+--------------------------------------------------------------------------------+---------------------------------------------------+
-
-## tsibbles
-
-`r slide_atual = slide_atual + 1`
-
-")`tsibble`r a_r(" é uma classe derivada da tibbl que tem funcionalidades para séries temporais
-
-```{r}
-
-
-ipca <- BETS::BETSget(433)
-
-
-```
-
-A função ")`as_tsibble()`r a_r(" cria um tibble a partir de vários tipos de objetos que armazenam séries temporais
-
-O tsibble representa bem séries temporais regulares e reconhece o intervalo entre os valores
-
-```{r}
-
-tsbl_ipca <- as_tsibble(ipca) %>% 
-  mutate(value = value/100)
-
-
-print(tsbl_ipca)
-
-```
-
-## tsibbles com várias séries a partir de um tibble
-
-No código abaixo calculamos o número de instalações de Geração Distribuída por UF as partir dos dados a respeito das instalações.
-
-Repare que a função ")\`yearmonth()\#\#\# cria uma data mensal que é específica para períodos de um mês
-
-```{r}
-dados_gd <- read_rds("dados/gd/gd.rds")
-
-meses <- tibble(mes = seq.Date(from = make_date(2009,1,1), to = make_date(2020,3,1), by = "month" ) %>%  yearmonth())
-
-
-dados_gd_cum <- dados_gd %>% 
-    rename(
-        uf = USER_SigUF
-    ) %>% 
-    crossing(meses) %>% 
-    filter(DthConexao < mes) %>%
-    group_by(
-        uf,
-        mes
-    ) %>% 
-    summarise(
-        n = n(),
-        potencia = sum(USER_MdaPo)
-    )
-
-
-```
-
-A função as_tibble aceita um campo como referência da data, via parâmetro `index`, e um campo como chave de cada série contida no tibble: `key`
-
-```{r}
-
-
-dados_gd_tsbl <- as_tsibble(dados_gd_cum, key = uf, index = mes ) 
-
-
-dados_gd_tsbl
-
-```
-
-## Mudando a periodicidade
-
-Podemos mudar a periodicidade da série indexando por uma transformação do índice atual, usando ")`group_by_key`r a_r(" e ")`index_by`r a_r(".
-
-No caso, queremos as informações no final do ano, portanto vamos usar ")`last()`r a_r(".
-
-```{r}
-
-gd_anual <- dados_gd_tsbl %>% 
-    group_by_key() %>% 
-    index_by(ano = year(mes) ) %>% 
-    summarise(
-        n = last(n),
-        potencia = last(potencia)
-    )
-
-gd_trimestre <- dados_gd_tsbl %>% 
-    group_by_key() %>% 
-    index_by(trimestre = yearquarter(mes)) %>% 
-    summarise(
-        n = last(n), 
-        potencia = last(potencia)
-    )
-
-
-gd_anual
-
-gd_trimestre
-
-
-```
-
-## Plotando uma série
-
-A função ")\`autoplot()\#\#\# cuida das principais tarefas para plotar uma série
-
-```{r}
-
-
-
-# 
-# 
-# tsbl_ipca %>% 
-#   filter(index > make_date(1994,7,1)) %>% 
-#   autoplot(value, color = "darkblue", size = 1) +
-#   scale_y_continuous(labels = percent_format(accuracy = 1) ) + 
-#   scale_x_date(date_breaks =  "1 year", labels = year) +
-#   labs(
-#     x = "",
-#     y = "IPCA"
-#   ) +
-#   theme_minimal() +
-#   theme(
-#     axis.text.x = element_text(angle = 90)
-#   )
-# 
-
-```
-
-## Plot sazonal
-
-A função ")`gg_season")` ajuda a fazer um gráfico mostrando os períodos sazonais para comparação
-
-```{r}
-
-# tsbl_ipca %>% 
-#   filter(year(index) > 2009) %>% 
-#   gg_season(value, period = "year", labels = "both") +
-#   scale_y_continuous(
-#     labels = percent_format(accuracy = 0.1), 
-#     breaks = seq(0.000, by = 0.001,to =  0.015) ) + 
-#   scale_x_date(
-#     date_labels = "%b",
-#     date_breaks = "1 month"
-#   ) +
-#   labs(
-#     x = "",
-#     y = "IPCA"
-#   ) +
-#   theme_minimal() +
-#   theme(
-#     axis.text.x = element_text(angle = 90)
-#   )
-#   
-# 
-# 
-# 
-
-
-```
-
-```{r}
-
-
-# tsbl_ipca %>% 
-#   filter(year(index) > 1995) %>% 
-#   gg_season(value, period = "year") +
-#   scale_y_continuous(
-#     labels = percent_format(accuracy = 0.1), 
-#     breaks = seq(0.000, by = 0.002,to =  0.03) ) + 
-#   scale_x_date(
-#     date_labels = "%b",
-#     date_breaks = "1 month"
-#   ) +
-#   labs(
-#     x = "",
-#     y = "IPCA"
-#   ) +
-#   theme_minimal() +
-#   theme(
-#     axis.text.x = element_text(angle = 90)
-#   )
-# 
-
-
-```
-
-```{r}
-
-
-# buscas <- gtrends("xvideos", geo = "BR", time = "today 1-m", onlyInterest = TRUE)
-# 
-# buscas$interest_over_time
-# 
-# 
-
-
-
-```
-
-# DESENVOLVIMENTO DE PACOTES
-
-`r slide_atual = slide_atual + 1`
-
-## Filosofia
-
-`r slide_atual = slide_atual + 1`
-
-Tudo que pode ser automatizado deve ser automatizado *devtools*
-
-## Preparando o ambiente
-
-`r slide_atual = slide_atual + 1`
-
-Pacotes a instalar para começar:
-
-```{r, eval = FALSE }
-
-install.packages(c("devtools", "roxygen2", "testthat", "knitr"))
-
-```
-
-Para checar se o ambiente está preparado para criar pacotes:
-
-```{r, eval = FALSE }
-
-devtools::has_devel()
-
-
-```
-
-## Criando a estrutura
-
-`r slide_atual = slide_atual + 1`
-
-New Project -\> New Directory -\> R Package
-
-The main difference between library() and require() is what happens if a package isn't found. While library() throws an error, require() prints a warning message and returns FALSE. In practice, this distinction isn't important because when building a package you should NEVER use either inside a package. See package dependencies for what you should do instead.
-
-# Apêndices
-
-`r slide_atual = slide_atual + 1`
 
 ## Índice remissivo
 
