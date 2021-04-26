@@ -4047,6 +4047,7 @@ crime_estado <- crime_rio %>%
   mutate(
     data = make_date(ano, mes, 1) %>% yearmonth()
   ) %>% 
+  relocate(data) %>% 
   arrange(data) %>% 
   mutate(
     across(
@@ -4065,6 +4066,8 @@ crime_estado <- crime_rio %>%
     hom_doloso,
     hom_doloso_diff_log
   ) 
+
+
 
 crime_estado_ts <- as_tsibble(crime_estado, index = data)
 
@@ -4200,7 +4203,7 @@ embeleza_gg_tsdisplay(conjunto)
 
 Existem testes que verificam a hipótese de que a série é estacionária. 
 
-No teste executado abaixo, Kwiatkowski, a hipótese nula é de que a série é não-estacionária (na verdade não-estacionária com a posibilidade de tendência constante). 
+No teste executado abaixo, Kwiatkowski, a hipótese nula é de que a série é estacionária. 
 
 Sendo assim p-value obtido mostra que a chance de se obter um resultado tão extremo quanto o observado se a hipótese nula for verdadeira é baixíssima e podemos rejeitar a hipótese nula.
 
@@ -4278,7 +4281,7 @@ embeleza_gg_tsdisplay(serie_diff_log)
 ## Testando a estacionariedade de diff(log(serie))
 `r slide_atual = slide_atual + 1`
 
-O teste dessa vez não oferece evidências para descartarmos a hipótese nula de que a aérie é não-estacionária.
+O teste dessa vez não oferece evidências para descartarmos a hipótese nula de que a aérie é estacionária.
 
 
 ```{r}

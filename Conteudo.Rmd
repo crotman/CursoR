@@ -6580,13 +6580,6 @@ Um filtro do tipo select vazio pode querer dizer que o usuário que ver todos os
 Incluí aqui uma função chamada browser(), que faz com que a execução seja interrompida. A função browser estabelece um breakpoint na execução. Assim o desenvolvedor pode visualizar o estado das variáveis. Esta técnica de debug é importante, principalmente nos casos de programação reativa.
 
 
-- updateselect
-- bindcache
-- eval
-- dashboard
-- shinymodules
-- download
-
 
 
 
@@ -6721,110 +6714,1173 @@ shinyApp(ui, server)
 
 
 
+## Selects progressivos com um observer
+`r slide_atual = slide_atual + 1`
 
-## Exemplo de Dashboard
+
+Os filtros de continentes e países, neste caso, podem ser progressivos, pois existe uma relação 1 para n dos continentes com os países (cada continente pode estar ligado a vários países e cada país está ligado a um continente)
+
+Vamos atualizar o select de países de acordo com os continentes escolhidos. Para isso vamos usar a função observe, que cria um observer. O observer é copmo um reactive mas não retorna um valor. Ee executa uma ação. É o tipo de elemento que deve ser usado quando precisamos disparar uma ação quando algum valor muda 
+
+No caso, a ação que é disparada é a alteração das opções do select de países
+
+
+![](imagens/reactlog14.png){width="80%"}
+
+
 
 
 ```{r, eval=FALSE}
 
-eventos <- read_feather(here("dados/football_events/gameevents.feather"))
-
-dicionario <- read_lines(here("dados/football_events/dictionary.txt")) %>%
-    enframe(
-        value = "linha"
-    ) %>%
-    mutate(
-        inicio_tabela = str_detect(linha, "^[a-z]"),
-        vazio = str_length(linha) == 0,
-        tabela = cumsum(inicio_tabela)
-    ) %>%
-    filter(
-        !vazio
-    ) %>%
-    group_by(tabela) %>%
-    nest() %>%
-    mutate(
-        conteudo_limpo = map(
-            .x = data, .f = ~janitor::row_to_names(dat = .x, row_number = 1, remove_row = TRUE)
-        )
-    ) %>%
-    unnest(
-        conteudo_limpo
-    ) %>%
-    ungroup(tabela) %>%
-    select(
-        -matches("^[0-9]")
-    ) %>%
-    select(
-        -matches("TRUE")
-    ) %>%
-    select(
-        -matches("FALSE")
-    ) %>%
-    select(
-        -matches("tabela")
-    ) %>%
-    select(
-        -matches("data")
-    ) %>%
-    pivot_longer(
-        cols = everything(),
-        names_to = "campo",
-        values_to = "valor",
-        values_drop_na = TRUE
-    ) %>%
-    separate(
-        col = valor,
-        into = c("cod", "valor"),
-        sep = "\t"
-    ) %>%
-    mutate(cod = as.integer(cod))
 
 
-eventos %>% 
-    head(100) %>% 
-    left_join(
-        dicionario %>% filter(campo == "event_type") %>% rename(event_type_str = valor),
-        by = c("event_type" = "cod")
-    ) %>% 
-    left_join(
-        dicionario %>% filter(campo == "event_type2") %>% rename(event_type2_str = valor),
-        by = c("event_type2" = "cod")
-    ) %>%
-    left_join(
-        dicionario %>% filter(campo == "shot_place") %>% rename(shot_place_str = valor),
-        by = c("shot_place" = "cod")
-    ) %>%
-    left_join(
-        dicionario %>% filter(campo == "shot_outcome") %>% rename(shot_outcome_str = valor),
-        by = c("shot_outcome" = "cod")
-    ) %>%
-    left_join(
-        dicionario %>% filter(campo == "location") %>% rename(location_str = valor),
-        by = c("location" = "cod")
-    ) %>%
-    left_join(
-        dicionario %>% filter(campo == "bodypart") %>% rename(bodypart_str = valor),
-        by = c("bodypart" = "cod")
-    ) %>%
-    left_join(
-        dicionario %>% filter(campo == "assist_method") %>% rename(assist_method_str = valor),
-        by = c("assist_method" = "cod")
-    ) %>%
-    left_join(
-        dicionario %>% filter(campo == "situation") %>% rename(situation_str = valor),
-        by = c("situation" = "cod")
+
+library(shiny)
+library(reactable)
+library(rhandsontable)
+library(gapminder)
+library(tidyverse)
+
+
+selectContinentes <-     
+    selectInput(
+        "continent", 
+        label = "Continente", 
+        choices = gapminder$continent %>%  unique() %>%  sort(),
+        multiple = TRUE 
+    )
+
+
+selectPaises <-     
+    selectInput(
+        "pais", 
+        label = "País", 
+        choices = gapminder$country %>%  unique() %>%  sort(),
+        multiple = TRUE 
+    )
+
+botao <- actionButton(inputId = "botao_vai", label = "Vai!")
+
+
+ui <- fluidPage(
+    h1("Dashboard Gapminder"),
+    hr(),
+    h3("Filtros:"),
+    selectContinentes,
+    selectPaises,
+    botao,
+    h3("Gráfico:"),
+    plotOutput("grafico"),
+    h3("Tabela bonita:"),
+    reactableOutput("tabela_reactable"),
+    h3("Tabela pros viciados:"),
+    rHandsontableOutput("tabela_rhanson")
+)
+
+server <- function(input, output, session) {
+    
+  
+
+    paises_para_select <- reactive({
+        
+        resposta <- gapminder %>% 
+            filter(continent %in% input$continent | length(input$continent) == 0 ) %>% 
+            pull(country) %>% 
+            unique() %>% 
+            sort()
+        
+        resposta
+        
+    })
+    
+
+    observe(
+        updateSelectInput(session = session, inputId = "pais", choices = paises_para_select() )
     )
     
-write_feather()
+    
+    dados_filtrados <- eventReactive(
+        eventExpr = input$botao_vai, 
+        valueExpr = 
+            {
+                gapminder %>% 
+                    filter(country %in% input$pais | length(input$pais) == 0) %>% 
+                    filter(continent %in% input$continent | length(input$continent) == 0)
+                
+            })
+    
+    
+    output$grafico <- renderPlot({
+        dados_filtrados() %>% 
+            ggplot() +
+            geom_line(aes(x = year, y = gdpPercap, color = country )) +
+            geom_point(aes(x = year, y = gdpPercap, color = country )) +
+            theme_light()
+        
+    }) 
+    
+    
+    output$tabela_reactable <- renderReactable({
+        
+        dados_filtrados() %>% 
+            select(
+                country,
+                year,
+                gdpPercap
+            ) %>% 
+            pivot_wider(
+                names_from = year,
+                values_from = gdpPercap
+            ) %>% 
+            reactable(
+                defaultColDef = colDef(
+                    format = colFormat(digits = 0, separators = TRUE) 
+                )
+            )
+        
+    })
+    
+    
+    output$tabela_rhanson <- renderRHandsontable({
+        
+        dados_filtrados() %>% 
+            select(
+                country,
+                year,
+                gdpPercap
+            ) %>% 
+            pivot_wider(
+                names_from = year,
+                values_from = gdpPercap
+            ) %>% 
+            mutate_at(
+                vars(matches("[0-9]{4}")),
+                ~round(x = .x, digits = 0)
+            ) %>% 
+            rhandsontable(
+                readOnly = TRUE
+            ) %>% 
+            hot_cols(
+                format = "0,000",
+                language = "pt-BR"
+            )
+        
+    })
+    
+    
+}
+
+
+shinyApp(ui, server)
+
+
 
 ```
 
 
 
-## Criando relatórios com R Markdown
-
+## Estrutura de Dashboard
 `r slide_atual = slide_atual + 1`
+
+
+Em muitos casos, temos painéis de visualização com várias seções diferentes.
+
+Existem algumas bibliotecas que disponibilizam frameworks que criam menus onde é possível definir diversas seções.
+
+Um delas é a shinydashboard, que oferece uma estrutura via dashboardPage(), que deve receber a especificação do cabeçalho, do menu lateral e do corpo principal
+
+```{r, eval=FALSE}
+
+ui <- dashboardPage(
+    header = header,
+    sidebar = sidebar,
+    body = body
+)
+
+
+```
+
+
+O menu lateral aponta para itens que têm o mesmo nome definido no corpo principal
+
+
+```{r, eval=FALSE}
+
+header <- dashboardHeader(
+    title = "Gapminder"
+)
+
+
+sidebar <- dashboardSidebar(
+    sidebarMenu(
+        menuItem(
+            text = "PIB", tabName = "tab_pib"
+        ) ,
+        menuItem(
+            text = "Expec. Vida", tabName = "tab_expec"            
+        )
+    )
+)
+
+
+body <- dashboardBody(
+    tabItems(
+        tabItem(
+            tabName = "tab_pib",
+            "Sou o pib"
+        ) ,
+        tabItem(
+            tabName = "tab_expec",
+            "Sou expec"
+        ) 
+    )
+)
+
+
+
+```
+
+
+Juntando tudo:
+
+
+```{r, eval=FALSE}
+
+
+library(shiny)
+library(reactable)
+library(rhandsontable)
+library(gapminder)
+library(tidyverse)
+library(shinydashboard)
+
+
+header <- dashboardHeader(
+    title = "Gapminder"
+)
+
+
+sidebar <- dashboardSidebar(
+    sidebarMenu(
+        menuItem(
+            text = "PIB", tabName = "tab_pib"
+        ) ,
+        menuItem(
+            text = "Expec. Vida", tabName = "tab_expec"            
+        )
+    )
+)
+
+
+body <- dashboardBody(
+    tabItems(
+        tabItem(
+            tabName = "tab_pib",
+            "Sou o pib"
+        ) ,
+        tabItem(
+            tabName = "tab_expec",
+            "Sou expec"
+        ) 
+    )
+)
+
+
+ui <- dashboardPage(
+    header = header,
+    sidebar = sidebar,
+    body = body
+)
+
+
+server <- function(input, output, session){
+    
+}
+
+
+shinyApp(
+    ui = ui, server = server
+)
+
+
+
+
+```
+
+
+  
+## Dashboard sem DRY - don´t repeat yourself
+`r slide_atual = slide_atual + 1`
+
+
+Muitas vezes várias seções do Dashboard são parecidas.
+
+O jeito mais ingênuo de fazer é copiar o codigo e modificar uma pequena parte da cópia.
+
+Isso é uma péssima prática, que viola um principio chamado DRY - Don´t Repeat Yourself.
+
+Código copiado é uma das piores pragas da programação. É também uma das mais comuns.
+
+Todo código significa um legado, um elemento que deve ser mantido.
+
+
+```{r, eval=FALSE}
+
+library(shiny)
+library(reactable)
+library(rhandsontable)
+library(gapminder)
+library(tidyverse)
+library(shinydashboard)
+
+
+header <- dashboardHeader(
+    title = "Gapminder"
+)
+
+
+sidebar <- dashboardSidebar(
+    sidebarMenu(
+        menuItem(
+            text = "PIB", tabName = "tab_pib"
+        ) ,
+        menuItem(
+            text = "Expec. Vida", tabName = "tab_expec"            
+        )
+    )
+)
+
+selectContinentes <-     
+    selectInput(
+        "continent", 
+        label = "Continente", 
+        choices = gapminder$continent %>%  unique() %>%  sort(),
+        multiple = TRUE 
+    )
+
+
+selectPaises <-     
+    selectInput(
+        "pais", 
+        label = "País", 
+        choices = gapminder$country %>%  unique() %>%  sort(),
+        multiple = TRUE 
+    )
+
+botao <- actionButton(inputId = "botao_vai", label = "Vai!")
+
+
+nucleo <- fluidPage(
+    h1("Dashboard Gapminder - País"),
+    hr(),
+    h3("Filtros:"),
+    selectContinentes,
+    selectPaises,
+    botao,
+    h3("Gráfico:"),
+    plotOutput("grafico")
+)
+
+
+
+selectContinentes_expec <-     
+    selectInput(
+        "continent_expec", 
+        label = "Continente", 
+        choices = gapminder$continent %>%  unique() %>%  sort(),
+        multiple = TRUE 
+    )
+
+
+selectPaises_expec <-     
+    selectInput(
+        "pais_expec", 
+        label = "País", 
+        choices = gapminder$country %>%  unique() %>%  sort(),
+        multiple = TRUE 
+    )
+
+botao_expec <- actionButton(inputId = "botao_vai_expec", label = "Vai!")
+
+
+nucleo_expec <- fluidPage(
+    h1("Dashboard Gapminder - Expectativa de vida"),
+    hr(),
+    h3("Filtros:"),
+    selectContinentes_expec,
+    selectPaises_expec,
+    botao_expec,
+    h3("Gráfico:"),
+    plotOutput("grafico_expec"),
+)
+
+
+
+
+
+body <- dashboardBody(
+    tabItems(
+        tabItem(
+            tabName = "tab_pib",
+            nucleo
+        ) ,
+        tabItem(
+            tabName = "tab_expec",
+            nucleo_expec
+        ) 
+    )
+)
+
+
+ui <- dashboardPage(
+    header = header,
+    sidebar = sidebar,
+    body = body
+)
+
+
+server <- function(input, output, session){
+    
+
+    paises_para_select <- reactive({
+        
+        resposta <- gapminder %>% 
+            filter(continent %in% input$continent | length(input$continent) == 0 ) %>% 
+            pull(country) %>% 
+            unique() %>% 
+            sort()
+        
+        resposta
+        
+    })
+    
+    paises_para_select_expec <- reactive({
+        
+        resposta <- gapminder %>% 
+            filter(continent %in% input$continent_expec | length(input$continent_expec) == 0 ) %>% 
+            pull(country) %>% 
+            unique() %>% 
+            sort()
+        
+        resposta
+        
+    })
+    
+    observe(
+        updateSelectInput(session = session, inputId = "pais", choices = paises_para_select() )
+    )
+    
+    observe(
+        updateSelectInput(session = session, inputId = "pais_expec", choices = paises_para_select_expec() )
+    )
+    
+    dados_filtrados <- eventReactive(
+        eventExpr = input$botao_vai, 
+        valueExpr = 
+            {
+                gapminder %>% 
+                    filter(country %in% input$pais | length(input$pais) == 0) %>% 
+                    filter(continent %in% input$continent | length(input$continent) == 0)
+                
+            })
+    
+    
+    dados_filtrados_expec <- eventReactive(
+        eventExpr = input$botao_vai_expec, 
+        valueExpr = 
+            {
+                gapminder %>% 
+                    filter(country %in% input$pais_expec | length(input$pais_expec) == 0) %>% 
+                    filter(continent %in% input$continent_expec | length(input$continent_expec) == 0)
+                
+            })
+    
+    
+    output$grafico <- renderPlot({
+        dados_filtrados() %>% 
+            ggplot() +
+            geom_line(aes(x = year, y = gdpPercap, color = country )) +
+            geom_point(aes(x = year, y = gdpPercap, color = country )) +
+            theme_light()
+        
+    }) 
+    
+    
+    output$grafico_expec <- renderPlot({
+        dados_filtrados_expec() %>% 
+            ggplot() +
+            geom_line(aes(x = year, y = lifeExp, color = country )) +
+            geom_point(aes(x = year, y = lifeExp, color = country )) +
+            theme_light()
+        
+    }) 
+    
+    
+}
+
+
+shinyApp(
+    ui = ui, server = server
+)
+
+
+
+```
+
+
+## Além de DRY, Acoplamento e Coesão
+`r slide_atual = slide_atual + 1`
+
+
+Duas metas muito importantes na programação são Alta Coesão e Baixo Acoplamento. Essas metas estão muito aquém do que podem estar na situação que estamos visualizando.
+
+
+Coesão: um componente do software deve servir a APENAS UMA responsabilidade bem definida. Os elementos contidos neste componente devem colaborar e depender um dos outros mais do que dependem de componentes externos.
+
+
+Acoplamento: componentes de software devem depender o menos possível um dos outros. Se não houver acoplamento, o software não funciona, mas ele deve ser minimizado.
+
+
+## Acoplamento e Coesão no dashboard usado como exemplo
+`r slide_atual = slide_atual + 1`
+
+Veja como no dashboard abaixo o único módulo existente tem duas responsabilidades: lidar com a apresentação do PIB e com a apresentação da Expectativa de Vida.
+
+Além disso conseguimos notar dois grupos de componentes que precisam realmente se relacionar entre si. Entretanto nada impede que os componentes se relacionem, o que aumentaria a complexidade desnecessariamente e poderia levar a bugs. 
+
+
+![](diagramas/modulos_shiny.png){width="80%"}
+
+
+## Uma divisão em módulos melhora a arquitetura
+`r slide_atual = slide_atual + 1`
+
+
+Se dividirmos a aplicação em dois módulos, teremos maior coesão: cada módulo vai cuidar de uma só responsabilidade e os componentes contidos em cada módulo são realmente os que deveriam se relacionar.
+
+
+![](diagramas/modulos_shiny_2.png){width="80%"}
+
+
+
+## E o princípio DRY - Don´t Repeat Yourself ?
+`r slide_atual = slide_atual + 1`
+
+
+Podemos perceber também que os módulos são praticamente iguais: a forma como os componentes se relacionam são iguais, e o gráfico é igual. A única diferença é a coluna usada para o eixo y do gráfico.
+
+
+É posível usar uma técnica que define modelos de módulos que são usados para gerar instâncias concretas que se comportam de forma diferebnte apenas onde necessário.
+
+
+![](diagramas/modulos_shiny_3.png){width="80%"}
+
+
+
+## Shiny Modules
+`r slide_atual = slide_atual + 1`
+
+
+Os shiny modules são a forma de definir templates de módulos com suas funções UI e Server que podem ser instanciados várias vezes. Cada instância possui um valor diferente em sua variável namespace.
+
+
+Primeiro vamos escrever um módulo que só vai se preocupar em emular o comportamento para a primeira tab do nosso namespace (PIB).
+
+Depois vamos estendê-lo para funcionar tanto para PIB quando para Expectativa de Vida.
+
+A convenção mais usada é escrever as funções "nomedomodulo_ui" e "nomedomodulo_server" em um arquivo "nomedomodulo.R" que ficará em uma pasta "R" na raiz do diretório onde fica aplicação Shiny (ou seja, onde fica o arquivo app.R ou UI.R e Server.R).
+
+No nosso caso, vamos escrever o arquivo visualiza_gapminder.R assim como abaixo.
+
+
+Na ui:
+
+- Vamos encapsular o código que gera a ui em uma função que recebe id
+
+- Vamos encapsular os nomes dos id originais dos componentes com NS(id, id_original_do_componente)
+
+
+Na server:
+
+- A função deve receber id
+
+- Deve chamar uma função chamada moduleServer
+
+
+```{r, eval=FALSE}
+
+
+library(shiny)
+library(tidyverse)
+
+
+visualiza_gapminder_ui <- function(id){
+  
+  selectContinentes <-     
+    selectInput(
+      inputId = NS(id, "continent"), 
+      label = "Continente", 
+      choices = gapminder$continent %>%  unique() %>%  sort(),
+      multiple = TRUE 
+    )
+  
+  
+  selectPaises <-     
+    selectInput(
+      inputId = NS(id, "pais"),
+      label = "País", 
+      choices = gapminder$country %>%  unique() %>%  sort(),
+      multiple = TRUE 
+    )
+  
+  botao <- actionButton(inputId = NS(id, "botao_vai"), label = "Vai!")
+  
+  
+  nucleo <- fluidPage(
+    h1("Dashboard Gapminder - País"),
+    hr(),
+    h3("Filtros:"),
+    selectContinentes,
+    selectPaises,
+    botao,
+    h3("Gráfico:"),
+    plotOutput(NS(id, "grafico"))
+  )
+  
+  
+  nucleo  
+  
+}
+
+
+
+visualiza_gapminder_server <- function(id){
+  
+  moduleServer(id, function(input, output, session){
+    
+    
+    paises_para_select <- reactive({
+      
+      resposta <- gapminder %>% 
+        filter(continent %in% input$continent | length(input$continent) == 0 ) %>% 
+        pull(country) %>% 
+        unique() %>% 
+        sort()
+      
+      resposta
+      
+    })
+    
+    observe(
+      updateSelectInput(session = session, inputId = "pais", choices = paises_para_select() )
+    )
+    
+    
+    dados_filtrados <- eventReactive(
+      eventExpr = input$botao_vai, 
+      valueExpr = 
+        {
+          gapminder %>% 
+            filter(country %in% input$pais | length(input$pais) == 0) %>% 
+            filter(continent %in% input$continent | length(input$continent) == 0)
+          
+        })
+    
+    
+    output$grafico <- renderPlot({
+      dados_filtrados() %>% 
+        ggplot() +
+        geom_line(aes(x = year, y = gdpPercap, color = country )) +
+        geom_point(aes(x = year, y = gdpPercap, color = country )) +
+        theme_light()
+      
+    }) 
+    
+  })
+}
+
+
+
+```
+
+
+
+No código principal do shiny, as funções relativas devem ser chamadas.
+
+
+```{r, eval=FALSE}
+
+
+
+library(shiny)
+library(gapminder)
+library(tidyverse)
+library(shinydashboard)
+
+
+header <- dashboardHeader(
+  title = "Gapminder"
+)
+
+
+sidebar <- dashboardSidebar(
+  sidebarMenu(
+    menuItem(
+      text = "PIB", tabName = "tab_pib"
+    )
+  )
+)
+
+body <- dashboardBody(
+  tabItems(
+    tabItem(
+      tabName = "tab_pib",
+      visualiza_gapminder_ui(id = "pib")
+    ) 
+  )
+)
+
+
+ui <- dashboardPage(
+  header = header,
+  sidebar = sidebar,
+  body = body
+)
+
+
+server <- function(input, output, session){
+  
+  visualiza_gapminder_server(id = "pib")
+  
+  
+}
+
+
+shinyApp(
+  ui = ui, server = server
+)
+
+
+
+```
+
+
+## Melhorando a organização da aplicação Shiny
+`r slide_atual = slide_atual + 1`
+
+Para tornar o módulo genérico precisamos tratar o código abaixo.
+
+
+```{r, eval=FALSE}
+    output$grafico <- renderPlot({
+      dados_filtrados() %>% 
+        ggplot() +
+        geom_line(aes(x = year, y = gdpPercap, color = country )) +
+        geom_point(aes(x = year, y = gdpPercap, color = country )) +
+        theme_light()
+      
+    }) 
+
+```
+
+
+Aqui temos um problema de múltiplas responsabilidades.
+
+Este código é responsável por algumas coisas, dentre elas
+
+- Gerar um gráfico específico com uma linha pra cada país com eixo x = ano e eixo y igual à métrica de PIB
+
+- Definir o gráfico deve aparecer no output chamado grafico e quais dados devem ser usados pra ele.
+
+Temos uma oportunidade de melhorar bastante o código separando essas responsabilidades.
+
+Da forma como o código está há vários problemas: não podemos, por exemplo, reutilizar o mesmo gráfico em outros lugares.
+
+Vamos ver posteriormente como isso é mais importante do que você pode imaginar agora.
+
+
+## Boa prática Shiny: separar implementação não depende de reatividade
+`r slide_atual = slide_atual + 1`
+
+De modo geral é positivo separar a parte do código que depende dos inputs, reactives etc, ou seja, a parte que tem que rodar dentro do ambiente reativo das parte do código que implementa funcionalidades que não dependem de reatividade.
+
+A construção de um gráfico não depende de reatividade, as informações necessárias que vêm do ambiente reativo podem ser tratados antes da chamada da função que gera o gráfico.
+
+Assim, a construção do gráfico vai passar para uma função separada, que sera colocada em um arquivo R separado também.
+
+
+```{r, eval=FALSE}
+
+gera_grafico_series_temporais_pais <- function(dados){
+
+    ggplot(dados) +
+    geom_line(aes(x = year, y = gdpPercap, color = country )) +
+    geom_point(aes(x = year, y = gdpPercap, color = country )) +
+    theme_light()
+}
+
+
+```
+
+
+Vamos deixar o código no shiny module tratar as informações vindas do ambiente reativo
+
+Repare que chamei a funcão e "gera_grafico_series_temporais_pais" e não "gera_grafico_series_temporais_pais", já que a ideia é tornar essa função genérica pra pib, expectativa de vida etc.
+
+
+```{r, eval=FALSE}
+
+output$grafico <- renderPlot({
+  gera_grafico_series_temporais_pais(dados_filtrados())
+}) 
+
+
+
+```
+
+
+Agora podemos chamar essa função de outros suportes, como relatórios estáticos ou relatórios shiny
+
+
+
+## Recebendo por parâmetro o campo a mapear na escala
+`r slide_atual = slide_atual + 1`
+
+Vamos preparar nossa função para receber via parâmetro o nome do campo que vai ser mapeado no eixo y, já que ora vamos usar PIB, ora vamos usar Expectativa de Vida
+
+Para isso vamos usar .data[[nome_do_campo]] dentro de aes()
+
+
+```{r, eval=FALSE}
+
+gera_grafico_series_temporais_pais <- function(dados, campo_y){
+  
+  ggplot(dados) +
+    geom_line(aes(x = year, y = .data[[campo_y]] , color = country )) +
+    geom_point(aes(x = year, y =  .data[[campo_y]], color = country )) +
+    theme_light()
+}
+
+
+
+```
+
+
+## Generalizando o módulo para PIb, Expectativa de Vida, ...
+`r slide_atual = slide_atual + 1`
+
+
+Agora precisamos que o nome módulo passe o nome do campo correto para a função que gera o gráfico
+
+Uma forma de fazer isso é criar uma estrutura que contenha, para cada id possível, informações para execução da aplicação
+
+
+
+```{r, eval=FALSE}
+
+
+
+library(shiny)
+library(tidyverse)
+
+
+info_modulos <- tribble(
+  ~id,   ~campo_y,      ~titulo,
+  "pib",   "gdpPercap",   "PIB",
+  "expec", "lifeExp",     "Expectativa de Vida",
+  "pop",   "pop",         "População"
+  
+)
+
+
+define_titulo_visualiza_gapminder <- function(id_escolhido){
+  info_modulos %>% 
+    filter(
+      id == id_escolhido
+    ) %>% 
+    pull(titulo)
+}
+
+
+define_campo_y_visualiza_gapminder <-  function(id_escolhido){
+  info_modulos %>% 
+    filter(
+      id == id_escolhido
+    ) %>% 
+    pull(campo_y)
+}
+
+
+visualiza_gapminder_ui <- function(id){
+  
+  selectContinentes <-     
+    selectInput(
+      inputId = NS(id, "continent"), 
+      label = "Continente", 
+      choices = gapminder$continent %>%  unique() %>%  sort(),
+      multiple = TRUE 
+    )
+  
+  
+  selectPaises <-     
+    selectInput(
+      inputId = NS(id, "pais"),
+      label = "País", 
+      choices = gapminder$country %>%  unique() %>%  sort(),
+      multiple = TRUE 
+    )
+  
+  botao <- actionButton(inputId = NS(id, "botao_vai"), label = "Vai!")
+  
+  
+  
+  nucleo <- fluidPage(
+    h1("Dashboard Gapminder - {define_titulo_visualiza_gapminder(id)}" %>% str_glue()),
+    hr(),
+    h3("Filtros:"),
+    selectContinentes,
+    selectPaises,
+    botao,
+    h3("Gráfico:"),
+    plotOutput(NS(id, "grafico"))
+  )
+  
+  
+  nucleo  
+  
+}
+
+
+
+visualiza_gapminder_server <- function(id){
+  
+  moduleServer(id, function(input, output, session){
+    
+    
+    paises_para_select <- reactive({
+      
+      resposta <- gapminder %>% 
+        filter(continent %in% input$continent | length(input$continent) == 0 ) %>% 
+        pull(country) %>% 
+        unique() %>% 
+        sort()
+      
+      resposta
+      
+    })
+    
+    observe(
+      updateSelectInput(session = session, inputId = "pais", choices = paises_para_select() )
+    )
+    
+    
+    dados_filtrados <- eventReactive(
+      eventExpr = input$botao_vai, 
+      valueExpr = 
+        {
+          gapminder %>% 
+            filter(country %in% input$pais | length(input$pais) == 0) %>% 
+            filter(continent %in% input$continent | length(input$continent) == 0)
+          
+        })
+    
+    
+    output$grafico <- renderPlot({
+      gera_grafico_series_temporais_pais(
+        dados = dados_filtrados(),
+        campo_y = define_campo_y_visualiza_gapminder(id)
+      )
+    }) 
+    
+  })
+}
+
+
+
+
+```
+
+
+Na aplicação criamos os itens de menu necessários
+
+
+```{r, eval=FALSE}
+
+
+
+library(shiny)
+library(gapminder)
+library(tidyverse)
+library(shinydashboard)
+
+
+header <- dashboardHeader(
+  title = "Gapminder"
+)
+
+
+sidebar <- dashboardSidebar(
+  sidebarMenu(
+    menuItem(
+      text = "PIB", tabName = "tab_pib"
+    ),
+    menuItem(
+      text = "Expectativa de vida", tabName = "tab_expec"
+    ),
+    menuItem(
+      text = "População", tabName = "tab_pop"
+    )
+  )
+)
+
+body <- dashboardBody(
+  tabItems(
+    tabItem(
+      tabName = "tab_pib",
+      visualiza_gapminder_ui(id = "pib")
+    ), 
+    tabItem(
+      tabName = "tab_expec",
+      visualiza_gapminder_ui(id = "expec")
+    ) ,
+    tabItem(
+      tabName = "tab_pop",
+      visualiza_gapminder_ui(id = "pop")
+    ) 
+  )
+)
+
+
+ui <- dashboardPage(
+  header = header,
+  sidebar = sidebar,
+  body = body
+)
+
+
+server <- function(input, output, session){
+  
+  visualiza_gapminder_server(id = "pib")
+  visualiza_gapminder_server(id = "expec")
+  visualiza_gapminder_server(id = "pop")
+  
+  
+}
+
+
+shinyApp(
+  ui = ui, server = server
+)
+
+
+
+
+```
+
+
+## Funcionalidade de baixar dados
+`r slide_atual = slide_atual + 1`
+
+
+Uma funcionalidade bastante pedida pelos usuários dos dashboards é a possibilidade de baixar dados referentes à análise.
+
+Para fazer isso, precisamos incluir um downloadButton ou downloadLink na ui. Cuidado pra não esquecer a NS()
+
+Vamos usar para mostrar o uso das fontes font awesome
+
+```{r, eval=FALSE}
+
+downloadLink(outputId = NS(id,"baixar_dados"), label = HTML("<i class='fas fa-file-excel'></i>")),
+
+```
+
+
+Na server, precisamos conectar este output a funções que vão determinar o nome e o conteúdo do arquivo a ser baixado
+
+Vamos baixar uma planilha excel, portanto vamos usar a função write_xlsx a biblioteca writexl
+
+```{r}
+
+    output$baixar_dados <- downloadHandler(
+      filename = function(){
+        "dados.xlsx"
+      },
+      content = function(arquivo){
+        write_xlsx(dados_filtrados(), arquivo)
+      }
+    )
+
+
+
+```
+
+
+## Gráfico interativo via ggiraph
+`r slide_atual = slide_atual + 1`
+
+
+A biblioteca ggiraph ajuda a transformar o gráfico gerado pela ggplot em um html widget. 
+
+Ou seja, o gráfico deixa de ser uma figura estática mostrada pela aplicação e passa a ser um objeto html que pode ter comportamento controleado por javascript.
+
+Existem vários tipos de interação possíveis entre esses gráficos interativos e o usuário vamos nos concentrar nos tooltips
+
+
+Para gerar os elementos interativos para a ggiraph é necessário usar os elementos geom_xxxx_interactive, e mapear o texto desejadoà escala "tooltip"
+
+
+```{r}
+gera_grafico_series_temporais_pais <- function(dados, campo_y = "gdpPercap"){
+  
+  ggplot(dados) +
+    geom_line(aes(x = year, y = .data[[campo_y]] , color = country )) +
+    geom_point_interactive(
+      aes(
+        x = year, 
+        y =  .data[[campo_y]], 
+        color = country ,
+        tooltip = paste0(
+          country,
+          ", ",
+          year,
+          ": ",
+          number(.data[[campo_y]], accuracy = 1, big.mark = ".")
+        )
+      )
+    ) +
+    theme_light() +
+    theme(
+      legend.position = "top"
+    )
+  
+
+}
+
+
+```
+
+
+Temos que encapsular o gráfico em uma chamada a girafe(). Criamos uma função para isso
+
+```{r}
+
+encapsula_ggiraph <- function(grafico){
+  
+  girafe(
+    code = {print(grafico)},
+    width_svg = 10,
+    height_svg = 6,
+    options = list(
+      opts_tooltip(use_fill = TRUE)
+    )
+  )  
+}
+
+
+```
+
+
+
 
 
 ## Índice remissivo
@@ -6836,58 +7892,3 @@ write_feather()
 ## Bibliografia
 
 `r slide_atual = slide_atual + 1`
-
-```{r, echo=FALSE }
-
-# TODO
-# Package
-# mature
-# actively
-# document
-# well used
-# 
-# Package ctv
-# 
-# old.packages
-# 
-# conflicted
-# 
-# T/F  e TRUE e FALSE
-# isTRUE() 
-# 
-#supressPackageStartupMessages
-#
-#message() longrunning
-
-#warning()
-
-#stop()
-
-#try
-
-#não usar "." num nome de função
-
-#Estilo: consistente
-
-# = ou <-
-
-#spaces: operadores e depois de espaço
-
-#lintr: análise de código
-
-#não use espacos em nomes de arquivos
-
-#traço é melhor. google usa traço como separador, e espressão regular usa traço como caracter
-
-#YYYY-MM-DD
-
-
-
-
-
-
-
-
-
-
-```
